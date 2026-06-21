@@ -1,0 +1,6 @@
+set_global_assignment -name IP_TOOL_NAME "ALTFP_CONVERT"
+set_global_assignment -name IP_TOOL_VERSION "13.0"
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "CONVBACK.v"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "CONVBACK.bsf"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "CONVBACK_inst.v"]
+set_global_assignment -name MISC_FILE [file join $::quartus(qip_path) "CONVBACK_bb.v"]

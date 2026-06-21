@@ -1,0 +1,213 @@
+
+**** Clean-only build of configuration Flash for project MITU_C28 ****
+
+"C:\\ti\\ccsv6\\utils\\bin\\gmake" -k clean 
+DEL /F  "PCON_C28.out"  "PCON_C28.hex" 
+DEL /F "ADC_Interrupt.d" "ALG_DataExchange.d" "ALG_DataProcessing.d" "ALG_MainCycleCalc.d" "ALG_ParamManager.d" "ALG_Protections.d" "ALG_Regulation.d" "ALG_StateMachine.d" "ALG_StructuresInit.d" "ALG_Synchronizer.d" "ExternalControls.d" "Filters.d" "GlobalDataInit.d" "MemFunctions.d" "PCON_C28.d" "SPIFlashFunctions.d" "TimedProt.d" "pid.d" 
+DEL /F "InitFunctions.d" "inc\F28M35x_Adc.d" "inc\F28M35x_CpuTimers.d" "inc\F28M35x_DMA.d" "inc\F28M35x_DefaultIsr.d" "inc\F28M35x_GlobalVariableDefs.d" "inc\F28M35x_Gpio.d" "inc\F28M35x_Ipc.d" "inc\F28M35x_Ipc_Lite.d" "inc\F28M35x_Ipc_Util.d" "inc\F28M35x_PieCtrl.d" "inc\F28M35x_PieVect.d" "inc\F28M35x_SysCtrl.d" 
+DEL /F "ADC_Interrupt.obj" "ALG_DataExchange.obj" "ALG_DataProcessing.obj" "ALG_MainCycleCalc.obj" "ALG_ParamManager.obj" "ALG_Protections.obj" "ALG_Regulation.obj" "ALG_StateMachine.obj" "ALG_StructuresInit.obj" "ALG_Synchronizer.obj" "ExternalControls.obj" "Filters.obj" "GlobalDataInit.obj" "InitFunctions.obj" "MemFunctions.obj" "PCON_C28.obj" "SPIFlashFunctions.obj" "TimedProt.obj" "pid.obj" "inc\F28M35x_Adc.obj" "inc\F28M35x_CodeStartBranch.obj" "inc\F28M35x_CpuTimers.obj" "inc\F28M35x_DMA.obj" "inc\F28M35x_DefaultIsr.obj" "inc\F28M35x_GlobalVariableDefs.obj" "inc\F28M35x_Gpio.obj" "inc\F28M35x_Ipc.obj" "inc\F28M35x_Ipc_Lite.obj" "inc\F28M35x_Ipc_Util.obj" "inc\F28M35x_PieCtrl.obj" "inc\F28M35x_PieVect.obj" "inc\F28M35x_SysCtrl.obj" "inc\F28M35x_usDelay.obj" 
+DEL /F "inc\F28M35x_CodeStartBranch.d" "inc\F28M35x_usDelay.d" 
+Не удается найти C:\PROJECTS\workspace_v6_2\MITU_C28\Flash\inc\F28M35x_CodeStartBranch.d
+'Finished clean'
+' '
+
+**** Build Finished ****
+
+**** Build of configuration Flash for project MITU_C28 ****
+
+"C:\\ti\\ccsv6\\utils\\bin\\gmake" -k all 
+'Building file: ../ADC_Interrupt.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ADC_Interrupt.d"  "../ADC_Interrupt.cpp"
+'Finished building: ../ADC_Interrupt.cpp'
+' '
+'Building file: ../ALG_DataExchange.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_DataExchange.d"  "../ALG_DataExchange.cpp"
+"../ALG_DataExchange.cpp", line 126: warning: integer conversion resulted in truncation
+"../ALG_DataExchange.cpp", line 140: warning: variable "ValueFromEMIF" was declared but never referenced
+"../ALG_DataExchange.cpp", line 141: warning: variable "k" was declared but never referenced
+'Finished building: ../ALG_DataExchange.cpp'
+' '
+'Building file: ../ALG_DataProcessing.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_DataProcessing.d"  "../ALG_DataProcessing.cpp"
+'Finished building: ../ALG_DataProcessing.cpp'
+' '
+'Building file: ../ALG_MainCycleCalc.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_MainCycleCalc.d"  "../ALG_MainCycleCalc.cpp"
+'Finished building: ../ALG_MainCycleCalc.cpp'
+' '
+'Building file: ../ALG_ParamManager.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_ParamManager.d"  "../ALG_ParamManager.cpp"
+"../ALG_ParamManager.cpp", line 374: warning: label "reader_exit" was declared but never referenced
+"../ALG_ParamManager.cpp", line 442: warning: variable "Checksumm" was declared but never referenced
+"../ALG_ParamManager.cpp", line 444: warning: variable "Uint32Union" was declared but never referenced
+"../ALG_ParamManager.cpp", line 524: warning: missing return statement at end of non-void function "SyncReadWordFromFlash"
+'Finished building: ../ALG_ParamManager.cpp'
+' '
+'Building file: ../ALG_Protections.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_Protections.d"  "../ALG_Protections.cpp"
+'Finished building: ../ALG_Protections.cpp'
+' '
+'Building file: ../ALG_Regulation.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_Regulation.d"  "../ALG_Regulation.cpp"
+'Finished building: ../ALG_Regulation.cpp'
+' '
+'Building file: ../ALG_StateMachine.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_StateMachine.d"  "../ALG_StateMachine.cpp"
+'Finished building: ../ALG_StateMachine.cpp'
+' '
+'Building file: ../ALG_StructuresInit.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_StructuresInit.d"  "../ALG_StructuresInit.cpp"
+'Finished building: ../ALG_StructuresInit.cpp'
+' '
+'Building file: ../ALG_Synchronizer.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ALG_Synchronizer.d"  "../ALG_Synchronizer.cpp"
+'Finished building: ../ALG_Synchronizer.cpp'
+' '
+'Building file: ../ExternalControls.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="ExternalControls.d"  "../ExternalControls.cpp"
+'Finished building: ../ExternalControls.cpp'
+' '
+'Building file: ../Filters.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="Filters.d"  "../Filters.cpp"
+'Finished building: ../Filters.cpp'
+' '
+'Building file: ../GlobalDataInit.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="GlobalDataInit.d"  "../GlobalDataInit.cpp"
+'Finished building: ../GlobalDataInit.cpp'
+' '
+'Building file: ../InitFunctions.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="InitFunctions.d"  "../InitFunctions.c"
+'Finished building: ../InitFunctions.c'
+' '
+'Building file: ../MemFunctions.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="MemFunctions.d"  "../MemFunctions.cpp"
+'Finished building: ../MemFunctions.cpp'
+' '
+'Building file: ../PCON_C28.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="PCON_C28.d"  "../PCON_C28.cpp"
+"../PCON_C28.cpp", line 8: warning: variable "WatchdogValue" was set but never used
+"../PCON_C28.cpp", line 10: warning: variable "ReadResult" was declared but never referenced
+"../PCON_C28.cpp", line 11: warning: variable "LED" was declared but never referenced
+"../PCON_C28.cpp", line 86: warning: variable "DataSize" was declared but never referenced
+'Finished building: ../PCON_C28.cpp'
+' '
+'Building file: ../SPIFlashFunctions.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="SPIFlashFunctions.d"  "../SPIFlashFunctions.cpp"
+'Finished building: ../SPIFlashFunctions.cpp'
+' '
+'Building file: ../TimedProt.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="TimedProt.d"  "../TimedProt.cpp"
+'Finished building: ../TimedProt.cpp'
+' '
+'Building file: ../pid.cpp'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="pid.d"  "../pid.cpp"
+'Finished building: ../pid.cpp'
+' '
+'Building file: ../inc/F28M35x_Adc.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Adc.d" --obj_directory="inc"  "../inc/F28M35x_Adc.c"
+'Finished building: ../inc/F28M35x_Adc.c'
+' '
+'Building file: ../inc/F28M35x_CodeStartBranch.asm'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_CodeStartBranch.d" --obj_directory="inc"  "../inc/F28M35x_CodeStartBranch.asm"
+'Finished building: ../inc/F28M35x_CodeStartBranch.asm'
+' '
+'Building file: ../inc/F28M35x_CpuTimers.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_CpuTimers.d" --obj_directory="inc"  "../inc/F28M35x_CpuTimers.c"
+'Finished building: ../inc/F28M35x_CpuTimers.c'
+' '
+'Building file: ../inc/F28M35x_DMA.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_DMA.d" --obj_directory="inc"  "../inc/F28M35x_DMA.c"
+'Finished building: ../inc/F28M35x_DMA.c'
+' '
+'Building file: ../inc/F28M35x_DefaultIsr.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_DefaultIsr.d" --obj_directory="inc"  "../inc/F28M35x_DefaultIsr.c"
+'Finished building: ../inc/F28M35x_DefaultIsr.c'
+' '
+'Building file: ../inc/F28M35x_GlobalVariableDefs.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_GlobalVariableDefs.d" --obj_directory="inc"  "../inc/F28M35x_GlobalVariableDefs.c"
+'Finished building: ../inc/F28M35x_GlobalVariableDefs.c'
+' '
+'Building file: ../inc/F28M35x_Gpio.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Gpio.d" --obj_directory="inc"  "../inc/F28M35x_Gpio.c"
+'Finished building: ../inc/F28M35x_Gpio.c'
+' '
+'Building file: ../inc/F28M35x_Ipc.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc.d" --obj_directory="inc"  "../inc/F28M35x_Ipc.c"
+'Finished building: ../inc/F28M35x_Ipc.c'
+' '
+'Building file: ../inc/F28M35x_Ipc_Lite.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc_Lite.d" --obj_directory="inc"  "../inc/F28M35x_Ipc_Lite.c"
+'Finished building: ../inc/F28M35x_Ipc_Lite.c'
+' '
+'Building file: ../inc/F28M35x_Ipc_Util.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc_Util.d" --obj_directory="inc"  "../inc/F28M35x_Ipc_Util.c"
+'Finished building: ../inc/F28M35x_Ipc_Util.c'
+' '
+'Building file: ../inc/F28M35x_PieCtrl.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_PieCtrl.d" --obj_directory="inc"  "../inc/F28M35x_PieCtrl.c"
+'Finished building: ../inc/F28M35x_PieCtrl.c'
+' '
+'Building file: ../inc/F28M35x_PieVect.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_PieVect.d" --obj_directory="inc"  "../inc/F28M35x_PieVect.c"
+'Finished building: ../inc/F28M35x_PieVect.c'
+' '
+'Building file: ../inc/F28M35x_SysCtrl.c'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_SysCtrl.d" --obj_directory="inc"  "../inc/F28M35x_SysCtrl.c"
+"../inc/F28M35x_SysCtrl.c", line 351: warning: variable "temp" was set but never used
+'Finished building: ../inc/F28M35x_SysCtrl.c'
+' '
+'Building file: ../inc/F28M35x_usDelay.asm'
+'Invoking: C2000 Compiler'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_usDelay.d" --obj_directory="inc"  "../inc/F28M35x_usDelay.asm"
+'Finished building: ../inc/F28M35x_usDelay.asm'
+' '
+'Building target: PCON_C28.out'
+'Invoking: C2000 Linker'
+"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch -z -m"PCON_C28.map" --stack_size=0x300 --warn_sections -i"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/lib" -i"C:/PROJECTS/workspace_v6_2/MITU_C28" -i"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --reread_libs --xml_link_info="PCON_C28_linkInfo.xml" --entry_point=code_start --rom_model -o "PCON_C28.out" "./ADC_Interrupt.obj" "./ALG_DataExchange.obj" "./ALG_DataProcessing.obj" "./ALG_MainCycleCalc.obj" "./ALG_ParamManager.obj" "./ALG_Protections.obj" "./ALG_Regulation.obj" "./ALG_StateMachine.obj" "./ALG_StructuresInit.obj" "./ALG_Synchronizer.obj" "./ExternalControls.obj" "./Filters.obj" "./GlobalDataInit.obj" "./InitFunctions.obj" "./MemFunctions.obj" "./PCON_C28.obj" "./SPIFlashFunctions.obj" "./TimedProt.obj" "./pid.obj" "./inc/F28M35x_Adc.obj" "./inc/F28M35x_CodeStartBranch.obj" "./inc/F28M35x_CpuTimers.obj" "./inc/F28M35x_DMA.obj" "./inc/F28M35x_DefaultIsr.obj" "./inc/F28M35x_GlobalVariableDefs.obj" "./inc/F28M35x_Gpio.obj" "./inc/F28M35x_Ipc.obj" "./inc/F28M35x_Ipc_Lite.obj" "./inc/F28M35x_Ipc_Util.obj" "./inc/F28M35x_PieCtrl.obj" "./inc/F28M35x_PieVect.obj" "./inc/F28M35x_SysCtrl.obj" "./inc/F28M35x_usDelay.obj" "../inc/F28M35x_Headers_nonBIOS.cmd"  -l"C:/PROJECTS/workspace_v6_2/CMD/F28M35x_generic_wshared_C28_FLASH.cmd" -lrts2800_fpu32.lib 
+<Linking>
+warning: creating ".esysmem" section with default size of 0x400; use the -heap
+'Finished building target: PCON_C28.out'
+   option to change the default size
+' '
+warning: entry-point symbol other than "_c_int00" specified:  "code_start"
+
+**** Build Finished ****
+
+**** Build of configuration Flash for project MITU_C28 ****
+
+"C:\\ti\\ccsv6\\utils\\bin\\gmake" -k all 
+gmake: Nothing to be done for 'all'.
+
+**** Build Finished ****

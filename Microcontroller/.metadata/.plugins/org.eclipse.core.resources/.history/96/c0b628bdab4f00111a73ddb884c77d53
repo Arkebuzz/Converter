@@ -1,0 +1,57 @@
+/*
+ * ExternalControls.cpp
+ *
+ *  Created on: 8 дек. 2016 г.
+ *      Author: Volkodav
+ */
+
+#include <GlobalData.h>
+
+
+
+
+
+void ErrorRemove(void) {GpioG1DataRegs.GPADAT.bit.GPIO0 = 1;}
+//void SetPhAOCP(Uint16 SetBit) {GpioG2DataRegs.GPEDAT.bit.GPIO129 = SetBit;}
+//void SetPhBOCP(Uint16 SetBit) {GpioG2DataRegs.GPEDAT.bit.GPIO130 = SetBit;}
+//void SetPhCOCP(Uint16 SetBit) {GpioG2DataRegs.GPEDAT.bit.GPIO131 = SetBit;}
+//void SetChopperOCP(Uint16 SetBit) {GpioG2DataRegs.GPEDAT.bit.GPIO132 = SetBit;}
+//void SetExcitationOCP(Uint16 SetBit) {GpioG2DataRegs.GPEDAT.bit.GPIO133 = SetBit;}
+
+void ActivateInverter(Uint16 Activate)
+{
+	if (Activate==0) {GpioG1DataRegs.GPADAT.bit.GPIO7 = 0;InverterActivated=0;} //NORMAL PCON
+	else {GpioG1DataRegs.GPADAT.bit.GPIO7 = 1;InverterActivated=1;}
+
+	//if (Activate==0) {GpioG1DataRegs.GPADAT.bit.GPIO6 = 0;InverterActivated=0;} //TEST FOEXP
+	  //  else {GpioG1DataRegs.GPADAT.bit.GPIO6 = 1;InverterActivated=1;}
+}
+
+void ActivateChopper(Uint16 Activate)
+{
+
+}
+
+void ActivateBrake(Uint16 Activate)
+{
+
+}
+
+void ActivateExcitation(Uint16 Activate)
+{
+	if (Activate==0) {GpioG1DataRegs.GPADAT.bit.GPIO6 = 0;ExcitationActivated=0;}   //NORMAL PCON
+	else {GpioG1DataRegs.GPADAT.bit.GPIO6 = 1;ExcitationActivated=1;}
+
+	//if (Activate==0) {GpioG1DataRegs.GPADAT.bit.GPIO5 = 0;ExcitationActivated=0;}   //TEST FOEXP
+	  //  else {GpioG1DataRegs.GPADAT.bit.GPIO5 = 1;ExcitationActivated=1;}
+}
+
+void ActivateBreakerControl(Uint16 Activate)
+{
+
+}
+
+void ActivateSyncout(Uint16 Activate)
+{
+
+}

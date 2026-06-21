@@ -1,0 +1,26 @@
+
+**** Build of configuration Debug for project MITU_M3 ****
+
+"C:\\ti\\ccsv6\\utils\\bin\\gmake" -k all 
+making ../src/sysbios/sysbios.aem3 ...
+gmake[1]: Entering directory 'C:/PROJECTS/workspace_v6_2/MITU_M3/src/sysbios'
+gmake[1]: Nothing to be done for 'all'.
+gmake[1]: Leaving directory 'C:/PROJECTS/workspace_v6_2/MITU_M3/src/sysbios'
+'Building file: ../MITU_M3.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/rtu" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/tcp" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/port" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/ti/sysbios/posix" --include_path="C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/nettools" --define=ccs --define=MWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi --ual --preproc_with_compile --preproc_dependency="MITU_M3.d" --cmd_file="configPkg/compiler.opt" "../MITU_M3.c"
+'Finished building: ../MITU_M3.c'
+' '
+'Building file: ../TMDXDOCKH52C1.c'
+'Invoking: ARM Compiler'
+"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/rtu" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/tcp" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/port" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/ti/sysbios/posix" --include_path="C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/nettools" --define=ccs --define=MWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi --ual --preproc_with_compile --preproc_dependency="TMDXDOCKH52C1.d" --cmd_file="configPkg/compiler.opt" "../TMDXDOCKH52C1.c"
+'Finished building: ../TMDXDOCKH52C1.c'
+' '
+'Building target: MITU_M3.out'
+'Invoking: ARM Linker'
+"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=ccs --define=MWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi --ual -z -m"MITU_M3.map" --heap_size=0 --stack_size=256 -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="MITU_M3_linkInfo.xml" --rom_model -o "MITU_M3.out" "./DataProcessing.obj" "./GlobalDataInit.obj" "./MITU_M3.obj" "./MemFunctions.obj" "./ModbusFunctions.obj" "./ModbusFunctions_v2.obj" "./NETW_AHooks.obj" "./NETW_Echo.obj" "./NETW_SocketComms.obj" "./TMDXDOCKH52C1.obj" "./modbus/ascii/mbascii.obj" "./modbus/functions/mbfunccoils.obj" "./modbus/functions/mbfuncdiag.obj" "./modbus/functions/mbfuncdisc.obj" "./modbus/functions/mbfuncholding.obj" "./modbus/functions/mbfuncinput.obj" "./modbus/functions/mbfuncother.obj" "./modbus/functions/mbutils.obj" "./modbus/mb.obj" "./modbus/rtu/mbcrc.obj" "./modbus/rtu/mbrtu.obj" "./modbus/tcp/mbtcp.obj" "./port/portevent.obj" "./port/portother.obj" "./port/porttcp.obj" "../TMDXDOCKH52C1_M3.cmd" -l"configPkg/linker.cmd" -lrtsv7M3_T_le_eabi.lib -l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/grlib/ccs/Debug/grlib.lib" -l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/usblib/ccs/Debug/usblib.lib" -l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/driverlib/ccs/Debug/driverlib.lib" 
+<Linking>
+'Finished building target: MITU_M3.out'
+' '
+
+**** Build Finished ****

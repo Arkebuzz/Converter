@@ -1,0 +1,104 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Each subdirectory must supply rules for building sources it contributes
+inc/F28M35x_Adc.obj: ../inc/F28M35x_Adc.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Adc.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_CodeStartBranch.obj: ../inc/F28M35x_CodeStartBranch.asm $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_CodeStartBranch.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_CpuTimers.obj: ../inc/F28M35x_CpuTimers.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_CpuTimers.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_DMA.obj: ../inc/F28M35x_DMA.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_DMA.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_DefaultIsr.obj: ../inc/F28M35x_DefaultIsr.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_DefaultIsr.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_GlobalVariableDefs.obj: ../inc/F28M35x_GlobalVariableDefs.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_GlobalVariableDefs.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_Gpio.obj: ../inc/F28M35x_Gpio.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Gpio.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_Ipc.obj: ../inc/F28M35x_Ipc.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_Ipc_Lite.obj: ../inc/F28M35x_Ipc_Lite.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc_Lite.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_Ipc_Util.obj: ../inc/F28M35x_Ipc_Util.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_Ipc_Util.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_PieCtrl.obj: ../inc/F28M35x_PieCtrl.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_PieCtrl.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_PieVect.obj: ../inc/F28M35x_PieVect.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_PieVect.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_SysCtrl.obj: ../inc/F28M35x_SysCtrl.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_SysCtrl.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+inc/F28M35x_usDelay.obj: ../inc/F28M35x_usDelay.asm $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --include_path="C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28" --include_path="C:/PROJECTS/workspace_v6_2/MITU_C28/inc" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include" --include_path="C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include" --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch --preproc_with_compile --preproc_dependency="inc/F28M35x_usDelay.d" --obj_directory="inc" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+
