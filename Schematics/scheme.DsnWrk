@@ -1,0 +1,6 @@
+[ProjectGroup]
+Version=1.0
+[Project1]
+ProjectPath=ADC_HUB\ADC_HUB.PrjPcb
+[Project2]
+ProjectPath=CONTROLLER\CONTROLLER.PrjPcb
