@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename resource &apos;MITU_M3/ModbusFunctions_v2&apos; to &apos;ModbusFunctions_v2.c&apos;" description="Rename resource &apos;ModbusFunctions_v2&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ModbusFunctions_v2" name="ModbusFunctions_v2.c" stamp="1757408011078" updateReferences="true"/>
-</session>
