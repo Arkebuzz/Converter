@@ -11,7 +11,7 @@ var makeAssembly = false;
 var Executable = xdc.module('xdc.bld.Executable');
 
 var exeOpts = new Executable.Attrs({
-        cfgScript: 'C:/PROJECTS/workspace_v6_2/MITU_M3/MITU_M3.cfg',
+        cfgScript: 'C:/Users/user/ekb/Controller/MITU_M3/MITU_M3.cfg',
         profile: 'release',
         cfgHome: 'configPkg',
 });
@@ -41,7 +41,7 @@ else {
 
 var thisObj = {
     cfg:        '../MITU_M3.cfg',
-    outputPath: 'C:/PROJECTS/workspace_v6_2/MITU_M3/Debug/configPkg',
+    outputPath: 'C:/Users/user/ekb/Controller/MITU_M3/Debug/configPkg',
     exeName:    'MITU_M3' + suffix,
     exeIntName: 'MITU_M3' + suffix.replace('.', '_'),
     targ:       targ,

@@ -1,7 +1,7 @@
 ******************************************************************************
-             TMS320C2000 Linker PC v15.12.3                    
+             TMS320C2000 Linker PC v16.9.0                     
 ******************************************************************************
->> Linked Thu May 14 18:45:12 2026
+>> Linked Mon Jun 22 22:22:59 2026
 
 OUTPUT FILE NAME:   <PCON_C28.out>
 ENTRY POINT SYMBOL: "code_start"  address: 0013fff0
@@ -16,7 +16,7 @@ PAGE 0:
   RAML1                 00009000   00001000  00000000  00001000  RWIX
   FLASHG                00120000   00008000  00000000  00008000  RWIX
   FLASHF                00128000   00008000  00000000  00008000  RWIX
-  FLASHE                00130000   00008000  000053a5  00002c5b  RWIX
+  FLASHE                00130000   00008000  00005369  00002c97  RWIX
   FLASHD                00138000   00002000  00000077  00001f89  RWIX
   FLASHC                0013a000   00002000  00000000  00002000  RWIX
   FLASHA                0013e000   00001f80  00000b7c  00001404  RWIX
@@ -117,7 +117,7 @@ SECTION ALLOCATION MAP
  output                                  attributes/
 section   page    origin      length       input sections
 --------  ----  ----------  ----------   ----------------
-.text      0    00130000    000053a5     
+.text      0    00130000    00005369     
                   00130000    00000b27     ALG_DataExchange.obj (.text)
                   00130b27    000009df     ALG_StructuresInit.obj (.text)
                   00131506    0000099f     ALG_StateMachine.obj (.text)
@@ -139,25 +139,24 @@ section   page    origin      length       input sections
                   00134e9e    000000b1     MemFunctions.obj (.text)
                   00134f4f    000000b1     TimedProt.obj (.text)
                   00135000    00000094     Filters.obj (.text)
-                  00135094    00000088     rts2800_fpu32.lib : fs_div.obj (.text)
-                  0013511c    00000056                       : boot.obj (.text)
-                  00135172    00000046                       : cpy_tbl.obj (.text)
-                  001351b8    00000045     GlobalDataInit.obj (.text)
-                  001351fd    00000044     F28M35x_Gpio.obj (.text)
-                  00135241    0000002f     ExternalControls.obj (.text)
-                  00135270    0000002d     F28M35x_PieCtrl.obj (.text)
-                  0013529d    0000002a     rts2800_fpu32.lib : l_div.obj (.text)
-                  001352c7    00000029                       : exit.obj (.text)
-                  001352f0    00000025                       : e_sqrtf.obj (.text)
-                  00135315    00000020                       : new_.obj (.text)
-                  00135335    0000001e                       : memcpy.obj (.text)
-                  00135353    0000001a                       : cpy_utils.obj (.text)
-                  0013536d    00000019                       : args_main.obj (.text)
-                  00135386    00000012     F28M35x_PieVect.obj (.text)
-                  00135398    00000009     rts2800_fpu32.lib : _lock.obj (.text)
-                  001353a1    00000002                       : pre_init.obj (.text)
-                  001353a3    00000001                       : newhandler.obj (.text)
-                  001353a4    00000001                       : startup.obj (.text)
+                  00135094    00000088     rts2800_fpu32.lib : fs_div28.obj (.text)
+                  0013511c    00000056                       : boot28.obj (.text)
+                  00135172    00000045     GlobalDataInit.obj (.text)
+                  001351b7    00000044     F28M35x_Gpio.obj (.text)
+                  001351fb    0000002f     ExternalControls.obj (.text)
+                  0013522a    0000002d     F28M35x_PieCtrl.obj (.text)
+                  00135257    0000002a     rts2800_fpu32.lib : l_div28.obj (.text)
+                  00135281    00000029                       : exit.obj (.text)
+                  001352aa    00000025                       : e_sqrtf.obj (.text)
+                  001352cf    00000024                       : cpy_tbl.obj (.text)
+                  001352f3    00000020                       : new_.obj (.text)
+                  00135313    0000001e                       : memcpy.obj (.text)
+                  00135331    00000019                       : args_main.obj (.text)
+                  0013534a    00000012     F28M35x_PieVect.obj (.text)
+                  0013535c    00000009     rts2800_fpu32.lib : _lock.obj (.text)
+                  00135365    00000002                       : pre_init.obj (.text)
+                  00135367    00000001                       : newhandler.obj (.text)
+                  00135368    00000001                       : startup.obj (.text)
 
 ramfuncs   0    00138000    00000077     RUN ADDR = 00008000
                   00138000    00000073     F28M35x_SysCtrl.obj (ramfuncs)
@@ -502,77 +501,76 @@ PUTREADIDX
                   0000b31d    000003ff     --HOLE--
 
 .reset     0    003fffc0    00000002     DSECT
-                  003fffc0    00000002     rts2800_fpu32.lib : boot.obj (.reset)
+                  003fffc0    00000002     rts2800_fpu32.lib : boot28.obj (.reset)
 
 vectors    0    003fffc2    00000000     DSECT
 
 MODULE SUMMARY
 
-       Module                           code    ro data   rw data
-       ------                           ----    -------   -------
+       Module                           code    initialized data   uninitialized data
+       ------                           ----    ----------------   ------------------
     .\
-       GlobalDataInit.obj               69      0         7315   
-       ALG_DataExchange.obj             2855    0         172    
-       ALG_StructuresInit.obj           2527    0         0      
-       ALG_StateMachine.obj             2463    0         0      
-       ALG_Regulation.obj               1936    0         0      
-       ALG_ParamManager.obj             1883    0         0      
-       pid.obj                          1363    0         0      
-       ALG_MainCycleCalc.obj            954     0         0      
-       ALG_Synchronizer.obj             665     0         0      
-       ALG_Protections.obj              614     0         0      
-       ALG_DataProcessing.obj           556     0         0      
-       InitFunctions.obj                510     0         0      
-       PCON_C28.obj                     387     0         0      
-       ADC_Interrupt.obj                222     0         3      
-       MemFunctions.obj                 177     0         0      
-       TimedProt.obj                    177     0         0      
-       Filters.obj                      148     0         0      
-       ExternalControls.obj             47      0         0      
-    +--+--------------------------------+-------+---------+---------+
-       Total:                           17553   0         7490   
-                                                                 
+       GlobalDataInit.obj               69      2471               4844              
+       ALG_DataExchange.obj             2855    172                0                 
+       ALG_StructuresInit.obj           2527    0                  0                 
+       ALG_StateMachine.obj             2463    0                  0                 
+       ALG_Regulation.obj               1936    0                  0                 
+       ALG_ParamManager.obj             1883    0                  0                 
+       pid.obj                          1363    0                  0                 
+       ALG_MainCycleCalc.obj            954     0                  0                 
+       ALG_Synchronizer.obj             665     0                  0                 
+       ALG_Protections.obj              614     0                  0                 
+       ALG_DataProcessing.obj           556     0                  0                 
+       InitFunctions.obj                510     0                  0                 
+       PCON_C28.obj                     387     0                  0                 
+       ADC_Interrupt.obj                222     0                  3                 
+       MemFunctions.obj                 177     0                  0                 
+       TimedProt.obj                    177     0                  0                 
+       Filters.obj                      148     0                  0                 
+       ExternalControls.obj             47      0                  0                 
+    +--+--------------------------------+-------+------------------+--------------------+
+       Total:                           17553   2643               4847              
+                                                                                     
     .\inc\
-       F28M35x_GlobalVariableDefs.obj   0       0         3951   
-       F28M35x_DefaultIsr.obj           863     0         0      
-       F28M35x_Adc.obj                  849     0         0      
-       F28M35x_DMA.obj                  779     0         0      
-       F28M35x_SysCtrl.obj              464     0         0      
-       F28M35x_PieVect.obj              18      0         256    
-       F28M35x_Ipc.obj                  0       0         136    
-       F28M35x_Gpio.obj                 68      0         0      
-       F28M35x_PieCtrl.obj              45      0         0      
-       F28M35x_CpuTimers.obj            0       0         24     
-       F28M35x_usDelay.obj              8       0         0      
-       F28M35x_CodeStartBranch.obj      2       0         0      
-    +--+--------------------------------+-------+---------+---------+
-       Total:                           3096    0         4367   
-                                                                 
-    C:/ti/ccsv6/tools/compiler/c2000_15.12.3.LTS/lib/rts2800_fpu32.lib
-       memory.obj                       466     0         12     
-       fs_div.obj                       136     0         0      
-       boot.obj                         86      0         0      
-       cpy_tbl.obj                      70      0         0      
-       exit.obj                         41      0         20     
-       l_div.obj                        42      0         0      
-       e_sqrtf.obj                      37      0         0      
-       new_.obj                         32      0         0      
-       memcpy.obj                       30      0         0      
-       cpy_utils.obj                    26      0         0      
-       args_main.obj                    25      0         0      
-       _lock.obj                        9       0         14     
-       vars.obj                         0       0         7      
-       errno.obj                        0       0         5      
-       pre_init.obj                     2       0         0      
-       newhandler.obj                   1       0         0      
-       startup.obj                      1       0         0      
-    +--+--------------------------------+-------+---------+---------+
-       Total:                           1004    0         58     
-                                                                 
-       Heap:                            0       0         1024   
-       Stack:                           0       0         768    
-    +--+--------------------------------+-------+---------+---------+
-       Grand Total:                     21653   0         13707  
+       F28M35x_GlobalVariableDefs.obj   0       0                  3951              
+       F28M35x_DefaultIsr.obj           863     0                  0                 
+       F28M35x_Adc.obj                  849     0                  0                 
+       F28M35x_DMA.obj                  779     0                  0                 
+       F28M35x_SysCtrl.obj              464     0                  0                 
+       F28M35x_PieVect.obj              18      256                0                 
+       F28M35x_Ipc.obj                  0       0                  136               
+       F28M35x_Gpio.obj                 68      0                  0                 
+       F28M35x_PieCtrl.obj              45      0                  0                 
+       F28M35x_CpuTimers.obj            0       0                  24                
+       F28M35x_usDelay.obj              8       0                  0                 
+       F28M35x_CodeStartBranch.obj      2       0                  0                 
+    +--+--------------------------------+-------+------------------+--------------------+
+       Total:                           3096    256                4111              
+                                                                                     
+    C:/ti/ti-cgt-c2000_16.9.0.LTS/lib/rts2800_fpu32.lib
+       memory.obj                       466     4                  8                 
+       fs_div28.obj                     136     0                  0                 
+       boot28.obj                       86      0                  0                 
+       exit.obj                         41      14                 6                 
+       l_div28.obj                      42      0                  0                 
+       e_sqrtf.obj                      37      0                  0                 
+       cpy_tbl.obj                      36      0                  0                 
+       new_.obj                         32      0                  0                 
+       memcpy.obj                       30      0                  0                 
+       args_main.obj                    25      0                  0                 
+       _lock.obj                        9       10                 4                 
+       vars.obj                         0       5                  2                 
+       errno.obj                        0       4                  1                 
+       pre_init.obj                     2       0                  0                 
+       newhandler.obj                   1       0                  0                 
+       startup.obj                      1       0                  0                 
+    +--+--------------------------------+-------+------------------+--------------------+
+       Total:                           944     37                 21                
+                                                                                     
+       Heap:                            0       0                  1024              
+       Stack:                           0       0                  768               
+    +--+--------------------------------+-------+------------------+--------------------+
+       Grand Total:                     21593   2936               10771             
 
 
 GLOBAL DATA SYMBOLS: SORTED BY DATA PAGE
@@ -1404,12 +1402,12 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 page  address   name                                            
 ----  -------   ----                                            
 0     00130000  .text                                           
-0     001352c7  C$$EXIT                                         
+0     00135281  C$$EXIT                                         
 0     00135094  FS$$DIV                                         
-0     0013529d  L$$DIV                                          
-0     001352ac  L$$MOD                                          
-0     001352ba  UL$$DIV                                         
-0     001352c1  UL$$MOD                                         
+0     00135257  L$$DIV                                          
+0     00135266  L$$MOD                                          
+0     00135274  UL$$DIV                                         
+0     0013527b  UL$$MOD                                         
 0     0013375b  _ADCINT1_ISR                                    
 0     00133765  _ADCINT2_ISR                                    
 0     00133931  _ADCINT3_ISR                                    
@@ -1477,13 +1475,13 @@ page  address   name
 1     0000a1ec  _APLowpassFilter2                               
 1     0000a316  _APPID_I                                        
 1     0000a320  _APPID_P                                        
-0     0013525a  _ActivateBrake__FUi                             
-0     0013526e  _ActivateBreakerControl__FUi                    
-0     00135259  _ActivateChopper__FUi                           
-0     0013525b  _ActivateExcitation__FUi                        
-0     00135246  _ActivateInverter__FUi                          
+0     00135214  _ActivateBrake__FUi                             
+0     00135228  _ActivateBreakerControl__FUi                    
+0     00135213  _ActivateChopper__FUi                           
+0     00135215  _ActivateExcitation__FUi                        
+0     00135200  _ActivateInverter__FUi                          
 0     00134058  _ActivateSynchronizer__FUi                      
-0     0013526f  _ActivateSyncout__FUi                           
+0     00135229  _ActivateSyncout__FUi                           
 1     0000a1e8  _ActivePower                                    
 0     0013209f  _ActivePowerRegulation__Fv                      
 1     0000a116  _ActivePowerSetpoint                            
@@ -1861,7 +1859,7 @@ page  address   name
 1     0013fff4  _EcslPwl                                        
 0     00134d7f  _EcslUnlock                                     
 1     0000a330  _EmergencyCounter                               
-0     00135294  _EnableInterrupts                               
+0     0013524e  _EnableInterrupts                               
 1     0000a388  _EngineAMPSET                                   
 1     0000a398  _EngineBuckPWM                                  
 1     0000a39a  _EngineExcPWM                                   
@@ -1871,7 +1869,7 @@ page  address   name
 1     0000a310  _ErrorFlags2                                    
 1     0000a31e  _ErrorFlags3                                    
 1     0000a30c  _ErrorFlags4                                    
-0     00135241  _ErrorRemove__Fv                                
+0     001351fb  _ErrorRemove__Fv                                
 0     0013435a  _ErrorReset__Fv                                 
 0     001342f1  _ErrorSet__FUl                                  
 1     0000a20e  _ExcCurrentFilter                               
@@ -2013,10 +2011,10 @@ page  address   name
 0     00133a11  _InitAdcAio                                     
 0     00130b27  _InitData__Fv                                   
 0     00008000  _InitFlash                                      
-0     001351fd  _InitGpio                                       
+0     001351b7  _InitGpio                                       
 0     00134d19  _InitPeripheralClocks                           
-0     00135270  _InitPieCtrl                                    
-0     00135386  _InitPieVectTable                               
+0     0013522a  _InitPieCtrl                                    
+0     0013534a  _InitPieVectTable                               
 0     00134cd6  _InitSysCtrl                                    
 0     00134783  _Init_SPI                                       
 0     00135030  _Input__12SecOrdFilterFf                        
@@ -2451,34 +2449,32 @@ abs   ffffffff  ___c_args__
 0     001331b8  ___ct__15FloatBipolarPIDFv                      
 0     00134f4f  ___ct__15TimedProtectionFv                      
 0     00132d90  ___ct__8FloatPIDFv                              
-0     001353a3  ___default_new_handler__Fv                      
-0     001353a5  ___etext__                                      
-0     00135315  ___nw__FUl                                      
+0     00135367  ___default_new_handler__Fv                      
+0     00135369  ___etext__                                      
+0     001352f3  ___nw__FUl                                      
 0     0013eb78  ___pinit__                                      
-0     001351b8  ___sti___18_GlobalDataInit_cpp_9f39418d         
+0     00135172  ___sti___18_GlobalDataInit_cpp_9f39418d         
 0     00130000  ___text__                                       
-0     0013536d  __args_main                                     
+0     00135331  __args_main                                     
 1     0000b2fe  __lock                                          
 1     0000b31a  __new_handler                                   
-0     001353a0  __nop                                           
-0     0013539c  __register_lock                                 
-0     00135398  __register_unlock                               
+0     00135364  __nop                                           
+0     00135360  __register_lock                                 
+0     0013535c  __register_unlock                               
 1     00000050  __stack                                         
 1     0000b31c  __sys_memory                                    
-0     001353a4  __system_post_cinit                             
-0     001353a1  __system_pre_init                               
+0     00135368  __system_post_cinit                             
+0     00135365  __system_pre_init                               
 1     0000b318  __unlock                                        
-0     001352c7  _abort                                          
+0     00135281  _abort                                          
 0     00134dc0  _adc1_isr__Fv                                   
 0     0013511c  _c_int00                                        
 0     00134b3c  _calloc                                         
 0     00134b3a  _chkheap                                        
-0     00135172  _copy_in                                        
+0     001352cf  _copy_in                                        
 1     0000a242  _dFilter                                        
-0     00135353  _ddcopy                                         
-0     00135353  _dpcopy                                         
 1     0000b2fd  _errno                                          
-0     001352c9  _exit                                           
+0     00135283  _exit                                           
 0     00134981  _free                                           
 0     00134b1c  _free_memory                                    
 1     0003f800  _g_asIPCCtoMBuffers                             
@@ -2490,20 +2486,18 @@ abs   ffffffff  ___c_args__
 0     00134b53  _main                                           
 0     001349ea  _malloc                                         
 0     00134afa  _max_free                                       
-0     00135335  _memcpy                                         
+0     00135313  _memcpy                                         
 0     001349c5  _minit                                          
-0     00135353  _pdcopy                                         
-0     00135353  _ppcopy                                         
 1     0000a250  _qFilter                                        
 0     00134a48  _realloc                                        
 0     001339f2  _rsvd_ISR                                       
-0     001352f0  _sqrt                                           
-0     001352f0  _sqrtf                                          
+0     001352aa  _sqrt                                           
+0     001352aa  _sqrtf                                          
 1     0000a0a8  _transfer_countFPGA                             
 abs   ffffffff  binit                                           
 0     0013e1ac  cinit                                           
 0     0013fff0  code_start                                      
-0     001353a5  etext                                           
+0     00135369  etext                                           
 0     0013eb78  pinit                                           
 
 
@@ -2841,43 +2835,39 @@ page  address   name
 0     00135086  _ResetData__12SecOrdFilterFv                    
 0     00135094  FS$$DIV                                         
 0     0013511c  _c_int00                                        
-0     00135172  _copy_in                                        
-0     001351b8  ___sti___18_GlobalDataInit_cpp_9f39418d         
-0     001351fd  _InitGpio                                       
-0     00135241  _ErrorRemove__Fv                                
-0     00135246  _ActivateInverter__FUi                          
-0     00135259  _ActivateChopper__FUi                           
-0     0013525a  _ActivateBrake__FUi                             
-0     0013525b  _ActivateExcitation__FUi                        
-0     0013526e  _ActivateBreakerControl__FUi                    
-0     0013526f  _ActivateSyncout__FUi                           
-0     00135270  _InitPieCtrl                                    
-0     00135294  _EnableInterrupts                               
-0     0013529d  L$$DIV                                          
-0     001352ac  L$$MOD                                          
-0     001352ba  UL$$DIV                                         
-0     001352c1  UL$$MOD                                         
-0     001352c7  C$$EXIT                                         
-0     001352c7  _abort                                          
-0     001352c9  _exit                                           
-0     001352f0  _sqrt                                           
-0     001352f0  _sqrtf                                          
-0     00135315  ___nw__FUl                                      
-0     00135335  _memcpy                                         
-0     00135353  _ddcopy                                         
-0     00135353  _dpcopy                                         
-0     00135353  _pdcopy                                         
-0     00135353  _ppcopy                                         
-0     0013536d  __args_main                                     
-0     00135386  _InitPieVectTable                               
-0     00135398  __register_unlock                               
-0     0013539c  __register_lock                                 
-0     001353a0  __nop                                           
-0     001353a1  __system_pre_init                               
-0     001353a3  ___default_new_handler__Fv                      
-0     001353a4  __system_post_cinit                             
-0     001353a5  ___etext__                                      
-0     001353a5  etext                                           
+0     00135172  ___sti___18_GlobalDataInit_cpp_9f39418d         
+0     001351b7  _InitGpio                                       
+0     001351fb  _ErrorRemove__Fv                                
+0     00135200  _ActivateInverter__FUi                          
+0     00135213  _ActivateChopper__FUi                           
+0     00135214  _ActivateBrake__FUi                             
+0     00135215  _ActivateExcitation__FUi                        
+0     00135228  _ActivateBreakerControl__FUi                    
+0     00135229  _ActivateSyncout__FUi                           
+0     0013522a  _InitPieCtrl                                    
+0     0013524e  _EnableInterrupts                               
+0     00135257  L$$DIV                                          
+0     00135266  L$$MOD                                          
+0     00135274  UL$$DIV                                         
+0     0013527b  UL$$MOD                                         
+0     00135281  C$$EXIT                                         
+0     00135281  _abort                                          
+0     00135283  _exit                                           
+0     001352aa  _sqrt                                           
+0     001352aa  _sqrtf                                          
+0     001352cf  _copy_in                                        
+0     001352f3  ___nw__FUl                                      
+0     00135313  _memcpy                                         
+0     00135331  __args_main                                     
+0     0013534a  _InitPieVectTable                               
+0     0013535c  __register_unlock                               
+0     00135360  __register_lock                                 
+0     00135364  __nop                                           
+0     00135365  __system_pre_init                               
+0     00135367  ___default_new_handler__Fv                      
+0     00135368  __system_post_cinit                             
+0     00135369  ___etext__                                      
+0     00135369  etext                                           
 0     00138000  _RamfuncsLoadStart                              
 0     00138077  _RamfuncsLoadEnd                                
 0     0013e000  _PieVectTableInit                               
@@ -3614,4 +3604,4 @@ abs   ffffffff  ___binit__
 abs   ffffffff  ___c_args__                                     
 abs   ffffffff  binit                                           
 
-[1102 symbols]
+[1098 symbols]

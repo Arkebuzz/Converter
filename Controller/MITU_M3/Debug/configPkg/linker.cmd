@@ -9,7 +9,7 @@
  */
 
 
--l"C:\PROJECTS\workspace_v6_2\MITU_M3\Debug\configPkg\package\cfg\MITU_M3_pem3.oem3"
+-l"C:\Users\user\ekb\Controller\MITU_M3\Debug\configPkg\package\cfg\MITU_M3_pem3.oem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\ndk_2_25_00_09\packages\ti\ndk\hal\timer_bios\lib\hal_timer_bios.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\ndk_2_25_00_09\packages\ti\ndk\os\lib\os.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\ndk_2_25_00_09\packages\ti\ndk\hal\userled_stub\lib\hal_userled_stub.aem3"
@@ -25,7 +25,7 @@
 -l"C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages/ti/drivers/lib/drivers_mware.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\tidrivers_c2000_2_16_00_08\packages\ti\mw\fatfs\lib\release\ti.mw.fatfs.aem3"
 -l"C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages/ti/drivers/ports/lib/tirtosport.aem3"
--l"C:\PROJECTS\workspace_v6_2\MITU_M3\src\sysbios\sysbios.aem3"
+-l"C:\Users\user\ekb\Controller\MITU_M3\src\sysbios\sysbios.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\bios_6_45_01_29\packages\ti\catalog\arm\cortexm3\concertoInit\lib\Boot.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\bios_6_45_01_29\packages\ti\targets\arm\rtsarm\lib\ti.targets.arm.rtsarm.aem3"
 -l"C:\ti\tirtos_c2000_2_16_00_08\products\bios_6_45_01_29\packages\ti\targets\arm\rtsarm\lib\boot.aem3"

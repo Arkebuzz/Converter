@@ -1,7 +1,7 @@
 #
-_XDCBUILDCOUNT = 0
+_XDCBUILDCOUNT = 
 ifneq (,$(findstring path,$(_USEXDCENV_)))
-override XDCPATH = C:/ti/tirtos_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages;C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages;C:/ti/tirtos_c2000_2_16_00_08/products/uia_2_00_05_50/packages;C:/ti/xdctools_3_32_00_06_core;C:/ti/xdctools_3_32_01_22_core;C:/ti/xdctools_3_32_00_06_core/packages/xdc;C:/ti/ccsv6/ccs_base
+override XDCPATH = C:/ti/tirtos_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages;C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages;C:/ti/tirtos_c2000_2_16_00_08/products/uia_2_00_05_50/packages;C:/ti/xdctools_3_32_00_06_core;C:/ti/xdctools_3_32_01_22_core;C:/ti/xdctools_3_32_00_06_core/packages/xdc;C:/ti/ccs2051/ccs/ccs_base
 override XDCROOT = C:/ti/xdctools_3_32_00_06_core
 override XDCBUILDCFG = ./config.bld
 endif
@@ -11,6 +11,6 @@ override XDCTARGETS =
 endif
 #
 ifeq (0,1)
-PKGPATH = C:/ti/tirtos_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages;C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages;C:/ti/tirtos_c2000_2_16_00_08/products/uia_2_00_05_50/packages;C:/ti/xdctools_3_32_00_06_core;C:/ti/xdctools_3_32_01_22_core;C:/ti/xdctools_3_32_00_06_core/packages/xdc;C:/ti/ccsv6/ccs_base;C:/ti/xdctools_3_32_00_06_core/packages;..
+PKGPATH = C:/ti/tirtos_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/tidrivers_c2000_2_16_00_08/packages;C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages;C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages;C:/ti/tirtos_c2000_2_16_00_08/products/uia_2_00_05_50/packages;C:/ti/xdctools_3_32_00_06_core;C:/ti/xdctools_3_32_01_22_core;C:/ti/xdctools_3_32_00_06_core/packages/xdc;C:/ti/ccs2051/ccs/ccs_base;C:/ti/xdctools_3_32_00_06_core/packages;..
 HOSTOS = Windows
 endif

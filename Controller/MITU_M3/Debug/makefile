@@ -4,6 +4,8 @@
 
 SHELL = cmd.exe
 
+CG_TOOL_ROOT := C:/ti/ti-cgt-arm_16.9.0.LTS
+
 GEN_OPTS__FLAG := --cmd_file="configPkg/compiler.opt" 
 GEN_CMDS__FLAG := -l"configPkg/linker.cmd" 
 
@@ -36,9 +38,9 @@ ORDERED_OBJS += \
 "../TMDXDOCKH52C1_M3.cmd" \
 $(GEN_CMDS__FLAG) \
 -lrtsv7M3_T_le_eabi.lib \
--l"/products/MWare_v202a/grlib/ccs/Debug/grlib.lib" \
--l"/products/MWare_v202a/usblib/ccs/Debug/usblib.lib" \
--l"/products/MWare_v202a/driverlib/ccs/Debug/driverlib.lib" \
+-l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/grlib/ccs/Debug/grlib.lib" \
+-l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/usblib/ccs/Debug/usblib.lib" \
+-l"C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a/driverlib/ccs/Debug/driverlib.lib" \
 
 -include ../makefile.init
 
@@ -163,7 +165,7 @@ all: MITU_M3.out
 # Tool invocations
 MITU_M3.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'ARM Linker - building target: "$@"'
-	"" -z -m"MITU_M3.map" --heap_size=0 --stack_size=256 -i"/lib" -i"/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="MITU_M3_linkInfo.xml" --rom_model -o "MITU_M3.out" $(ORDERED_OBJS)
+	"C:/ti/ti-cgt-arm_16.9.0.LTS/bin/armcl" -mv7M3 --code_state=16 --float_support=vfplib -me --define=ccs --define=MWARE -g --gcc --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on --abi=eabi --ual -z -m"MITU_M3.map" --heap_size=0 --stack_size=256 -i"C:/ti/ti-cgt-arm_16.9.0.LTS/lib" -i"C:/ti/ti-cgt-arm_16.9.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="MITU_M3_linkInfo.xml" --rom_model -o "MITU_M3.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

@@ -1,4 +1,11 @@
 .config
+.cproject
+.theia
 .launches
 .settings
 .metadata
+.clangd
+
+*.obj
+*.d
+*.mk

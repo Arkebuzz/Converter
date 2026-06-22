@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS
+CG_TOOL_ROOT := C:/ti/ti-cgt-c2000_16.9.0.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -45,7 +45,7 @@ ORDERED_OBJS += \
 "./inc/F28M35x_usDelay.obj" \
 "../inc/F28M35x_Headers_nonBIOS.cmd" \
 $(GEN_CMDS__FLAG) \
--l"C:/PROJECTS/workspace_v6_2/CMD/F28M35x_generic_wshared_C28_FLASH.cmd" \
+-l"C:/Users/user/ekb/Controller/CMD/F28M35x_generic_wshared_C28_FLASH.cmd" \
 -lrts2800_fpu32.lib \
 
 -include ../makefile.init
@@ -161,7 +161,7 @@ all: PCON_C28.out
 # Tool invocations
 PCON_C28.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'C2000 Linker - building target: "$@"'
-	"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --advice:performance=all -g --define="_FLASH" --diag_warning=225 --no_fast_branch -z -m"PCON_C28.map" --stack_size=0x300 --warn_sections -i"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/lib" -i"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28" -i"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include" --reread_libs --xml_link_info="PCON_C28_linkInfo.xml" --entry_point=code_start --rom_model -o "PCON_C28.out" $(ORDERED_OBJS)
+	"C:/ti/ti-cgt-c2000_16.9.0.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -O1 --opt_for_speed=5 --advice:performance=all --define=_FLASH -g --diag_warning=225 --no_fast_branch -z -m"PCON_C28.map" --stack_size=0x300 --warn_sections -i"C:/ti/ti-cgt-c2000_16.9.0.LTS/lib" -i"C:/Users/user/ekb/Controller/MITU_C28" -i"C:/ti/ti-cgt-c2000_16.9.0.LTS/include" --reread_libs --xml_link_info="PCON_C28_linkInfo.xml" --entry_point=code_start --rom_model -o "PCON_C28.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

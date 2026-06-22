@@ -7,5 +7,5 @@
 #       or equal to the generated config header
 #
 linker.cmd: package/cfg/MITU_M3_pem3.xdl
-	$(SED) 's"^\"\(package/cfg/MITU_M3_pem3cfg.cmd\)\"$""\"C:/PROJECTS/workspace_v6_2/MITU_M3/Debug/configPkg/\1\""' package/cfg/MITU_M3_pem3.xdl > $@
+	$(SED) 's"^\"\(package/cfg/MITU_M3_pem3cfg.cmd\)\"$""\"C:/Users/user/ekb/Controller/MITU_M3/Debug/configPkg/\1\""' package/cfg/MITU_M3_pem3.xdl > $@
 	-$(SETDATE) -r:max package/cfg/MITU_M3_pem3.h compiler.opt compiler.opt.defs

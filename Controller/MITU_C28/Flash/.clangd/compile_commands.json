@@ -1,167 +1,167 @@
 [
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ADC_Interrupt.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ADC_Interrupt.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_DataExchange.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_DataExchange.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_DataProcessing.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_DataProcessing.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_MainCycleCalc.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_MainCycleCalc.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_ParamManager.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_ParamManager.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_Protections.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_Protections.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_Regulation.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_Regulation.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_StateMachine.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_StateMachine.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_StructuresInit.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_StructuresInit.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ALG_Synchronizer.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ALG_Synchronizer.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/ExternalControls.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/ExternalControls.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Filters.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/Filters.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/GlobalDataInit.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/GlobalDataInit.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/InitFunctions.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/InitFunctions.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/MemFunctions.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/MemFunctions.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/PCON_C28.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/PCON_C28.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/SPIFlashFunctions.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/SPIFlashFunctions.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/TimedProt.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/TimedProt.cpp"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_Adc.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_Adc.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\"",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_CodeStartBranch.asm"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_CodeStartBranch.asm"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_CpuTimers.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_CpuTimers.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_DMA.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_DMA.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_DefaultIsr.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_DefaultIsr.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_GlobalVariableDefs.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_GlobalVariableDefs.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_Gpio.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_Gpio.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_Ipc.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_Ipc.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_Ipc_Lite.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_Ipc_Lite.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_Ipc_Util.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_Ipc_Util.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_PieCtrl.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_PieCtrl.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_PieVect.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_PieVect.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_SysCtrl.c"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_SysCtrl.c"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\"",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc/F28M35x_usDelay.asm"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/inc/F28M35x_usDelay.asm"
    },
    {
-      "directory" : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/Flash",
-      "command"   : "clang++ -I\"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28\" -I\"C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D\"_FLASH\" -xc++",
-      "file"      : "C:/Users/Arkebuzz/Documents/Практика/workspace_v6_2 TEM2/MITU_C28/pid.cpp"
+      "directory" : "C:/Users/user/ekb/Controller/MITU_C28/Flash",
+      "command"   : "clang++ -I\"C:/ti/ti-cgt-c2000_16.9.0.LTS/include\" -I\"C:/Users/user/ekb/Controller/MITU_C28\" -I\"C:/Users/user/ekb/Controller/MITU_C28/inc\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_common/include\" -I\"C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_headers/include\" -D_FLASH -xc++",
+      "file"      : "C:/Users/user/ekb/Controller/MITU_C28/pid.cpp"
    }
 ]

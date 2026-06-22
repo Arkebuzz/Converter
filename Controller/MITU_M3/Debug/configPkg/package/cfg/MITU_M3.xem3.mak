@@ -3,7 +3,7 @@
 #  package.bld.  Any modifications to this file will be 
 #  overwritten whenever makefiles are re-generated.
 #
-#  target compatibility key = ti.targets.arm.elf.M3{1,0,16.9,7
+#  target compatibility key = ti.targets.arm.elf.M3{1,0,16.9,0
 #
 MITU_M3.xem3: package/cfg/MITU_M3.xem3.mak
 

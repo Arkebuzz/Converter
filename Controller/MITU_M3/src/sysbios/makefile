@@ -16,11 +16,11 @@ BIOS_INC  = -I"C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/"
 
 TARGET_INC = -I"C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/"
 
-INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/rtu" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/tcp" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus/include" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/modbus" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3/port" --include_path="C:/PROJECTS/workspace_v6_2/MITU_M3" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/ti/sysbios/posix" --include_path="C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/nettools" 
+INCS = $(BIOS_INC) $(TARGET_INC)  --include_path="C:/Users/user/ekb/Controller/MITU_M3/modbus/rtu" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd" --include_path="C:/Users/user/ekb/Controller/MITU_M3/modbus/tcp" --include_path="C:/Users/user/ekb/Controller/MITU_M3/modbus/include" --include_path="C:/Users/user/ekb/Controller/MITU_M3/modbus" --include_path="C:/Users/user/ekb/Controller/MITU_M3/port" --include_path="C:/Users/user/ekb/Controller/MITU_M3" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/MWare_v202a" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/bios_6_45_01_29/packages/ti/sysbios/posix" --include_path="C:/ti/ti-cgt-arm_16.9.0.LTS/include" --include_path="C:/ti/tirtos_c2000_2_16_00_08/products/ndk_2_25_00_09/packages/ti/ndk/inc/nettools" 
 
-CC = C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include
-ASM = C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/include
-AR = C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.7.LTS/bin/armar rq
+CC = C:/ti/ti-cgt-arm_16.9.0.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ti-cgt-arm_16.9.0.LTS/include
+ASM = C:/ti/ti-cgt-arm_16.9.0.LTS/bin/armcl -c $(CCOPTS) -I C:/ti/ti-cgt-arm_16.9.0.LTS/include
+AR = C:/ti/ti-cgt-arm_16.9.0.LTS/bin/armar rq
 
 DEL = C:/ti/xdctools_3_32_00_06_core/packages/../bin/rm -f
 CP = C:/ti/xdctools_3_32_00_06_core/packages/../bin/cp -f

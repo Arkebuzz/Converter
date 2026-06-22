@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS
+CG_TOOL_ROOT := C:/ti/ccs2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -161,7 +161,7 @@ all: blinky_dc_c28.out
 # Tool invocations
 blinky_dc_c28.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'C2000 Linker - building target: "$@"'
-	"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -g --diag_warning=225 --no_fast_branch -z -m"blinky_dc_c28.map" --stack_size=0x300 --warn_sections -i"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/lib" -i"C:/Program Files/ti/CCS2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include" --reread_libs --xml_link_info="blinky_dc_c28_linkInfo.xml" --entry_point=code_start --rom_model -o "blinky_dc_c28.out" $(ORDERED_OBJS)
+	"C:/ti/ccs2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/bin/cl2000" -v28 -ml -mt --float_support=fpu32 --vcu_support=vcu0 -g --diag_warning=225 --no_fast_branch -z -m"blinky_dc_c28.map" --stack_size=0x300 --warn_sections -i"C:/ti/ccs2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/lib" -i"C:/ti/ccs2051/ccs/tools/compiler/ti-cgt-c2000_25.11.0.LTS/include" --reread_libs --xml_link_info="blinky_dc_c28_linkInfo.xml" --entry_point=code_start --rom_model -o "blinky_dc_c28.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
