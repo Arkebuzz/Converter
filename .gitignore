@@ -1,9 +1,28 @@
-Boards TEM2/
+#-----------ПЛИС-----------#
+
+# Файлы компиляции
 db/
 incremental_db/
 output_files/
 simulation/
+__Previews/
+
+# Резервные копии
 *.qws
 *.bak
 *.orig
+
+
+#---------Контроллер--------#
+
+# Файлы компиляции
+Debug/
+Release/
+src/
+RAM/
+FLASH/
+
+
+#------------Ещё------------#
 *.exe
+*.log
