@@ -52,8 +52,6 @@
                                     <listOptionValue value="${workspace_loc:/${ProjName}/inc}"/>
                                     <listOptionValue value="${INSTALLROOT_F28M35X_V202}/F28M35x_common/include"/>
                                     <listOptionValue value="${INSTALLROOT_F28M35X_V202}/F28M35x_headers/include"/>
-                                    <listOptionValue value="C:/Users/Arkebuzz/Documents/Converter/Code/Controller/F28M35x_headers_include"/>
-                                    <listOptionValue value="C:/Users/Arkebuzz/Documents/Converter/Code/Controller/F28M35x_common_include"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_16.9.compilerID.ADVICE__PERFORMANCE.1494599079" superClass="com.ti.ccstudio.buildDefinitions.C2000_16.9.compilerID.ADVICE__PERFORMANCE" value="--advice:performance=all" valueType="string"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_16.9.compilerID.DEBUGGING_MODEL.583779812" superClass="com.ti.ccstudio.buildDefinitions.C2000_16.9.compilerID.DEBUGGING_MODEL" value="com.ti.ccstudio.buildDefinitions.C2000_16.9.compilerID.DEBUGGING_MODEL.SYMDEBUG__DWARF" valueType="enumerated"/>
