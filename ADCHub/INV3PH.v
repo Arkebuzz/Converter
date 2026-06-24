@@ -1,24 +1,26 @@
 module INV3PH (
-   clock_20,   // Часы 20 MHz
-   clock_50,   // Не используется
+   CLOCK_20,   // Часы 20 мГц
+   CLOCK_50,   // Не используется
+   // АЦП сигма-дельта на напряжение, 4 штуки
    AMC_DATA,   // Сигма-дельта АЦП
-   AMC_CLK,    // Назначены часы 20 MHz ?
+   AMC_CLK,    // Назначены часы 20 мГц ?
+   // АЦП ADS7886 - поток бит на ток, 3 штуки
    ADC_DATA,   // Данные 3-х АЦП, по биту на каждый
-   ADC_CLK,    // Ручное управление ~5 мГц
+   ADC_CLK,    // Часы 5 мГц
    ADC_NCS,    // Сигнал выбор чипа, 1->0 для запуска передачи данных
-   VDR_ERR,    // Не используется
-   VSENS_ERR,  // Не используется
-   nPGOOD,     // Не используется
+   VDR_ERR,    // Не используется, ошибки питания
+   VSENS_ERR,  // Не используется, ошибки питания
+   nPGOOD,     // Не используется, ошибки питания
    CTRL_TOP,   // Управление верхними IGBT (3 штуки, пользуем 1)
    CTRL_BOT,   // Управление нижними  IGBT (3 штуки, пользуем 1)
    FO_INPUT,   // Оптоволокно ОТ главной ПЛИС
    FO_OUTPUT,  // Оптоволокно К  главной ПЛИС
-   FO_nEN,     // Присвоено 0 ?
+   FO_nEN,     // Включение приемника оптоволокна
    IGBT_ERR    // Ошибки IGBT
 );
 
-input clock_20;
-input clock_50;
+input CLOCK_20;
+input CLOCK_50;
 input [4:1] AMC_DATA;
 input [3:1] ADC_DATA;
 input VDR_ERR;
@@ -36,108 +38,106 @@ output FO_OUTPUT;
 output FO_nEN;
 
 
-// Так было, пусть будет:
+// Включение приемника оптоволокна
 assign FO_nEN = 0;
 
 
 // Часы меньшей герцовки
-reg [1:0] div_counter;
-reg clock_10 = 0;
-reg clock_5 = 0;
+reg [1:0] DIV_COUNTER;
+reg CLOCK_10;
+reg CLOCK_5;
 
 
 // АЦП ADS7886
 
-reg adc_clock;
-reg adc_chipselect;
-reg [2:0] adc_state;
-reg [3:0] adc_counter;
-reg [11:0] adc1_data;
-reg [11:0] adc2_data;
-// Выход тока:
-reg [11:0] current1;
-reg [11:0] current2;
+localparam ADC_ST_INIT = 0;
+localparam ADC_ST_SKIP = 1;
+localparam ADC_ST_READ = 2;
+localparam ADC_ST_SAVE = 3;
+localparam ADC_ST_WAIT = 4;
 
-assign ADC_CLK[1] = adc_clock;
-assign ADC_CLK[2] = adc_clock;
+reg ADC_CLOCK;
+reg ADC_nCHIPSELECT;
+reg [2:0] ADC_STATE;
+reg [3:0] ADC_COUNTER;
+reg [11:0] ADC1_DATA;
+reg [11:0] ADC2_DATA;
+// Выход тока:
+reg [11:0] CURRENT_1;
+reg [11:0] CURRENT_2;
+
+assign ADC_CLK[1] = ADC_CLOCK;
+assign ADC_CLK[2] = ADC_CLOCK;
 assign ADC_CLK[3] = 0;
-assign ADC_NCS[1] = adc_chipselect;
-assign ADC_NCS[2] = adc_chipselect;
+assign ADC_NCS[1] = ADC_nCHIPSELECT;
+assign ADC_NCS[2] = ADC_nCHIPSELECT;
 assign ADC_NCS[3] = 0;
 
 
 initial begin
-   div_counter = 0;
+   DIV_COUNTER <= 0;
    
    // Настройка АЦП ADS7886
-   adc_clock <= 1;
-   adc_chipselect <= 1;
-   adc_state <= 0;
+   ADC_STATE <= 0;
+   ADC_nCHIPSELECT <= 1;
 end
 
 
 // Такт = 50 нс
-always @(posedge clock_20) begin
-   div_counter <= div_counter + 1;
-   clock_10 <= div_counter[0];  // 10 MHz
-   clock_5 <= div_counter[1];   // 5 MHz
+always @(posedge CLOCK_20) begin
+   DIV_COUNTER <= DIV_COUNTER + 1;
+   CLOCK_10 <= DIV_COUNTER[0];  // 10 мГц
+   CLOCK_5 <= DIV_COUNTER[1];   // 5  мГц
+   ADC_CLOCK <= ~CLOCK_5;       // 5  мГц со сдвигом влево на 50 нс
 end
 
 
-// Такт = 100 нс
-always @(posedge clock_10) begin
-   // ------------------------------------------------------------ //
-   //                Получение значений с ADS7886                  //
-   //                                                              //
-   //  Полный цикл: 4000 нс = 4 мс = 20 тактов                     //
-   // ------------------------------------------------------------ //
-   
-   if (adc_state == 0) begin  // Инициализация АЦП, nCS: 1 -> 0
-      adc_clock = 1;
-      adc_chipselect <= 0;
-      adc_counter <= 0;
-      adc_state <= 1;
+// ------------------------------------------------------------ //
+//                Получение значений с ADS7886                  //
+//                                                              //
+//  Полный цикл: 4000 нс = 4 мс = 20 тактов  (1 такт = 200 нс)  //
+//  Для доп. информации смотри временную диаграмму в Docs       //
+// ------------------------------------------------------------ //
+
+always @(posedge CLOCK_5) begin
+   if (ADC_STATE == ADC_ST_INIT) begin  // nCS: 1 -> 0
+      ADC_nCHIPSELECT <= 0;
+      ADC_COUNTER <= 0;
+      ADC_STATE <= ADC_ST_SKIP;
    end
-   else if (adc_state == 1) begin  // Пропуск первых 4 нулей
-      adc_clock <= ~adc_clock;
-      
-      if (adc_counter == 6) begin
-         adc_state <= 2;
-         adc_counter <= 11;
+   else if (ADC_STATE == ADC_ST_SKIP) begin  // Пропуск первых 4 нулей
+      if (ADC_COUNTER == 2) begin
+         ADC_STATE <= ADC_ST_READ;
+         ADC_COUNTER <= 11;
       end else begin
-         adc_counter <= adc_counter + 1;
+         ADC_COUNTER <= ADC_COUNTER + 1;
       end
    end
-   else if (adc_state == 2) begin  // Чтение значащих 12 бит
-      adc_clock <= ~adc_clock;
+   else if (ADC_STATE == ADC_ST_READ) begin  // Чтение значащих 12 бит
+      ADC1_DATA[ADC_COUNTER] <= ADC_DATA[1];
+      ADC2_DATA[ADC_COUNTER] <= ADC_DATA[2];
       
-      if (adc_clock == 0) begin
-         adc1_data[adc_counter] <= ADC_DATA[1];
-         adc2_data[adc_counter] <= ADC_DATA[2];
-         adc_counter <= adc_counter - 1;  // Выполняется в конце, в adc_data старое значение
-      end
-      
-      if (adc_counter == 15) begin // adc_counter == -1
-         adc_state <= 3;
+      if (ADC_COUNTER == 15) begin // ADC_COUNTER == -1
+         ADC_STATE <= ADC_ST_SAVE;
+         ADC_COUNTER <= 0;
+      end else begin
+         ADC_COUNTER <= ADC_COUNTER - 1;
       end
    end
-   else if (adc_state == 3) begin  
+   else if (ADC_STATE == ADC_ST_SAVE) begin  
       // Запись результата
-      current1 <= adc1_data;
-      current2 <= adc2_data;
+      CURRENT_1 <= ADC1_DATA;
+      CURRENT_2 <= ADC2_DATA;
       
       // Переход в состояние ожидания
-      adc_chipselect <= 1;
-      adc_clock = 1;
-      
-      adc_counter <= 0;
-      adc_state <= 4;
+      ADC_nCHIPSELECT <= 1;
+      ADC_STATE <= ADC_ST_WAIT;
    end
-   else if (adc_state == 4) begin  // Ожидание следующего цикла
-      adc_counter <= adc_counter + 1;
-      
-      if (adc_counter == 6) begin
-         adc_state <= 0;
+   else if (ADC_STATE == ADC_ST_WAIT) begin  // Ожидание следующего цикла
+      if (ADC_COUNTER == 2) begin
+         ADC_STATE <= ADC_ST_INIT;
+      end else begin
+         ADC_COUNTER <= ADC_COUNTER + 1;
       end
    end
 end
@@ -150,7 +150,7 @@ endmodule
 //
 //reg [2:0] ADC_SM_STATE;
 //reg [3:0] ADC_SM_COUNTER;
-//reg ADC_CHIPSELECT;
+//reg ADC_nCHIPSELECT;
 //reg ADC_CLOCK;
 //reg [1:0] ADC_CLOCK_DIV;
 //
@@ -198,13 +198,13 @@ endmodule
 //assign ADC_CLK[1] = ADC_CLOCK;
 //assign ADC_CLK[2] = ADC_CLOCK;
 //assign ADC_CLK[3] = ADC_CLOCK;
-//assign ADC_NCS[1] = ADC_CHIPSELECT;
-//assign ADC_NCS[2] = ADC_CHIPSELECT;
-//assign ADC_NCS[3] = ADC_CHIPSELECT;
-//assign AMC_CLK[1] = clock_20;
-//assign AMC_CLK[2] = clock_20;
-//assign AMC_CLK[3] = clock_20;
-//assign AMC_CLK[4] = clock_20;
+//assign ADC_NCS[1] = ADC_nCHIPSELECT;
+//assign ADC_NCS[2] = ADC_nCHIPSELECT;
+//assign ADC_NCS[3] = ADC_nCHIPSELECT;
+//assign AMC_CLK[1] = CLOCK_20;
+//assign AMC_CLK[2] = CLOCK_20;
+//assign AMC_CLK[3] = CLOCK_20;
+//assign AMC_CLK[4] = CLOCK_20;
 //
 //`ifdef LEFT
 //assign CTRL_TOP[1] = TOPCTRL_1;
@@ -288,7 +288,7 @@ endmodule
 //   ERR_RESET <= 0;
 //end
 //
-//always@(posedge clock_20) begin
+//always@(posedge CLOCK_20) begin
 //   //----------------------ERRORS HANDLING----------------------------
 //
 //   ERROR_FLAGS[0] <= (~IGBT_ERR[1]) | (~IGBT_ERR[2]); //ERR_T1
@@ -540,13 +540,13 @@ endmodule
 //   if (ADC_SM_STATE == 0) //Initiate ADC, nCS -> low, wait cycle
 //   begin
 //      ADC_SM_COUNTER <= 15;
-//      ADC_CHIPSELECT <= 0;
+//      ADC_nCHIPSELECT <= 0;
 //      ADC_SM_STATE <= 1;
 //      ADC_CLOCK <= 1;
 //      ADC_CLOCK_DIV <= 0;
 //   end
 //   else if (ADC_SM_STATE == 1) begin
-//      ADC_CHIPSELECT <= 0;
+//      ADC_nCHIPSELECT <= 0;
 //      ADC_CLOCK <= 0;
 //
 //      if (ADC_CLOCK_DIV < 3) begin
@@ -567,7 +567,7 @@ endmodule
 //   end
 //   else if (ADC_SM_STATE == 2) //READ 16 BITS
 //   begin
-//      ADC_CHIPSELECT <= 0;
+//      ADC_nCHIPSELECT <= 0;
 //
 //      if (ADC_CLOCK_DIV < 3) begin
 //         ADC_CLOCK_DIV <= ADC_CLOCK_DIV + 1;
@@ -614,7 +614,7 @@ endmodule
 //`endif
 //
 //      ADC_CLOCK <= 1;
-//      ADC_CHIPSELECT <= 1;
+//      ADC_nCHIPSELECT <= 1;
 //      ADC_SM_COUNTER <= 0;
 //      ADC_SM_STATE <= 4;
 //   end
@@ -622,7 +622,7 @@ endmodule
 //   begin
 //      ADC_SM_COUNTER <= ADC_SM_COUNTER + 1;
 //      ADC_CLOCK <= 1;
-//      ADC_CHIPSELECT <= 1;
+//      ADC_nCHIPSELECT <= 1;
 //
 //      if (ADC_SM_COUNTER > 5) begin
 //         ADC_SM_COUNTER <= 0;
@@ -891,6 +891,6 @@ endmodule
 //      end
 //   end
 //
-//end  // always@(posedge clock_20)
+//end  // always@(posedge CLOCK_20)
 //
 //endmodule
