@@ -22,6 +22,10 @@ src/
 RAM/
 FLASH/
 
+.launches
+.settings
+.config
+.metadata
 
 #------------Ещё------------#
 *.exe
