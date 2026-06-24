@@ -4,8 +4,17 @@
 db/
 incremental_db/
 output_files/
-simulation/
 __Previews/
+
+# Файлы симуляций
+simulation/
+work/
+*.wlf
+transcript
+
+# Проект симуляции, какашка с абсолютными путями
+*.mpf
+*.cr.mti
 
 # Резервные копии
 *.qws
@@ -27,6 +36,8 @@ FLASH/
 .config
 .metadata
 
+
 #------------Ещё------------#
+
 *.exe
 *.log
