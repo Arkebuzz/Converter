@@ -39,11 +39,7 @@ reg CLOCK_5;
 wire [11:0] current_1;
 wire [11:0] current_2;
 
-assign ADC_CLK[1] = CLOCK_5;
-assign ADC_CLK[2] = CLOCK_5;
-assign ADC_CLK[3] = 0;
-
-ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_NCS, current_1, current_2);
+ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_CLK, ADC_NCS, current_1, current_2);
 
 // Такт = 50 нс
 always @(posedge CLOCK_20) begin
