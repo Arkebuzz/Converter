@@ -20,7 +20,7 @@ git checkout <name>
   
 Создать ветку на удаленном репозитории:
 ```
-пока хз че
+git push --set-upstream origin <name>
 ```
 
 Запушить.
