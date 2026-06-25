@@ -33,6 +33,7 @@ Release/
 src/
 RAM/
 FLASH/
+fishsteam.exe
 
 .launches
 .settings
