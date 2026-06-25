@@ -1,4 +1,4 @@
-module INV3PH (
+module ADC_HUB (
    input CLOCK_20,   // Часы 20 мГц
    input CLOCK_50,   // Не используется
 
