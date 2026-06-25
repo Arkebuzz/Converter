@@ -48,7 +48,7 @@ initial begin
     CLOCK_20 = 0;
     CLOCK_50 = 0;
     AMC_DATA = 0;
-    ADC_DATA = 0;
+    ADC_DATA = 1;
     VDR_ERR = 0;
     VSENS_ERR = 0;
     nPGOOD = 1;
