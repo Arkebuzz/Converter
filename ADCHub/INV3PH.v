@@ -3,9 +3,9 @@ module INV3PH (
    input CLOCK_50,   // Не используется
 
    // Не используется, ошибки питания
-   input VDR_ERR,   
+   input VDR_ERR,
    input VSENS_ERR, 
-   input nPGOOD,    
+   input nPGOOD,
 
    // АЦП сигма-дельта на напряжение, 4 штуки
    input  [4:1] AMC_DATA,  // Сигма-дельта АЦП
@@ -22,43 +22,34 @@ module INV3PH (
    output [3:1] CTRL_BOT,
 
    // Оптоволокно c главной ПЛИС
-   input  FO_INPUT,   
-   output FO_OUTPUT,  
+   input  FO_INPUT,
+   output FO_OUTPUT,
    output FO_nEN      // Включение приемника оптоволокна
 );
-
 
 // Включение приемника оптоволокна
 assign FO_nEN = 0;
 
 // Часы меньшей герцовки
-reg [1:0] div_counter;
-reg CLOCK_10;
+reg [1:0] div_counter = 0;
+// reg CLOCK_10;
 reg CLOCK_5;
 
 // АЦП ADS7886
-reg adc_clock;
 wire [11:0] current_1;
 wire [11:0] current_2;
 
-assign ADC_CLK[1] = adc_clock;
-assign ADC_CLK[2] = adc_clock;
+assign ADC_CLK[1] = CLOCK_5;
+assign ADC_CLK[2] = CLOCK_5;
 assign ADC_CLK[3] = 0;
 
 ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_NCS, current_1, current_2);
 
-
-initial begin
-   div_counter <= 0;
-end
-
-
 // Такт = 50 нс
 always @(posedge CLOCK_20) begin
-   div_counter <= div_counter + 1;
-   CLOCK_10 <= div_counter[0];  // 10 мГц
+   div_counter <= div_counter + 2'd1;
+   // CLOCK_10 <= div_counter[0];  // 10 мГц
    CLOCK_5 <= div_counter[1];   // 5  мГц
-   adc_clock <= ~CLOCK_5;       // 5  мГц со сдвигом влево на 50 нс
 end
 
 endmodule
