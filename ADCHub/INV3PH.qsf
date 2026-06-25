@@ -85,8 +85,6 @@ set_location_assignment PIN_28 -to IGBT_ERR[2]
 set_location_assignment PIN_29 -to IGBT_ERR[1]
 set_location_assignment PIN_81 -to VDR_ERR
 set_location_assignment PIN_82 -to VSENS_ERR
-set_location_assignment PIN_12 -to clock_20
-set_location_assignment PIN_14 -to clock_50
 set_location_assignment PIN_83 -to nPGOOD
 set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL "Design Compiler"
 set_global_assignment -name EDA_INPUT_VCC_NAME VDD -section_id eda_design_synthesis
@@ -103,3 +101,6 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT NORMAL
 set_global_assignment -name OPTIMIZE_HOLD_TIMING "IO PATHS AND MINIMUM TPD PATHS"
 set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING OFF
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_location_assignment PIN_12 -to CLOCK_20
+set_location_assignment PIN_14 -to CLOCK_50
+set_global_assignment -name VERILOG_FILE ADS7886_READER.v
