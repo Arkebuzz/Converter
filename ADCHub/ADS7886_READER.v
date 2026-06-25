@@ -18,8 +18,8 @@ reg [1:0] state = ST_SKIP;
 
 reg [3:0] counter = 15;
 
-reg [3:0] data_1;
-reg [3:0] data_2;
+reg [11:0] data_1;
+reg [11:0] data_2;
 assign CURRENT_1 = data_1;
 assign CURRENT_2 = data_2;
 
