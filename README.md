@@ -7,7 +7,7 @@ git branch <name>
 
 [Опционально] Посмотреть список веток:
 ```
-git checkout <name>
+git branch --list
 ```
 
 Переключиться на новую ветку:
