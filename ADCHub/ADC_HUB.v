@@ -32,8 +32,16 @@ assign FO_nEN = 0;
 
 // Часы меньшей герцовки
 reg [1:0] div_counter = 0;
-// reg CLOCK_10;
+reg CLOCK_10;
 reg CLOCK_5;
+
+// Такт = 50 нс
+always @(posedge CLOCK_20) begin
+   div_counter <= div_counter + 2'd1;
+   CLOCK_10 <= div_counter[0];  // 10 мГц
+   CLOCK_5 <= div_counter[1];   // 5  мГц
+end
+
 
 // АЦП ADS7886
 wire [11:0] current_1;
@@ -41,11 +49,35 @@ wire [11:0] current_2;
 
 ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_CLK, ADC_NCS, current_1, current_2);
 
-// Такт = 50 нс
-always @(posedge CLOCK_20) begin
-   div_counter <= div_counter + 2'd1;
-   // CLOCK_10 <= div_counter[0];  // 10 мГц
-   CLOCK_5 <= div_counter[1];   // 5  мГц
+
+// Передача данных на центральный ПЛИС
+localparam OBJ_CUR1 = 0;
+localparam OBJ_CUR2 = 1;
+reg [2:0] object_to_send = OBJ_CUR1;
+
+reg new_data_to_send = 0;
+reg [15:0] data_to_send;
+wire ready_to_send;
+
+DATA_TRANSMITTER Transmitter(CLOCK_5, new_data_to_send, data_to_send, ready_to_send, FO_OUTPUT);
+
+// Такт = 200 нс
+always @(posedge CLOCK_5) begin
+   if (ready_to_send) begin
+      case (object_to_send)
+         OBJ_CUR1: begin
+            data_to_send <= { 4'b001, current_1 };
+            new_data_to_send <= 1;
+         end
+
+         OBJ_CUR2: begin
+            data_to_send <= { 4'b002, current_1 };
+            new_data_to_send <= 1;
+         end
+      endcase
+   end else begin
+      new_data_to_send <= 0;
+   end
 end
 
 endmodule
