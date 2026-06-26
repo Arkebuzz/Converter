@@ -36,7 +36,7 @@ reg CLOCK_10;
 reg CLOCK_5;
 
 // Такт = 50 нс
-always @(posedge CLOCK_20) begin
+always@ (posedge CLOCK_20) begin
    div_counter <= div_counter + 2'd1;
    CLOCK_10 <= div_counter[0];  // 10 мГц
    CLOCK_5 <= div_counter[1];   // 5  мГц
@@ -56,22 +56,22 @@ localparam OBJ_CUR2 = 1;
 reg [2:0] object_to_send = OBJ_CUR1;
 
 reg new_data_to_send = 0;
-reg [15:0] data_to_send;
+reg [14:0] data_to_send;
 wire ready_to_send;
 
-DATA_TRANSMITTER Transmitter(CLOCK_5, new_data_to_send, data_to_send, ready_to_send, FO_OUTPUT);
+DATA_TRANSMITTER Transmitter(CLOCK_10, new_data_to_send, data_to_send, ready_to_send, FO_OUTPUT);
 
-// Такт = 200 нс
-always @(posedge CLOCK_5) begin
+// Такт = 100 нс
+always@ (posedge CLOCK_10) begin
    if (ready_to_send) begin
       case (object_to_send)
          OBJ_CUR1: begin
-            data_to_send <= { 4'b001, current_1 };
+            data_to_send <= { 3'b001, current_1 };
             new_data_to_send <= 1;
          end
 
          OBJ_CUR2: begin
-            data_to_send <= { 4'b002, current_1 };
+            data_to_send <= { 3'b010, current_2 };
             new_data_to_send <= 1;
          end
       endcase

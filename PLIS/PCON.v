@@ -54,6 +54,6 @@ wire [15:0] data;
 wire data_ready;
 wire error;
 
-ADC_HUB_RECEIVER Receiver(CLOCK_5, D_INP[3], data, data_ready, error);
+DATA_RECEIVER Receiver(CLOCK_5, D_INP[3], data, data_ready, error);
 
 endmodule

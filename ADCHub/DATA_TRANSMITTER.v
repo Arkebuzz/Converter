@@ -3,7 +3,7 @@
 module DATA_TRANSMITTER (
    input CLOCK_10, 
    input DATA_READY,      // Флаг о наличии новых данных на отправку
-   input [15:0] DATA,     // Данные на отправку
+   input [14:0] DATA,     // Данные на отправку
    output READY_TO_SEND,  // Флаг о готовности отправки следующего набора данных
    output FO_OUT
 );
@@ -19,42 +19,35 @@ reg [3:0] pulse_counter = 0;
 reg ready2send = 1;
 assign READY_TO_SEND = ready2send;
 
-reg fo_out = 0;
+reg fo_out;
 assign FO_OUT = fo_out;
 
 
-always @(posedge CLOCK_10) begin
-   pulse_counter <= pulse_counter + 1;
+always@ (posedge CLOCK_10) begin
+   fo_out <= 0;
+   pulse_counter <= pulse_counter + 2'd1;
 
    case (state)
       ST_WAIT: begin
          if (DATA_READY) begin
             ready2send <= 0;
             bit_counter <= 0;
-            pulse_counter <= 0;
+            pulse_counter <= 1;
             state <= ST_SEND;
          end
       end
    
       ST_SEND: begin
-         if (DATA[bit_counter] == 1) begin
-            if (pulse_counter < 4) begin
-               fo_out <= 1;
-            end else begin
-               fo_out <= 0;
-            end
+         if (DATA[bit_counter] == 1 && pulse_counter < 5) begin
+            fo_out <= 1;
          end
-         else begin
-            if (pulse_counter < 1) begin
-               fo_out <= 1;
-            end else begin
-               fo_out <= 0;
-            end
+         else if (pulse_counter == 1) begin  // DATA[bit_counter] == 0
+            fo_out <= 1;
          end
 
          if (pulse_counter == 5) begin
-            bit_counter <= bit_counter + 1;
-            pulse_counter <= 0;
+            bit_counter <= bit_counter + 2'd1;
+            pulse_counter <= 1;
 
             if (bit_counter == 15) begin
                state <= ST_FINISH;
@@ -63,9 +56,8 @@ always @(posedge CLOCK_10) begin
       end 
 
       ST_FINISH: begin
-         ready2send = 1;
-
          if (pulse_counter == 9) begin
+            ready2send = 1;
             state <= ST_WAIT;
          end
       end
