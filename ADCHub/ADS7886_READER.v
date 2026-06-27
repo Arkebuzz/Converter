@@ -40,7 +40,7 @@ assign ADC_NCS[3] = 1;  // 3й не используется
 // Один замер считывается за 18 циклов
 // То есть первый бит следующего замера будет на 19м подьеме часиков
 always @(posedge CLOCK_5) begin
-   counter <= counter - 2'd1;
+   counter <= counter - 1;
    
    case (state)
       ST_SKIP: begin

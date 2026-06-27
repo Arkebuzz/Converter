@@ -30,14 +30,15 @@ module ADC_HUB (
 // Включение приемника оптоволокна
 assign FO_nEN = 0;
 
+
 // Часы меньшей герцовки
 reg [1:0] div_counter = 0;
 reg CLOCK_10;
 reg CLOCK_5;
 
 // Такт = 50 нс
-always@ (posedge CLOCK_20) begin
-   div_counter <= div_counter + 2'd1;
+always @(posedge CLOCK_20) begin
+   div_counter <= div_counter + 1;
    CLOCK_10 <= div_counter[0];  // 10 мГц
    CLOCK_5 <= div_counter[1];   // 5  мГц
 end
@@ -47,37 +48,49 @@ end
 wire [11:0] current_1;
 wire [11:0] current_2;
 
-ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_CLK, ADC_NCS, current_1, current_2);
+ADS7886_READER ADSReader(
+   .CLOCK_5(CLOCK_5),   
+   .ADC_DATA(ADC_DATA),  
+   .ADC_CLK(ADC_CLK),
+   .ADC_NCS(ADC_NCS),
+   .CURRENT_1(current_1), 
+   .CURRENT_2(current_2)
+);
 
 
 // Передача данных на центральный ПЛИС
+localparam DATA_WIDTH = 13;  // 13 бит под флаг для ошибок. Если возникла ошибка, прерываем текущую передачу и отправляем 12-битный пакет с ошибками.
+                             // А может и нахрен не надо, можно безболененно выкинуть.
 localparam OBJ_CUR1 = 0;
 localparam OBJ_CUR2 = 1;
 reg [2:0] object_to_send = OBJ_CUR1;
 
-reg new_data_to_send = 0;
-reg [14:0] data_to_send;
+reg tr_reset = 0;  // Может приходить с центральной ПЛИС для синхронизации
+
+reg [DATA_WIDTH-1:0] data_to_send;
 wire ready_to_send;
 
-DATA_TRANSMITTER Transmitter(CLOCK_10, new_data_to_send, data_to_send, ready_to_send, FO_OUTPUT);
+DATA_TRANSMITTER Transmitter (
+   .CLOCK_10(CLOCK_10), 
+   .RESET(tr_reset), 
+   .DATA(data_to_send), 
+   .READY_TO_SEND(ready_to_send), 
+   .FO_OUT(FO_OUTPUT)
+);
+defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
 
-// Такт = 100 нс
-always@ (posedge CLOCK_10) begin
-   if (ready_to_send) begin
-      case (object_to_send)
-         OBJ_CUR1: begin
-            data_to_send <= { 3'b001, current_1 };
-            new_data_to_send <= 1;
-         end
+always @(posedge ready_to_send) begin
+   case (object_to_send)
+      OBJ_CUR1: begin
+         data_to_send <= { 1'b0, current_1 };
+         object_to_send <= OBJ_CUR2;
+      end
 
-         OBJ_CUR2: begin
-            data_to_send <= { 3'b010, current_2 };
-            new_data_to_send <= 1;
-         end
-      endcase
-   end else begin
-      new_data_to_send <= 0;
-   end
+      OBJ_CUR2: begin
+         data_to_send <= { 1'b0, current_2 };
+         object_to_send <= OBJ_CUR1;
+      end
+   endcase
 end
 
 endmodule
