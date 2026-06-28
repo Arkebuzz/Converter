@@ -59,38 +59,24 @@ ADS7886_READER ADSReader(
 
 
 // Передача данных на центральный ПЛИС
-localparam DATA_WIDTH = 13;  // 13 бит под флаг для ошибок. Если возникла ошибка, прерываем текущую передачу и отправляем 12-битный пакет с ошибками.
-                             // А может и нахрен не надо, можно безболененно выкинуть.
-localparam OBJ_CUR1 = 0;
-localparam OBJ_CUR2 = 1;
-reg [2:0] object_to_send = OBJ_CUR1;
-
-reg tr_reset = 0;  // Может приходить с центральной ПЛИС для синхронизации
+localparam DATA_WIDTH = 48;  // 2 тока + 2 константы по 12 бит
 
 reg [DATA_WIDTH-1:0] data_to_send;
 wire ready_to_send;
 
 DATA_TRANSMITTER Transmitter (
-   .CLOCK_10(CLOCK_10), 
-   .RESET(tr_reset), 
+   .CLOCK_10(CLOCK_10),
    .DATA(data_to_send), 
    .READY_TO_SEND(ready_to_send), 
    .FO_OUT(FO_OUTPUT)
 );
 defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
 
-always @(posedge ready_to_send) begin
-   case (object_to_send)
-      OBJ_CUR1: begin
-         data_to_send <= { 1'b0, current_1 };
-         object_to_send <= OBJ_CUR2;
-      end
+localparam const_1 = 12'b1100_1010_1111;
+localparam const_2 = 12'b0101_0000_1100;
 
-      OBJ_CUR2: begin
-         data_to_send <= { 1'b0, current_2 };
-         object_to_send <= OBJ_CUR1;
-      end
-   endcase
+always @(posedge ready_to_send) begin
+   data_to_send <= {const_1, const_2, current_2, current_1};
 end
 
 endmodule
