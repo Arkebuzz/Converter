@@ -35,7 +35,7 @@ always @(posedge CLOCK_50) begin
    data_ready <= 0;
 
    if (signal_counter < 255) begin
-      signal_counter <= signal_counter + 1;
+      signal_counter <= signal_counter + 8'b1;
    end else begin
       connect_fail <= 1;
    end
@@ -68,7 +68,7 @@ always @(posedge CLOCK_50) begin
          data_ready <= 1;
       end 
       else if (bit_counter <= DATA_WIDTH) begin
-         bit_counter <= bit_counter + 1;
+         bit_counter <= bit_counter + 7'b1;
       end
 
       signal_counter <= 0;

@@ -19,8 +19,9 @@ if {[catch {restart -f}] == 0} {
     add wave -noupdate /tb_system_top/u_adc_hub/ready_to_send
     add wave -noupdate /tb_system_top/u_adc_hub/current_1
     add wave -noupdate /tb_system_top/u_adc_hub/current_2
+    add wave -noupdate /tb_system_top/u_adc_hub/voltage_1
+    add wave -noupdate /tb_system_top/u_adc_hub/voltage_2
     add wave -noupdate /tb_system_top/u_adc_hub/const_1
-    add wave -noupdate /tb_system_top/u_adc_hub/const_2
 
     add wave -noupdate -divider "=== TRANSMITTER (u_tx) ==="
     add wave -noupdate /tb_system_top/u_adc_hub/Transmitter/DATA
@@ -45,8 +46,9 @@ if {[catch {restart -f}] == 0} {
     add wave -noupdate -divider "=== PCON ==="
     add wave -noupdate /tb_system_top/u_pcon/current_1
     add wave -noupdate /tb_system_top/u_pcon/current_2
-    add wave -noupdate /tb_system_top/u_pcon/const_1
-    add wave /tb_system_top/u_pcon/const_2
+    add wave -noupdate /tb_system_top/u_pcon/voltage_1
+    add wave -noupdate /tb_system_top/u_pcon/voltage_2
+    add wave /tb_system_top/u_pcon/const_1
 
     run 100us
 }

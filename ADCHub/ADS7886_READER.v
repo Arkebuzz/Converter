@@ -22,8 +22,8 @@ reg [3:0] counter = 15;
 reg [11:0] data_1;
 reg [11:0] data_2;
 
-reg [11:0] current_1;
-reg [11:0] current_2;
+reg [11:0] current_1 = 0;
+reg [11:0] current_2 = 0;
 assign CURRENT_1 = current_1;
 assign CURRENT_2 = current_2;
 
@@ -40,7 +40,7 @@ assign ADC_NCS[3] = 1;  // 3й не используется
 // Один замер считывается за 18 циклов
 // То есть первый бит следующего замера будет на 19м подьеме часиков
 always @(posedge CLOCK_5) begin
-   counter <= counter - 1;
+   counter <= counter - 4'b1;
    
    case (state)
       ST_SKIP: begin

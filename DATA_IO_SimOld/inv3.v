@@ -3,7 +3,8 @@
 
 module INV3PH (clock_20, clock_50, AMC_DATA, AMC_CLK, ADC_DATA, ADC_CLK, ADC_NCS, VDR_ERR, VSENS_ERR, nPGOOD, CTRL_TOP, CTRL_BOT, FO_INPUT, FO_OUTPUT, FO_nEN, IGBT_ERR);
 
-`ifndef LEFT `ifndef RIGHT ; `endif `endif // Compilation error if side is not defined
+`ifndef LEFT `ifndef RIGHT ; `endif 
+`endif // Compilation error if side is not defined
 `ifdef LEFT `ifdef RIGHT ; `endif `endif   // Compilation error if both sides defined
 
 input clock_20;

@@ -37,7 +37,7 @@ module tb_system_top;
         .VDR_ERR(0),
         .VSENS_ERR(0),
         .nPGOOD(0),
-        .AMC_DATA(0),
+        .AMC_DATA({CLOCK_20, CLOCK_20, CLOCK_2_5, 1'b1}),
         .AMC_CLK(),
         .ADC_DATA({1'b0, CLOCK_2_5, CLOCK_1_25}),
         .ADC_CLK(),

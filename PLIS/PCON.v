@@ -42,7 +42,7 @@ reg [20:1] out;
 assign D_OUTP = out;
 
 // TEST
-localparam DATA_WIDTH = 48;
+localparam DATA_WIDTH = 56;
 
 wire [DATA_WIDTH-1:0] rc_data;
 wire rc_data_ready;
@@ -61,14 +61,15 @@ defparam Receiver.DATA_WIDTH = DATA_WIDTH;
 
 reg [11:0] current_1;
 reg [11:0] current_2;
+reg [9:0]  voltage_1;
+reg [9:0]  voltage_2;
 reg [11:0] const_1;
-reg [11:0] const_2;
 
 always @(posedge CLOCK_50) begin
-   out <= {const_1, const_2, current_1, current_2};  // Чисто, чтобы квартус не оптимизировал проект в 0
+   out <= {const_1, voltage_1, voltage_2, current_1, current_2};  // Чисто, чтобы квартус не оптимизировал проект в 0
    
    if (rc_data_ready) begin
-      {const_2, const_1, current_2, current_1} <= rc_data;
+      {const_1, voltage_2, voltage_1, current_2, current_1} <= rc_data;
    end
 end
 

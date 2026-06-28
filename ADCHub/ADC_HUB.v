@@ -38,7 +38,7 @@ reg CLOCK_5;
 
 // Такт = 50 нс
 always @(posedge CLOCK_20) begin
-   div_counter <= div_counter + 1;
+   div_counter <= div_counter + 2'b1;
    CLOCK_10 <= div_counter[0];  // 10 мГц
    CLOCK_5 <= div_counter[1];   // 5  мГц
 end
@@ -58,8 +58,21 @@ ADS7886_READER ADSReader(
 );
 
 
+// АЦП AMC1304M25
+wire [9:0] voltage_1;
+wire [9:0] voltage_2;
+
+AMC1304M25_READER AMCReader (
+   .CLOCK_20(CLOCK_20),
+   .AMC_DATA(AMC_DATA),
+   .AMC_CLK(AMC_CLK),
+   .VOLTAGE_1(voltage_1),
+   .VOLTAGE_2(voltage_2)
+);
+
+
 // Передача данных на центральный ПЛИС
-localparam DATA_WIDTH = 48;  // 2 тока + 2 константы по 12 бит
+localparam DATA_WIDTH = 56;  // 2 тока по 12 бит + 2 напряжения по 10 бит + константа 12 бит
 
 reg [DATA_WIDTH-1:0] data_to_send;
 wire ready_to_send;
@@ -72,11 +85,11 @@ DATA_TRANSMITTER Transmitter (
 );
 defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
 
-localparam const_1 = 12'b1100_1010_1111;
-localparam const_2 = 12'b0101_0000_1100;
+// Для теста корректности передачи:
+localparam const_1 = 12'b1100_0101_1100;
 
 always @(posedge ready_to_send) begin
-   data_to_send <= {const_2, const_1, current_2, current_1};
+   data_to_send <= {const_1, voltage_2, voltage_1, current_2, current_1};
 end
 
 endmodule
