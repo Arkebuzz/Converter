@@ -30,22 +30,53 @@ module ADC_HUB (
 // Включение приемника оптоволокна
 assign FO_nEN = 0;
 
+
 // Часы меньшей герцовки
 reg [1:0] div_counter = 0;
-// reg CLOCK_10;
+reg CLOCK_10;
 reg CLOCK_5;
+
+// Такт = 50 нс
+always @(posedge CLOCK_20) begin
+   div_counter <= div_counter + 1;
+   CLOCK_10 <= div_counter[0];  // 10 мГц
+   CLOCK_5 <= div_counter[1];   // 5  мГц
+end
+
 
 // АЦП ADS7886
 wire [11:0] current_1;
 wire [11:0] current_2;
 
-ADS7886_READER ADSReader(CLOCK_5, ADC_DATA, ADC_CLK, ADC_NCS, current_1, current_2);
+ADS7886_READER ADSReader(
+   .CLOCK_5(CLOCK_5),   
+   .ADC_DATA(ADC_DATA),  
+   .ADC_CLK(ADC_CLK),
+   .ADC_NCS(ADC_NCS),
+   .CURRENT_1(current_1), 
+   .CURRENT_2(current_2)
+);
 
-// Такт = 50 нс
-always @(posedge CLOCK_20) begin
-   div_counter <= div_counter + 2'd1;
-   // CLOCK_10 <= div_counter[0];  // 10 мГц
-   CLOCK_5 <= div_counter[1];   // 5  мГц
+
+// Передача данных на центральный ПЛИС
+localparam DATA_WIDTH = 48;  // 2 тока + 2 константы по 12 бит
+
+reg [DATA_WIDTH-1:0] data_to_send;
+wire ready_to_send;
+
+DATA_TRANSMITTER Transmitter (
+   .CLOCK_10(CLOCK_10),
+   .DATA(data_to_send), 
+   .READY_TO_SEND(ready_to_send), 
+   .FO_OUT(FO_OUTPUT)
+);
+defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
+
+localparam const_1 = 12'b1100_1010_1111;
+localparam const_2 = 12'b0101_0000_1100;
+
+always @(posedge ready_to_send) begin
+   data_to_send <= {const_1, const_2, current_2, current_1};
 end
 
 endmodule
