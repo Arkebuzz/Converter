@@ -29,5 +29,24 @@ interrupt void my_critical_interrupt_handler(void) {}
 5. Арм стартует первым, запускает ДСП, ДСП встает в режим ожидания,
 Арм посылает прерывание (MTOCIPCINT1 = Master To Control IPC Interrupt 1) на ДСП и запускает его,
 Арм говорит ДСП откуда брать код: с Флеш или ОП.
+
 6. Изначально все пины принадлежат к Арм ядру кроме GPIO128-GPIO135 - их может трогать только ДСП
 Чтобы ДСП получил доступ к другим пинам Арм должен дать ему доступ через GPIOPinConfigureCoreSelect()
+
+7. Пины оптоволокно <-> FPGA:
+    FPGA_INPUT1                    = 83
+    FPGA_INPUT2   .. FPGA_INPUT8   = 85 ..  91
+    FPGA_OUTPUT1  .. FPGA_OUTPUT4  = 98  .. 101
+    FPGA_OUTPUT5  .. FPGA_OUTPUT8  = 103 .. 106
+    FPGA_OUTPUT9  .. FPGA_OUTPUT10 = 114 .. 115
+    FPGA_INPUT9   .. FPGA_INPUT12  = 110 .. 113
+    FPGA_OUTPUT11 .. FPGA_OUTPUT13 = 119 .. 121
+    FPGA_OUTPUT14                  = 125
+    FPGA_INPUT13  .. FPGA_INPUT16  = 126 .. 129
+    FPGA_INPUT17  .. FPGA_INPUT18  = 132 .. 133
+    FPGA_INPUT19  .. FPGA_INPUT20  = 135 .. 136
+    FPGA_OUTPUT15                  = 137
+    FPGA_OUTPUT16 .. FPGA_OUTPUT19 = 141 .. 144
+    FPGA_OUTPUT20                  = 4
+    
+8. 
