@@ -76,7 +76,7 @@ localparam const_1 = 12'b1100_1010_1111;
 localparam const_2 = 12'b0101_0000_1100;
 
 always @(posedge ready_to_send) begin
-   data_to_send <= {const_1, const_2, current_2, current_1};
+   data_to_send <= {const_2, const_1, current_2, current_1};
 end
 
 endmodule
