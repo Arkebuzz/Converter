@@ -49,4 +49,27 @@ interrupt void my_critical_interrupt_handler(void) {}
     FPGA_OUTPUT16 .. FPGA_OUTPUT19 = 141 .. 144
     FPGA_OUTPUT20                  = 4
     
-8. 
+8. Пины FPGA <-> F28:
+    F28 = Master, FPGA = Slave
+    EPI = External Peripheral Interface
+    DA = Data+Address (both on the same wires)
+    ALE = Address Latch Enable (Switches modes: address on wires -> set ALE to 1 -> data on wires)
+    MWEN/MOEN = Master Write/Output Enable (commands to fpga: write = f28 -> fpga, output = fpga -> f28)
+    NBLEN/NHLEN = Non-Byte Low/High Enable (if only 10 of 20 bits needed: NBLEN = DA0..DA9, NBHIGH = DA10..DA19 ???)
+    NCS0/NCS1 = NChipselects (why 2 ???)
+
+    NBLEN_EPI0S0 = 79 <-> 32
+    NBHEN_EPI0S0 = 77 <-> 33
+    DA0_EPI0S0   = 76 <-> 35
+    DA1_EPI0S1   .. DA2_EPI0S2   = 72 .. 71 <-> 36 .. 37
+    DA3_EPI0S3   .. DA8_EPI0S8   = 69 .. 64 <-> 38 .. 43
+    DA9_EPI0S9   .. DA11_EPI0S11 = 60 .. 58 <-> 45 .. 47
+    DA12_EPI0S12 .. DA14_EPI0S14 = 51 .. 49 <-> 48 .. 50
+    DA15_EPI0S15 = 46 <-> 51
+    ALE_EPI0S30  = 44 <-> 53
+    MWEN_EPI0S29 = 43 <-> 56
+    MOEN_EPI0S28 = 42 <-> 57
+    DA16_EPI0S16 .. DA18_EPI0S18 = 31 .. 33 <-> 63 .. 61
+    DA19_EPI0S19 = 39 <-> 60
+    NCS0_EPI0S26 = 28 <-> 79
+    NCS1_EPI0S27 = 30 <-> 80

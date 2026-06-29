@@ -23,13 +23,11 @@ inline void setup_flash_mem(void) {
 }
 
 // Original code is in InitFunctions.c
-// FIXME: в теории это делает говно
-// надо спросить как это предполагалось что должно работать
 void setup_GPIO(void) {
     EALLOW;
-    // Sets GPIO128 (pin 140 = DGND) and GPIO19 (pin 29 = VCCINT_FPGA) to output
-    GpioG2CtrlRegs.GPEDIR.bit.GPIO128 = 1; // КЗ
-    GpioG1CtrlRegs.GPADIR.bit.GPIO19 = 1;  // это ваще взрыв плавка кремния я хз
+    // Sets GPIO128 (pin 140 not connected) and GPIO19 (pin 29 = EPWM6A) to output
+    GpioG2CtrlRegs.GPEDIR.bit.GPIO128 = 1;
+    GpioG1CtrlRegs.GPADIR.bit.GPIO19 = 1;
     EDIS;
 }
 
@@ -38,6 +36,11 @@ void setup_SPI(void) {
 }
 
 void main(void) {
+    // --- CONFIGURING THE CHIP ---
+
+    // Disable all interrupts while configuring
+    DINT;
+
     setup_flash_mem();
 
     InitSysCtrl();      // wakes up the CPU and the clocks
@@ -46,6 +49,7 @@ void main(void) {
     setup_GPIO();       // setup GPIO pins
     setup_SPI();        // setup SPI pins
 
-//    INIT_GPIO_Setup();  // setup GPIO pins
-//    Init_SPI();         // setup SPI pins
+    // Configuring PIE (Peripheral Interrupt Expansion)
+
+
 }
