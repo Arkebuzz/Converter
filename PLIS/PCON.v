@@ -1,20 +1,28 @@
 module PCON(
    CLOCK_50,
    CLOCK_12,
-   reset_button, 
-   D_INP, 
-   D_OUTP,
-   InternalPowerGood, 
-   CPU_DIN,
+   
+   // Связь с ADCHub
+   D_INP,   // 3, 4, 5  - используются
+   D_OUTP,  // 4, 5, 6  - используются
+   
+   // Связь с контроллером:
    ADRESS_DATA, 
-   ADRESS_TOP, 
-   nBLE, 
-   nBHE, 
-   ALE, 
+   ALE,   
    nCS0, 
    nCS1, 
    WEn, 
-   OEn
+   OEn,
+   
+   // Хрен знает, что, но кажись от контроллера:
+   CPU_DIN,
+   
+   // Не используется:
+   ADRESS_TOP,         
+   nBLE,               
+   nBHE,               
+   InternalPowerGood,
+   reset_button
 );
 
 //Входы FPGA

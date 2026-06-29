@@ -6,7 +6,7 @@ module AMC1304M25_READER (
    input  CLOCK_20,          // Часы 20 мГц
    input  [4:1] AMC_DATA,    // 4 AMC
    output [4:1] AMC_CLK,     // Часы 20 мГц для AMC
-   output [9:0] VOLTAGE_1,  // Напряжение с канала 1 и т.д.
+   output [9:0] VOLTAGE_1,   // Напряжение с канала 1 и т.д.
    output [9:0] VOLTAGE_2      
    // output [9:0] VOLTAGE_3,      
    // output [9:0] VOLTAGE_4       

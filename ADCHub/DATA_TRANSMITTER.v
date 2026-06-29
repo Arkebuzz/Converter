@@ -9,8 +9,8 @@ module DATA_TRANSMITTER #(
    output FO_OUT
 );
 
-localparam PULSE_1_LEN = 5;    // Длина импульса для 1
-localparam PULSE_0_LEN = 1;    // Длина импульса для 0
+localparam PULSE_1_LEN = 4;    // Длина импульса для 1
+localparam PULSE_0_LEN = 1;    // Длина импульса для 0. Меньше или равна PULSE_1_LEN
 localparam BIT_PERIOD = 5;     // Полный период на бит
 localparam RESET_PULSES = 10;  // Количество тактов для сброса 
 
@@ -50,10 +50,10 @@ always @(posedge CLOCK_10) begin
       end
 
       ST_SEND: begin
-         if (data[bit_counter] == 1 && pulse_counter < PULSE_1_LEN) begin
+         if (data[bit_counter] == 1 && pulse_counter <= PULSE_1_LEN) begin
             fo_out <= 1;
          end
-         else if (pulse_counter == PULSE_0_LEN) begin  // data[bit_counter] == 0
+         else if (pulse_counter <= PULSE_0_LEN) begin  // data[bit_counter] == 0
             fo_out <= 1;
          end
 

@@ -1,29 +1,31 @@
 // ------------------------------------------------------------ //
 //                Получение значений с ADS7886                  //
+//                                                              //
+//  Значения обновляются каждые 18 тактов на 5 мГц = 3600 нс    //
 // ------------------------------------------------------------ //
 
 module ADS7886_READER (
    input CLOCK_5,             // Часы 5 мГц
    input  [3:1]  ADC_DATA,    // Данные 3-х АЦП, по биту на каждый
-   output [3:1]  ADC_CLK,
+   output [3:1]  ADC_CLK,     // Часы АЦП, 5 мГц
    output [3:1]  ADC_NCS,     // Сигнал выбор чипа, 1->0 для запуска передачи данных
    output [11:0] CURRENT_1,   // Измеренные токи
    output [11:0] CURRENT_2
 );
 
-localparam ST_SKIP = 0;
-localparam ST_READ = 1;
-localparam ST_OFF  = 2;
-localparam ST_ON   = 3;
-reg [1:0] state = ST_SKIP;
+localparam ST_OFF  = 0;
+localparam ST_ON   = 1;
+localparam ST_SKIP = 2;
+localparam ST_READ = 3;
+reg [1:0] state = ST_OFF;
 
-reg [3:0] counter = 15;
+reg [3:0] counter;
 
-reg [11:0] data_1;
-reg [11:0] data_2;
+reg [11:0] data_1 = 0;
+reg [11:0] data_2 = 0;
 
-reg [11:0] current_1 = 0;
-reg [11:0] current_2 = 0;
+reg [11:0] current_1;
+reg [11:0] current_2;
 assign CURRENT_1 = current_1;
 assign CURRENT_2 = current_2;
 
