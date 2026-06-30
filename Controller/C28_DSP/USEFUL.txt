@@ -1,1 +1,4 @@
 M3_Write_Data
+
+в board.h добавлена строчка:
+#define Board_initEPI 				PCON_EPI_INIT
