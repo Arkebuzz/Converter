@@ -73,3 +73,12 @@ interrupt void my_critical_interrupt_handler(void) {}
     DA19_EPI0S19 = 39 <-> 60
     NCS0_EPI0S26 = 28 <-> 79
     NCS1_EPI0S27 = 30 <-> 80
+    
+    // ?? Что они делают
+    CPU_INOUT4   = 80 <-> 14
+    CPU_INOUT3   = 7  <-> 13
+    CPU_OUT1     = 25 <-> 5
+    CPU_OUT2     = 53 <-> 6
+    CPU_OUT3     = 54 <-> 7
+    CPU_OUT4     = 55 <-> 8
+    
