@@ -5,6 +5,7 @@ db/
 incremental_db/
 output_files/
 __Previews/
+*_auto_stripped.stp
 
 # Файлы симуляций
 simulation/
@@ -23,6 +24,7 @@ transcript
 
 # Какойто промежуточный файл
 .qsys_edit
+
 
 
 #---------Контроллер--------#
