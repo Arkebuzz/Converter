@@ -439,9 +439,9 @@ void SaveOffsetsToFlash(void)
 	int i;
 	Uint32 write_pointer;
 	//Uint16 LED=0;
-	Uint64 Checksumm = 0;
+	//Uint64 Checksumm = 0;
 	Short_cast ShortUnion;
-	Long_cast Uint32Union;
+	//Long_cast Uint32Union;
 	Uint32 Checksum=0;
 
 	GpioG1DataRegs.GPADAT.bit.GPIO4 = 1;

@@ -69,7 +69,7 @@ extern Uint16 RamfuncsRunStart;
 #define OSCI_SOURCES_COUNT 52
 
 extern interrupt void adc1_isr(void);
-extern void FPGA_Read_Data (Uint16 CyclesCounter);
+extern void FPGA_Read_Data(void);
 extern void FPGA_Write_Data (void);
 extern void FPGA_Write_Exitation(void);
 extern void FPGA_Write_Aux (void);

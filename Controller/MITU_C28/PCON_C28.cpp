@@ -5,10 +5,10 @@ void main(void)
 {
    Uint32 LedCounter=0;
    short k;
-   unsigned short WatchdogValue = 0;
+   //unsigned short WatchdogValue = 0;
    Uint32 Peak_ResetCounter = 0;
-   Uint16 ReadResult=0;
-   Uint16 LED = 0;
+   //Uint16 ReadResult=0;
+   //Uint16 LED = 0;
 
    SCADASystemState = SYSTEM_STATE_INIT;
    //GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
@@ -83,7 +83,7 @@ void main(void)
 	// Set up to use 16-bit data size
 	// Pointers are based on 16-bit words
 	// Increment by 1 (1 16-bit words)
-	Uint16 DataSize = 51;
+	//Uint16 DataSize = 51;
 	DMACH1BurstConfig(0,0,0);
 	DMACH1TransferConfig(49,1,1);
 	DMACH1WrapConfig(49,0,49,0);
@@ -114,7 +114,7 @@ void main(void)
         if(MainCycleMeasurmentsCounter == (MEASURMENTS_BUFFER_SIZE - 1)) {MainCycleMeasurmentsCounter = 0;}
     	else MainCycleMeasurmentsCounter++;
 
-    	WatchdogValue=1; //GpioG2DataRegs.GPEDAT.bit.GPIO128 = WatchdogValue; // Watchdog out
+    	//WatchdogValue=1; //GpioG2DataRegs.GPEDAT.bit.GPIO128 = WatchdogValue; // Watchdog out
 
     	LedCounter ++;   if (LedCounter == 500)  {GpioG1DataRegs.GPADAT.bit.GPIO8 = 0;} // LED Blink // Turn off LED
     	if (LedCounter > 1000) 	{GpioG1DataRegs.GPADAT.bit.GPIO8 = 1; LedCounter = 0;} // Turn on LED
@@ -128,7 +128,7 @@ void main(void)
 
     	CalculateValues(); //Sensor values calculation according sensors gains
 
-    	FPGA_Read_Data(MainCyclesCounter); //Read data from FPGA
+    	FPGA_Read_Data(); //Read data from FPGA
 
     	SignalProcessing(); //Signal processing - calculating Mean/RMS values, filtering
     	CalculatePower(); //Active, reactive power calculation
@@ -171,7 +171,7 @@ void main(void)
     	if (MeasurmentsCounter!= PrevMeasurmentCounterValue) {PrevMeasurmentCounterValue = MeasurmentsCounter;}
     	else {ErrorSet(ERR_ADC_IRQ_LOSS);}
 
-    	WatchdogValue=0; //GpioG2DataRegs.GPEDAT.bit.GPIO128 = WatchdogValue; // Watchdog out
+    	//WatchdogValue=0; //GpioG2DataRegs.GPEDAT.bit.GPIO128 = WatchdogValue; // Watchdog out
 
     	if (SaveDataRequestFlag==1) {SaveDataToFlash();	SaveDataRequestFlag=2;}
 		if (SaveDataRequestFlag==3)	{EraseFlashData(); SaveDataRequestFlag=4;}

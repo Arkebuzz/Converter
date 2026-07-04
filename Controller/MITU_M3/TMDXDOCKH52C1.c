@@ -220,6 +220,8 @@ void PCON_EPI_INIT(void)
 		GPIOPinConfigure(GPIO_PJ5_EPI0S29);
 		GPIOPinConfigure(GPIO_PJ6_EPI0S30);
 
+		// EPI0S20 - EPI0S23 не заданы, почему-то
+
 		SysCtlPeripheralEnable(SYSCTL_PERIPH_EPI0);
 		SysCtlPeripheralReset(SYSCTL_PERIPH_EPI0);
 
@@ -250,6 +252,11 @@ void PCON_EPI_INIT(void)
 		//EPIAddressMapSet(EPI0_BASE, (EPI_ADDR_RAM_SIZE_16MB | EPI_ADDR_RAM_BASE_6) );
 
 		ulMap = 0xBB;
+		// 1011 1011
+		// биты 1-2 - EPI_ADDR_RAM_BASE_6 | EPI_ADDR_RAM_BASE_8 что-то непонятное
+		// биты 3-4 - EPI_ADDR_RAM_SIZE_16MB
+		// биты 5-6 - EPI_ADDR_PER_SIZE_16MB
+		// биты 7-8 - EPI_ADDR_PER_BASE_A | EPI_ADDR_PER_BASE_C что-то непонятное
 		HWREG(ulBase + EPI_O_ADDRMAP) = ulMap;
 }
 /*

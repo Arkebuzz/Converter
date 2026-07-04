@@ -135,11 +135,8 @@ void FPGA_Get_Data (void)
 	FPGA_Error_State_L = (Uint16) ReadWordFromEPIFIFO();
 }
 
-void FPGA_Read_Data (Uint16 CyclesCounter)
+void FPGA_Read_Data (void)
 {
-	short ValueFromEMIF;
-	int k;
-
 	FPGA_Error_Latch_H = DMABufFPGA1[0];
 	FPGA_Error_Latch_L = DMABufFPGA1[1];
 	FPGA_Error_State_H = DMABufFPGA1[2];
