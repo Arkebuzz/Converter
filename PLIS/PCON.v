@@ -124,62 +124,62 @@ always @(posedge CLOCK_50) begin
    end
    
    // f28m35
+   emif_state_counter <= emif_state_counter + 1;
+   
    // TEMP - Временный блок передачи констант
    if          (emif_state_counter == 10) begin
-      emif_adress = 5;
-      emif_data_to_micro = const_1;
-      emif_wren = 1;
+      emif_adress <= 5;
+      emif_data_to_micro <= const_1;
+      emif_wren <= 1;
    end else if (emif_state_counter == 12) begin
-      emif_adress = 6;
-      emif_data_to_micro = const_2;
-      emif_wren = 1;
+      emif_adress <= 6;
+      emif_data_to_micro <= const_2;
+      emif_wren <= 1;
    end else if (emif_state_counter == 14) begin
-      emif_adress = 7;
-      emif_data_to_micro = 16'b0101_0000_1111_0110;
-      emif_wren = 1;
+      emif_adress <= 7;
+      emif_data_to_micro <= 16'b0101_0000_1111_0110;
+      emif_wren <= 1;
    end else if (emif_state_counter == 16) begin
-      emif_adress = 8;
-      emif_data_to_micro = const_4;
-      emif_wren = 1;
+      emif_adress <= 8;
+      emif_data_to_micro <= const_4;
+      emif_wren <= 1;
    end
    // Передача параметров с ADChubS
    else     if (emif_state_counter == 18) begin
-      emif_adress = 10;
-      emif_data_to_micro = voltage_inp;
-      emif_wren = 1;
+      emif_adress <= 10;
+      emif_data_to_micro <= voltage_inp;
+      emif_wren <= 1;
    end else if (emif_state_counter == 20) begin
-      emif_adress = 11;
-      emif_data_to_micro = voltage_out;
-      emif_wren = 1;
+      emif_adress <= 11;
+      emif_data_to_micro <= voltage_out;
+      emif_wren <= 1;
    end else if (emif_state_counter == 22) begin
-      emif_adress = 12;
-      emif_data_to_micro = current_1;
-      emif_wren = 1;
+      emif_adress <= 12;
+      emif_data_to_micro <= current_1;
+      emif_wren <= 1;
    end else if (emif_state_counter == 24) begin
-      emif_adress = 13;
-      emif_data_to_micro = current_2;
-      emif_wren = 1;
+      emif_adress <= 13;
+      emif_data_to_micro <= current_2;
+      emif_wren <= 1;
    end
    // Чтение параметров
    else     if (emif_state_counter == 50) begin
-      emif_adress = 55;
+      emif_adress <= 55;
    end else if (emif_state_counter == 54) begin
-      const_4 = emif_data_from_micro;
+      const_4 <= emif_data_from_micro;
    end 
    else if (emif_state_counter == 55) begin
-      emif_adress = 60;
+      emif_adress <= 60;
    end else if (emif_state_counter == 59) begin
-      pwm_counter = emif_data_from_micro;
+      pwm_counter <= emif_data_from_micro;
    end
    // Сброс 
    else if (emif_state_counter == 99) begin
-      emif_state_counter = 0;
+      emif_state_counter <= 0;
    end
    else begin
-      emif_wren = 0;
+      emif_wren <= 0;
    end
-
-   emif_state_counter = emif_state_counter + 1;
 end
 
 endmodule
