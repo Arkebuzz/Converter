@@ -11,7 +11,7 @@ module EMIF(
    
    // Работа внутри ПЛИС:   
    input [15:0] DATA_FROM_FPGA,   
-   input [13:0] ADRS_FROM_FPGA,  
+   input [6:0] ADRS_FROM_FPGA,  
    input WRE_FROM_FPGA,           // 0->1  =>  запись по ADRS_FROM_FPGA значения DATA_FROM_FPGA
    output [15:0] DATA_FROM_MICRO  // Если WRE_FROM_FPGA = 0, то в DATA_FROM_MICRO записывается значение по адресу ADRS_FROM_FPGA
 );
@@ -25,14 +25,14 @@ reg [15:0] data;
 wire [15:0] data_wire;
 assign data_wire = data;
 
-reg [13:0] adress;
-wire [13:0] adress_wire;
+reg [6:0] adress;
+wire [6:0] adress_wire;
 assign adress_wire = adress;
 
 wire [15:0] q_ram;
 
 reg [15:0] buffer;
-assign AD = (~OE) ? buffer : 'bz;
+assign AD = (~OE) ? buffer : 16'bz;
 
 reg wren;
 wire wren_wire;
@@ -46,13 +46,13 @@ always @* begin
    
    if (nCS0 != 1 || nCS1 != 0) begin
       wren = 0;
-      buffer = 'bz;
+      buffer = 16'bz;
    end
    else begin
       wren = ~WE;
       
       if (ALE == 1) begin
-         adress = AD[13:0];
+         adress = AD[6:0];
       end
       
       if (WE == 0) begin
@@ -62,7 +62,7 @@ always @* begin
       if (OE == 0) begin
          buffer = q_ram;
       end else begin
-         buffer = 'bz;
+         buffer = 16'bz;
       end
    end
 end

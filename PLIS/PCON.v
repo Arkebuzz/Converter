@@ -51,7 +51,7 @@ defparam Receiver1.DATA_WIDTH = DATA_WIDTH;
 
 reg [11:0] current_1;
 reg [11:0] voltage_inp;
-reg [11:0] const_1;
+reg [11:0] const_1;  // TEMP
 
 // ADCHub2 - выходное напряжение
 wire [DATA_WIDTH-1:0] rc_data_2;
@@ -71,14 +71,24 @@ defparam Receiver2.DATA_WIDTH = DATA_WIDTH;
 
 reg [11:0] current_2;
 reg [11:0] voltage_out;
-reg [11:0] const_2;
+reg [11:0] const_2;  // TEMP
 
 
 // Обмен с f28m35
-   wire [15:0] EMIF_DATA_TO_RAM;   
-   wire [13:0] EMIF_ADRESS;  
-   wire EMIF_WREN;           // 0->1  =>  запись по ADRS_FROM_FPGA значения DATA_FROM_FPGA
-   wire [15:0] EMIF_DATA_FROM_RAM_wire; 
+reg  [15:0] emif_data_to_micro;
+wire [15:0] emif_data_to_micro_wire;
+assign emif_data_to_micro_wire = emif_data_to_micro;
+
+reg  [6:0]  emif_adress; 
+wire [6:0]  emif_adress_wire; 
+assign emif_adress_wire = emif_adress; 
+
+// 0->1  =>  запись по ADRS_FROM_FPGA значения DATA_FROM_FPGA
+reg emif_wren;  
+wire emif_wren_wire;  
+assign emif_wren_wire = emif_wren; 
+
+wire [15:0] emif_data_from_micro; 
 
 EMIF Emif (
    .AD(ADRESS_DATA), 
@@ -88,15 +98,19 @@ EMIF Emif (
    .OE(OEn), 
    .ALE(ALE), 
    .CLOCK(CLOCK_50), 
-   .DATA_FROM_FPGA(EMIF_DATA_TO_RAM), 
-   .ADRS_FROM_FPGA(EMIF_ADRESS), 
-   .WRE_FROM_FPGA(EMIF_WREN), 
-   .DATA_FROM_MICRO(EMIF_DATA_FROM_RAM_wire)
+   .DATA_FROM_FPGA(emif_data_to_micro_wire), 
+   .ADRS_FROM_FPGA(emif_adress_wire), 
+   .WRE_FROM_FPGA(emif_wren_wire), 
+   .DATA_FROM_MICRO(emif_data_from_micro)
 );
 
+reg [6:0]  emif_state_counter = 0;
+reg [11:0] pwm_counter;
+
+reg [15:0] const_4;  // TEMP
 
 always @(posedge CLOCK_50) begin
-   // Чисто, чтобы квартус не оптимизировал проект в 0:
+   // TEMP - Чисто, чтобы квартус не оптимизировал проект в 0:
    out <= {const_2, voltage_out, current_2, const_1, voltage_inp, current_1};  
    
    // ADCHub1 приём
@@ -110,7 +124,62 @@ always @(posedge CLOCK_50) begin
    end
    
    // f28m35
-   
+   // TEMP - Временный блок передачи констант
+   if          (emif_state_counter == 10) begin
+      emif_adress = 5;
+      emif_data_to_micro = const_1;
+      emif_wren = 1;
+   end else if (emif_state_counter == 12) begin
+      emif_adress = 6;
+      emif_data_to_micro = const_2;
+      emif_wren = 1;
+   end else if (emif_state_counter == 14) begin
+      emif_adress = 7;
+      emif_data_to_micro = 16'b0101_0000_1111_0110;
+      emif_wren = 1;
+   end else if (emif_state_counter == 16) begin
+      emif_adress = 8;
+      emif_data_to_micro = const_4;
+      emif_wren = 1;
+   end
+   // Передача параметров с ADChubS
+   else     if (emif_state_counter == 18) begin
+      emif_adress = 10;
+      emif_data_to_micro = voltage_inp;
+      emif_wren = 1;
+   end else if (emif_state_counter == 20) begin
+      emif_adress = 11;
+      emif_data_to_micro = voltage_out;
+      emif_wren = 1;
+   end else if (emif_state_counter == 22) begin
+      emif_adress = 12;
+      emif_data_to_micro = current_1;
+      emif_wren = 1;
+   end else if (emif_state_counter == 24) begin
+      emif_adress = 13;
+      emif_data_to_micro = current_2;
+      emif_wren = 1;
+   end
+   // Чтение параметров
+   else     if (emif_state_counter == 50) begin
+      emif_adress = 55;
+   end else if (emif_state_counter == 54) begin
+      const_4 = emif_data_from_micro;
+   end 
+   else if (emif_state_counter == 55) begin
+      emif_adress = 60;
+   end else if (emif_state_counter == 59) begin
+      pwm_counter = emif_data_from_micro;
+   end
+   // Сброс 
+   else if (emif_state_counter == 99) begin
+      emif_state_counter = 0;
+   end
+   else begin
+      emif_wren = 0;
+   end
+
+   emif_state_counter = emif_state_counter + 1;
 end
 
 endmodule
