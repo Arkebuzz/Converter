@@ -7,12 +7,14 @@
 
 #include <GlobalData.h>
 
+/*
 void ErrorSet(Uint32 ErrNum)
 	{
+
 	if (GlobalError==0) {GlobalError = ErrNum;}
 	GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; //Remove system OK flag to FPGA
 	ActivateInverter(0); //Remove ActivateInverter flag to FPGA
-	ActivateChopper(0); //Remove ActivateChopper flag to FPGA
+	ActivateChopper(0);  //Remove ActivateChopper flag to FPGA
 	if (ErrNum==0 || ErrNum==3 || ErrNum==4 || ErrNum==5 || ErrNum==11 || ErrNum==12 || ErrNum==18)
 	{
 	ActivateExcitation(0);
@@ -25,6 +27,7 @@ void ErrorSet(Uint32 ErrNum)
 	else if (ErrNum<32)  {ErrorFlags1 |= ((Uint32)0x1)<<(ErrNum);}
 	else {ErrorFlags1|=0x1;}
 	}
+*/
 
 void ErrorReset(void)
 	{

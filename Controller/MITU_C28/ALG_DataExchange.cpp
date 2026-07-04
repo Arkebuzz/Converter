@@ -271,27 +271,17 @@ void FPGA_Write_DMA (void)
 }
 
 
-void M3_Read_Data (void)
-{
+void M3_Read_Data(void) {
 	int k;
-	for (k=0;k<4;k++)
-	{
-		//if (CtoMIpcRegs.MTOCIPCSTS.bit.IPC8 == 1)
-		//{
-			if (M3_TransmittCounter >= MTOC_DATA_TRANSMITT_COUNT)
-				{
-				M3_TransmittCounter = 0;
-				Data_FromM3[M3_TransmittCounter] = ReadFrom_MTOC_MSGRAM(M3_TransmittCounter);
-				//CtoMIpcRegs.MTOCIPCACK.bit.IPC8 = 1;
-				}
-			else
-				{
-				Data_FromM3[M3_TransmittCounter] = ReadFrom_MTOC_MSGRAM(M3_TransmittCounter);
-				M3_TransmittCounter++;
-				}
-		//}
+	for (k = 0; k < 4; k++) {
+		if (M3_TransmittCounter >= MTOC_DATA_TRANSMITT_COUNT) {
+			M3_TransmittCounter = 0;
+		}
+		else {
+			M3_TransmittCounter++;
+		}
+		Data_FromM3[M3_TransmittCounter] = ReadFrom_MTOC_MSGRAM(M3_TransmittCounter);
 	}
-	//Data_FromM3[1] = MTOC_cyclesCounter;
 }
 
 void M3_Get_Setups(void)
@@ -353,14 +343,9 @@ void M3_Write_Data (Uint32 CyclesCounter)
 	int k;
 	for (k=0;k<4;k++)
 	{
-
-		//CTOMtimeoutCounter++;
-		//if ((CtoMIpcRegs.CTOMIPCFLG.bit.IPC7 == 0) || CTOMtimeoutCounter>10000000)
-		//{
 		if (TransmittCounter >= CTOM_DATA_TRANSMITT_COUNT)
 		{
 			TransmittCounter = 0;
-			//CtoMIpcRegs.CTOMIPCSET.bit.IPC7 = 1;
 		}
 
 			Uint16 Addr_Offset = TransmittCounter % CTOM_DATA_TRANSMITT_COUNT;

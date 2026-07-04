@@ -1,14 +1,15 @@
 #include <GlobalData.h>
+#include <ERROR_LIST.h>
+
+
+void ErrorSet(Uint32 ErrNum) {
+	WriteTo_CTOM_MSGRAM(1, ErrNum);
+}
 
 
 void main(void)
 {
    Uint32 LedCounter=0;
-   short k;
-   //unsigned short WatchdogValue = 0;
-   Uint32 Peak_ResetCounter = 0;
-   //Uint16 ReadResult=0;
-   //Uint16 LED = 0;
 
    SCADASystemState = SYSTEM_STATE_INIT;
    //GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
@@ -20,8 +21,7 @@ void main(void)
    Init_SPI(); //Setup SPI pins
 
    DINT; // Step. Clear all interrupts and initialize PIE vector table: Disable CPU interrupts
-   //DMAInitialize();
-   //Setup_DMA(MEASURMENTS_BUFFER_SIZE_HALF);
+
    #ifdef _FLASH    // Step 4. Copy time critical code and Flash setup code to RAM
     memcpy(&RamfuncsRunStart, &RamfuncsLoadStart, (size_t)&RamfuncsLoadSize);
     InitFlash();
@@ -46,7 +46,7 @@ void main(void)
     ERTM;  // Enable Global realtime interrupt DBGM
 
     //Start system timers
-    ErrorSet(ERR_EMERGENCY_STOP_ALG);
+    //ErrorSet(ERR_EMERGENCY_STOP_ALG);
 
     INIT_Setup_Timers(ADC_SAMPLE_CYCLE_US, MAIN_CYCLE_US, C28_FREQ);  //Setup Timers
     INIT_StartTimers(); //Start timers operation
@@ -64,11 +64,10 @@ void main(void)
     } //Abort loading if data corrupted
   */
     InitData(); //Init structures with setup parameters
-  //  ReadResult = ReadOffsetsFromFlash();
 
+    // Вот это надо:
 	CtoMIpcRegs.CTOMIPCSET.bit.IPC1 = 1; //Send data ready signal
-	for (k=0;k<20;k++) {k++;} //Ensure IPC flag is set
-	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0) {k++;} //Wait for M3 to read init data.
+	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0); //Wait for M3 to read init data.
 
 	OsciChannelsInit(); //Init links to osci data
 
@@ -84,9 +83,9 @@ void main(void)
 	// Pointers are based on 16-bit words
 	// Increment by 1 (1 16-bit words)
 	//Uint16 DataSize = 51;
-	DMACH1BurstConfig(0,0,0);
-	DMACH1TransferConfig(49,1,1);
-	DMACH1WrapConfig(49,0,49,0);
+	DMACH1BurstConfig(0, 0, 0);
+	DMACH1TransferConfig(50, 1, 1);
+	DMACH1WrapConfig(50, 0, 50, 0);
 
 	// This is a static copy use one shot mode, so only one trigger is needed
 	// Use 16-bit mode
@@ -97,43 +96,124 @@ void main(void)
 					 CHINT_ENABLE);
 	StartDMACH1();
 
-// Step. Main loop.
-    for(;;)
-    {
-    	EALLOW;
-    	if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS!=0)  {ErrorSet(ERR_DMA_OVERRIDE);}
-		DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1; //DMA CH1 software start
-		EDIS;
+	// Я НАСРАЛ:
+	const Uint16 READY_TO_CALC_MEANS = 50;
+	float buffer_data[4] = {0, 0, 0, 0};
+	Uint16 buffer_counter = 0;
+	float current_1, current_2, voltage_inp, voltage_out;
+	Uint8 WatchDog = 0;
+	DMABufFPGA1[50] = 0;
 
+// Step. Main loop.
+    for(;;) {
     	// Cycle initialization, blink and WD signals toggle---------------------
-    	MainCyclesCounter++;
-    	CalcCycleCounter++;
-    	if (CalcCycleCounter>3) {CalcCycleCounter=0;}
+    	///MainCyclesCounter++;
+    	//CalcCycleCounter++;
+    	//if (CalcCycleCounter>3) {CalcCycleCounter=0;}
 
     	// Circular buffer counter reload
-        if(MainCycleMeasurmentsCounter == (MEASURMENTS_BUFFER_SIZE - 1)) {MainCycleMeasurmentsCounter = 0;}
-    	else MainCycleMeasurmentsCounter++;
+        //if(MainCycleMeasurmentsCounter == (MEASURMENTS_BUFFER_SIZE - 1)) {MainCycleMeasurmentsCounter = 0;}
+    	//else MainCycleMeasurmentsCounter++;
 
     	//WatchdogValue=1; //GpioG2DataRegs.GPEDAT.bit.GPIO128 = WatchdogValue; // Watchdog out
 
-    	LedCounter ++;   if (LedCounter == 500)  {GpioG1DataRegs.GPADAT.bit.GPIO8 = 0;} // LED Blink // Turn off LED
-    	if (LedCounter > 1000) 	{GpioG1DataRegs.GPADAT.bit.GPIO8 = 1; LedCounter = 0;} // Turn on LED
+        // Моргаем светодиодиком
+    	LedCounter++;
+    	if (LedCounter == 500) {
+    		GpioG1DataRegs.GPADAT.bit.GPIO8 = 0;
+    	}
+    	else if (LedCounter > 1000) {
+    		GpioG1DataRegs.GPADAT.bit.GPIO8 = 1;
+    		LedCounter = 0;
+    	}
+
     	// ----------------------------------------------------------------------
 
     	//Values calculations, data processing-----------------------------------
-    	if (RecalcOffset>0)  {if (RecalcOffset>1){MeanOffsetCalc();}  if (RecalcOffset>0) {RecalcOffset++;}} //Offset recalculation
+    	//if (RecalcOffset>0)  {if (RecalcOffset>1){MeanOffsetCalc();}  if (RecalcOffset>0) {RecalcOffset++;}} //Offset recalculation
 
-    	M3_Read_Data();//Read data from M3
-    	M3_Get_Setups(); //Check if new setup data incoming.
+    	//  M3_Read_Data();  // Read data from M3
 
-    	CalculateValues(); //Sensor values calculation according sensors gains
+    	// M3_Get_Setups(); // Check if new setup data incoming.
+    	// CalculateValues(); //Sensor values calculation according sensors gains
+    	// FPGA_Read_Data(); //Read data from FPGA
 
-    	FPGA_Read_Data(); //Read data from FPGA
+    	if (WatchDog != DMABufFPGA1[50]) {
+    		ErrorSet(ERROR_FPGA_CONNECT_FAIL);
+    	}
 
-    	SignalProcessing(); //Signal processing - calculating Mean/RMS values, filtering
-    	CalculatePower(); //Active, reactive power calculation
+    	WriteWordTo_FPGA(50, ++WatchDog);
+    	WriteWordTo_FPGA(55, 398);  // const_4
+
+    	Uint16 ErrorsFPGA = DMABufFPGA1[1];
+    	WriteTo_CTOM_MSGRAM(2, ErrorsFPGA);
+
+    	Uint16 const_1 = DMABufFPGA1[5];
+    	Uint16 const_2 = DMABufFPGA1[6];
+    	Uint16 const_3 = DMABufFPGA1[7];
+    	Uint16 const_4 = DMABufFPGA1[8];
+
+    	buffer_data[0] += ((float)DMABufFPGA1[10] - 2070.0) * 1.271565755;   // voltage_inp
+    	buffer_data[1] += ((float)DMABufFPGA1[11] - 2070.0) * 1.271565755;   // voltage_out
+    	buffer_data[2] += ((float)DMABufFPGA1[12] - 1706.66) * 0.366210938;  // current_1
+    	buffer_data[3] += ((float)DMABufFPGA1[13] - 1706.66) * 0.366210938;  // current_2
+
+    	if (buffer_counter >= READY_TO_CALC_MEANS) {
+    		buffer_counter = 0;
+
+    		// Расчет среднего:
+    		voltage_inp = buffer_data[0] / READY_TO_CALC_MEANS;
+    		voltage_out = buffer_data[1] / READY_TO_CALC_MEANS;
+    		current_1   = buffer_data[2] / READY_TO_CALC_MEANS;
+    		current_2   = buffer_data[3] / READY_TO_CALC_MEANS;
+
+    		// Отправка на M3:
+    		WriteTo_CTOM_MSGRAM_Float(100, voltage_inp);
+    		WriteTo_CTOM_MSGRAM_Float(101, voltage_out);
+    		WriteTo_CTOM_MSGRAM_Float(102, current_1);
+    		WriteTo_CTOM_MSGRAM_Float(103, current_2);
+    		WriteTo_CTOM_MSGRAM(104, const_1);
+    		WriteTo_CTOM_MSGRAM(105, const_2);
+    		WriteTo_CTOM_MSGRAM(106, const_3);
+    		WriteTo_CTOM_MSGRAM(107, const_4);
+    		WriteTo_CTOM_MSGRAM(108, FreeTimeCounter);
+
+    		buffer_data[0] = 0;
+    		buffer_data[1] = 0;
+    		buffer_data[2] = 0;
+    		buffer_data[3] = 0;
+    	} else {
+    		buffer_counter += 1;
+    	}
+
+    	EALLOW;
+    	if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS != 0) {
+    		ErrorSet(ERROR_DMA_OVERRIDE);
+    	}
+		DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1;  // DMA CH1 запуск получения значений (молимся, что на следующей итерации будут новые значения)
+		EDIS;
+
+    	CPU_OverloadFlag = 1;
+		WaitCyclesCounter = 0;
+		// Ждем до 300 мкс (одна итерация 300 мкс)
+		while (CpuTimer1Regs.TCR.bit.TIF == 0) {
+			FreeTimeCounter = CpuTimer1Regs.TIM.all;
+			CPU_OverloadFlag = 0;
+			WaitCyclesCounter++;
+			if (WaitCyclesCounter > 30000) {
+				ErrorSet(ERROR_MAIN_TIMER_DEAD);
+			}
+		}
+		if (CPU_OverloadFlag != 0) {
+			ErrorSet(ERROR_CPU_OVERLOAD);
+		}
+		CpuTimer1Regs.TCR.bit.TIF = 1; //Reset interrupt flag
+
+/*
+    	// SignalProcessing(); //Signal processing - calculating Mean/RMS values, filtering
+    	//CalculatePower(); //Active, reactive power calculation
     	//RotationSpeedMeasurments(); //Rotation speed measurements / zero cross detection
-    	CalcFundamentalValues(); //Phase and frequency calculations for synchronization
+    	//CalcFundamentalValues(); //Phase and frequency calculations for synchronization
     	ProtectionsCheck(); //Check values for safety operation
     	CommandsProcess(); //State machine operation, processing commands from M3 (SCADA)
 
@@ -187,6 +267,7 @@ void main(void)
     	if (CPU_OverloadFlag!=0) {ErrorSet(ERR_CPU_OVERLOAD);}
     	CpuTimer1Regs.TCR.bit.TIF = 1; //Reset interrupt flag
     	// ---------------------------------------------------------------------------------------------
+*/
     } //MAIN CYCLE END
 }
 

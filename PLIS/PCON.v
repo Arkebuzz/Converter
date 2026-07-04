@@ -30,6 +30,12 @@ reg [20:1] out;
 assign D_OUTP = out;
 
 
+// Описание ошибок:
+// 0: Потерян сигнал с f28m35
+// 1: Потерян сигнал с ADCHub1
+// 2: Потерян сигнал с ADCHub2
+reg [15:0] errors = 0;
+
 // Обмен с ADCHub
 localparam DATA_WIDTH = 36;
 
@@ -106,12 +112,14 @@ EMIF Emif (
 
 reg [6:0]  emif_state_counter = 0;
 reg [11:0] pwm_counter;
-
+reg [7:0]  watch_dog_curr;
+reg [7:0]  watch_dog_prev;
+reg [7:0]  watch_dog_timer;
 reg [15:0] const_4;  // TEMP
 
 always @(posedge CLOCK_50) begin
-   // TEMP - Чисто, чтобы квартус не оптимизировал проект в 0:
-   out <= {const_2, voltage_out, current_2, const_1, voltage_inp, current_1};  
+   errors[1] <= errors[1] | rc_connect_fail_1;
+   errors[2] <= errors[2] | rc_connect_fail_2;
    
    // ADCHub1 приём
    if (rc_data_ready_1) begin
@@ -145,36 +153,56 @@ always @(posedge CLOCK_50) begin
       emif_wren <= 1;
    end
    // Передача параметров с ADChubS
-   else     if (emif_state_counter == 18) begin
+   else if     (emif_state_counter == 18) begin
+      emif_adress <= 1;
+      emif_data_to_micro <= errors;
+      emif_wren <= 1;
+   end else if (emif_state_counter == 20) begin
       emif_adress <= 10;
       emif_data_to_micro <= voltage_inp;
       emif_wren <= 1;
-   end else if (emif_state_counter == 20) begin
+   end else if (emif_state_counter == 22) begin
       emif_adress <= 11;
       emif_data_to_micro <= voltage_out;
       emif_wren <= 1;
-   end else if (emif_state_counter == 22) begin
+   end else if (emif_state_counter == 24) begin
       emif_adress <= 12;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
-   end else if (emif_state_counter == 24) begin
+   end else if (emif_state_counter == 26) begin
       emif_adress <= 13;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;
    end
    // Чтение параметров
-   else     if (emif_state_counter == 50) begin
-      emif_adress <= 55;
+   else if (emif_state_counter == 50) begin
+      emif_adress <= 50;
    end else if (emif_state_counter == 54) begin
-      const_4 <= emif_data_from_micro;
+      watch_dog_curr <= emif_data_from_micro;
    end 
    else if (emif_state_counter == 55) begin
-      emif_adress <= 60;
+      emif_adress <= 55;
    end else if (emif_state_counter == 59) begin
+      const_4 <= emif_data_from_micro;
+   end 
+   else if (emif_state_counter == 60) begin
+      emif_adress <= 60;
+   end else if (emif_state_counter == 64) begin
       pwm_counter <= emif_data_from_micro;
    end
    // Сброс 
    else if (emif_state_counter == 99) begin
+      if (watch_dog_curr != watch_dog_prev) begin
+         watch_dog_prev <= watch_dog_curr;
+         watch_dog_timer <= 0;
+      end else begin
+         watch_dog_timer <= watch_dog_timer + 1;
+      end
+      
+      if (watch_dog_timer > 200) begin
+         errors[0] <= 1;
+      end
+
       emif_state_counter <= 0;
    end
    else begin

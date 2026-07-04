@@ -51,31 +51,31 @@ unsigned int ReadEPIFIFOSize(void)
 	return result;
 }
 
-short ReadWordFrom_FPGA(short offset)
-{
+short ReadWordFrom_FPGA(short offset) {
 	short *XMEM_pw;
 	short result;
-	if (offset>0x2000) {return (0);} // 14 бит = 0x3FFF
-	else
-		{
-		XMEM_pw = (short *)(0x340000 + offset); // CS1 выделено с 0x340000 по 0x037FFFF
+	if (offset > 0x80) {  // 128 слов
+		return (0);
+	}
+	else {
+		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x037FFFF
 
-			result = *XMEM_pw;
-			return result;
-		}
+		result = *XMEM_pw;
+		return result;
+	}
 }
-short WriteWordTo_FPGA(short offset, short value)
-{
-	short *XMEM_pw;
-	if (offset>0x2000) {return (-1);} // 14 бит = 0x3FFF
-	else
-	{
-		XMEM_pw = (short *)(0x340000 + offset); // CS1 выделено с 0x340000 по 0x037FFFF
 
-		*XMEM_pw  =  value;
+
+short WriteWordTo_FPGA(short offset, short value) {
+	short *XMEM_pw;
+	if (offset > 0x80) {  // 128 слов
+		return (-1);
+	}
+	else {
+		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x037FFFF
+		*XMEM_pw = value;
 		return 0;
 	}
-
 }
 
 short ReadWordFrom_SRAM(long offset)
@@ -184,7 +184,6 @@ short WriteTo_CTOM_MSGRAM(unsigned short offset, short value)
 		*XMEM_pw  =  value;
 		return 0;
 	}
-
 }
 
 short ReadFrom_CTOM_MSGRAM(short offset)
