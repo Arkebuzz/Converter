@@ -13,14 +13,6 @@
 #define MAIN_CYCLE_US		300		// Главный цикл С28 - 300 мкс
 #define CPU_FREQ     		100E6	// 100MHz
 
-// Shared memory buffer
-// telling the compiler to put this variable into the specific section
-// this only takes section 0 of 0-7 sections
-// look into .cmd file to see the layout
-#pragma DATA_SECTION(shared_mem, "SHARERAMS0")
-volatile Uint16 shared_mem[0x1000];
-
-
 // Currently we are using Flash memory to store the code
 inline void setup_flash_mem(void) {
     #ifdef _FLASH
@@ -227,7 +219,7 @@ void main(void) {
 		CheckFPGAConnect(Data, &WatchDog);
 
 		Data.C28_Errors = ErrorLatch;
-		//WriteOSCI_S6S7(Data);  	  // Взаимодействие с М3
+		WriteToM3(Data);	// Отправляем замер на М3
 
 		WriteFPGAData(WatchDog);  // Запись в FPGA
 
