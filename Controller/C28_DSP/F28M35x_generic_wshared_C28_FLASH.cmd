@@ -3,10 +3,8 @@
 // FILE:    F28M35x_generic_wshared_C28_FLASH.cmd
 // TITLE:    Linker Command File For all F28M35x device w/Shared RAM
 //###########################################################################
-// $TI Release: F28M35x Support Library v220 $
-// $Release Date: Tue Sep 26 15:35:11 CDT 2017 $
-// $Copyright: Copyright (C) 2011-2017 Texas Instruments Incorporated -
-//             http://www.ti.com/ ALL RIGHTS RESERVED $
+// $TI Release: F28M35x Support Library v202 $
+// $Release Date: Tue Apr  8 12:35:30 CDT 2014 $
 //###########################################################################
 */
 
@@ -72,11 +70,12 @@ PAGE 0:    /* Program Memory */
 PAGE 1 :   /* Data Memory */
            /* Memory (RAM/FLASH/OTP) blocks can be moved to PAGE0 for program allocation */
            /* Registers remain on PAGE1                                                  */
-   BOOT_RSVD   : origin = 0x000002, length = 0x0001A0     /* Part of M0, BOOT rom will use this for stack */
-   RAMM0       : origin = 0x0001A2, length = 0x00025E     /* on-chip RAM block M0 */
+   BOOT_RSVD   : origin = 0x000000, length = 0x000050     /* Part of M0, BOOT rom will use this for stack */
+   RAMM0       : origin = 0x000050, length = 0x0003B0     /* on-chip RAM block M0 */
    RAMM1       : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */
-   RAML2       : origin = 0x00A000, length = 0x001000     /* on-chip RAM block L2 */
-   RAML3       : origin = 0x00B000, length = 0x001000     /* on-chip RAM block L3 */
+   RAML2L3       : origin = 0x00A000, length = 0x002000     /* on-chip RAM block L2 */
+   //RAML2       : origin = 0x00A000, length = 0x001000     /* on-chip RAM block L2 */
+   //RAML3       : origin = 0x00B000, length = 0x001000     /* on-chip RAM block L3 */
    RAMS0       : origin = 0x00C000, length = 0x001000     /* on-chip Shared RAM block S0 */
    RAMS1       : origin = 0x00D000, length = 0x001000     /* on-chip Shared RAM block S1 */
    RAMS2       : origin = 0x00E000, length = 0x001000     /* on-chip Shared RAM block S2 */
@@ -103,39 +102,25 @@ SECTIONS
 {
 
    /* Allocate program areas: */
-   .cinit              : > FLASHA      PAGE = 0, ALIGN(4)
-   .pinit              : > FLASHA,     PAGE = 0, ALIGN(4)
-   .text               : > FLASHA      PAGE = 0, ALIGN(4)
-   codestart           : > BEGIN       PAGE = 0, ALIGN(4)
-
-   flashexeonly        : > FLASH_EXE_ONLY_P0 PAGE = 0, ALIGN(4)
-   ecslpasswds         : > ECSL_PWL_P0 PAGE = 0, ALIGN(4)
-   csmpasswds          : > CSM_PWL_P0  PAGE = 0, ALIGN(4)
-   csm_rsvd            : > CSM_RSVD    PAGE = 0, ALIGN(4)
-
-#ifdef __TI_COMPILER_VERSION__
-   #if __TI_COMPILER_VERSION__ >= 15009000
-    .TI.ramfunc : {} LOAD = FLASHD,
-                         RUN = RAML0,
-                         LOAD_START(_RamfuncsLoadStart),
-                         LOAD_SIZE(_RamfuncsLoadSize),
-                         LOAD_END(_RamfuncsLoadEnd),
-                         RUN_START(_RamfuncsRunStart),
-                         RUN_SIZE(_RamfuncsRunSize),
-                         RUN_END(_RamfuncsRunEnd),
-                         PAGE = 0, ALIGN(4)
-   #else
+   .cinit              : > FLASHA|FLASHC|FLASHD|FLASHE       PAGE = 0
+   .pinit              : > FLASHA|FLASHC|FLASHD|FLASHE ,     PAGE = 0
+   .text               : > FLASHA|FLASHC|FLASHD|FLASHE       PAGE = 0
+   codesettings        : > FLASHF       PAGE = 0
+   codestart           : > BEGIN       PAGE = 0
    ramfuncs            : LOAD = FLASHD,
-                         RUN = RAML0,
+                         RUN = RAML0|RAML1,
                          LOAD_START(_RamfuncsLoadStart),
                          LOAD_SIZE(_RamfuncsLoadSize),
                          LOAD_END(_RamfuncsLoadEnd),
                          RUN_START(_RamfuncsRunStart),
                          RUN_SIZE(_RamfuncsRunSize),
                          RUN_END(_RamfuncsRunEnd),
-                         PAGE = 0, ALIGN(4)   
-   #endif
-#endif
+                         PAGE = 0
+
+   flashexeonly        : > FLASH_EXE_ONLY_P0 PAGE = 0
+   ecslpasswds         : > ECSL_PWL_P0 PAGE = 0
+   csmpasswds          : > CSM_PWL_P0  PAGE = 0
+   csm_rsvd            : > CSM_RSVD    PAGE = 0
    
    /* The following section definitions are required when using the IPC API Drivers */ 
    GROUP : > CTOMRAM, PAGE = 1 
@@ -163,24 +148,24 @@ SECTIONS
 
    
    /* Allocate uninitalized data sections: */
-   .stack              : > RAMM0 | RAMM1       PAGE = 1
-   .ebss               : > RAML2       PAGE = 1
-   .esysmem            : > RAML2       PAGE = 1
+   .stack              : > RAMM0|RAMM1       PAGE = 1
+   .ebss               : > RAML2L3       PAGE = 1
+   .esysmem            : > RAML2L3       PAGE = 1
 
    /* Initalized sections go in Flash */
    /* For SDFlash to program these, they must be allocated to page 0 */
-   .econst             : > FLASHA      PAGE = 0, ALIGN(4)
-   .switch             : > FLASHA      PAGE = 0, ALIGN(4)
+   .econst             : > FLASHA      PAGE = 0
+   .switch             : > FLASHA      PAGE = 0
 
    /* Allocate IQ math areas: */
-   IQmath              : > FLASHA      PAGE = 0, ALIGN(4)       /* Math Code */
+   IQmath              : > FLASHA      PAGE = 0            /* Math Code */
    IQmathTables        : > IQTABLES,   PAGE = 0, TYPE = NOLOAD
 
    /* Allocate FPU math areas: */
    FPUmathTables       : > FPUTABLES,  PAGE = 0, TYPE = NOLOAD
    
-   DMARAML2           : > RAML2,       PAGE = 1
-   DMARAML3           : > RAML3,       PAGE = 1
+   //DMARAML2           : > RAML2,       PAGE = 1
+   //DMARAML3           : > RAML3,       PAGE = 1
 
   /* Uncomment the section below if calling the IQNexp() or IQexp()
       functions from the IQMath.lib library in order to utilize the

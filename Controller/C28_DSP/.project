@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>C28_DSP</name>
+	<name>MITU_C28</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -18,10 +18,24 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>com.ti.ccstudio.core.ccsNature</nature>
 		<nature>org.eclipse.cdt.core.cnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.core.ccnature</nature>
+		<nature>com.ti.ccstudio.core.ccsNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>INSTALLROOT_F28M35X_V202</name>
+			<value>$%7BPARENT-4-ORIGINAL_PROJECT_ROOT%7D</value>
+		</variable>
+		<variable>
+			<name>INSTALLROOT_FPU_FASTRTS_V100</name>
+			<value>$%7BPARENT-7-ORIGINAL_PROJECT_ROOT%7D/libs/math/FPUfastRTS/V100</value>
+		</variable>
+		<variable>
+			<name>ORIGINAL_PROJECT_ROOT</name>
+			<value>file:/C:/ti/controlSUITE/device_support/f28m35x/v202/F28M35x_examples_Dual/blinky/c28/ccs</value>
+		</variable>
+	</variableList>
 </projectDescription>
