@@ -9,9 +9,9 @@
 #include "communication_M3.h"
 #include "communication_FPGA.h"
 
-#define C28_FREQ			100  // C28 работает на 100 мГц
-#define MAIN_CYCLE_US		300  // Главный цикл С28 - 300 мкс
-#define CPU_FREQ     100E6      // 100MHz
+#define C28_FREQ			100		// C28 работает на 100 мГц
+#define MAIN_CYCLE_US		300		// Главный цикл С28 - 300 мкс
+#define CPU_FREQ     		100E6	// 100MHz
 
 // Shared memory buffer
 // telling the compiler to put this variable into the specific section
@@ -51,66 +51,66 @@ void setup_SPI(void) {
 
 	//GpioG1DataRegs.GPADAT.bit.GPIO19 = 1;
 
-		// Initialize SPI FIFO registers
-		// SPI reset
-		// Reset the FIFO pointer and hold in reset
-		//
-		    SpiaRegs.SPIFFTX.bit.SPIRST = 0;
-		    SpiaRegs.SPIFFTX.bit.TXFIFO = 0;
+	// Initialize SPI FIFO registers
+	// SPI reset
+	// Reset the FIFO pointer and hold in reset
+	//
+	SpiaRegs.SPIFFTX.bit.SPIRST = 0;
+	SpiaRegs.SPIFFTX.bit.TXFIFO = 0;
 
-		// Set TX FIFO to 4 words
-		// Enable TX FIFOs
-		// Enable TX FIFO interrupts
-		// Release FIFO from reset
-		    SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // в примере 4 у далера 6
-		    SpiaRegs.SPIFFTX.bit.SPIFFENA = 1;
-		    SpiaRegs.SPIFFTX.bit.TXFFIENA = 1;
-		    SpiaRegs.SPIFFTX.bit.TXFIFO = 1;
+	// Set TX FIFO to 4 words
+	// Enable TX FIFOs
+	// Enable TX FIFO interrupts
+	// Release FIFO from reset
+	SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // в примере 4 у далера 6
+	SpiaRegs.SPIFFTX.bit.SPIFFENA = 1;
+	SpiaRegs.SPIFFTX.bit.TXFFIENA = 1;
+	SpiaRegs.SPIFFTX.bit.TXFIFO = 1;
 
-		//
-		// Put RX FIFO in reset
-		// Set RX FIFO to 4 words
-		// Enable RX FIFO interrupts
-		// Release RX FIFO from reset
-		    SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0;
-		    SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // в примере 4 у далера 6
-		    SpiaRegs.SPIFFRX.bit.RXFFINT = 1;
-		    SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1;
+	//
+	// Put RX FIFO in reset
+	// Set RX FIFO to 4 words
+	// Enable RX FIFO interrupts
+	// Release RX FIFO from reset
+	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0;
+	SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // в примере 4 у далера 6
+	SpiaRegs.SPIFFRX.bit.RXFFINT = 1;
+	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1;
 
-		// Transmit delay is zero
-		// Release SPI from reset
-		    SpiaRegs.SPIFFCT.all=0x0;
-		    SpiaRegs.SPIFFTX.bit.SPIRST = 1;
+	// Transmit delay is zero
+	// Release SPI from reset
+	SpiaRegs.SPIFFCT.all=0x0;
+	SpiaRegs.SPIFFTX.bit.SPIRST = 1;
 
-	    // Set reset low before configuration changes
-	    // Clock polarity (0 == rising, 1 == falling)
-	    // 16-bit character
-	    // Enable loop-back
-	    SpiaRegs.SPICCR.bit.SPISWRESET = 0;
-	    SpiaRegs.SPICCR.bit.CLKPOLARITY = 1;
-	    SpiaRegs.SPICCR.bit.SPICHAR = (16-1);
-	    SpiaRegs.SPICCR.bit.SPILBK = 0;
+	// Set reset low before configuration changes
+	// Clock polarity (0 == rising, 1 == falling)
+	// 16-bit character
+	// Enable loop-back
+	SpiaRegs.SPICCR.bit.SPISWRESET = 0;
+	SpiaRegs.SPICCR.bit.CLKPOLARITY = 1;
+	SpiaRegs.SPICCR.bit.SPICHAR = (16-1);
+	SpiaRegs.SPICCR.bit.SPILBK = 0;
 
-	    // Enable master (0 == slave, 1 == master)
-	    // Enable transmission (Talk)
-	    // Clock phase (0 == normal, 1 == delayed ВЫБРАЛ 1)
-	    // SPI interrupts are disabled
-	    SpiaRegs.SPICTL.bit.MASTER_SLAVE = 1;
-	    SpiaRegs.SPICTL.bit.TALK = 1;
-	    SpiaRegs.SPICTL.bit.CLK_PHASE = 0;
-	    SpiaRegs.SPICTL.bit.SPIINTENA = 0;
+	// Enable master (0 == slave, 1 == master)
+	// Enable transmission (Talk)
+	// Clock phase (0 == normal, 1 == delayed ВЫБРАЛ 1)
+	// SPI interrupts are disabled
+	SpiaRegs.SPICTL.bit.MASTER_SLAVE = 1;
+	SpiaRegs.SPICTL.bit.TALK = 1;
+	SpiaRegs.SPICTL.bit.CLK_PHASE = 0;
+	SpiaRegs.SPICTL.bit.SPIINTENA = 0;
 
-	    // Set the baud rate
-	    //
-	    SpiaRegs.SPIBRR = SPI_BRR;
+	// Set the baud rate
+	//
+	SpiaRegs.SPIBRR = SPI_BRR;
 
-	    // Set FREE bit
-	    // Halting on a breakpoint will not halt the SPI
-	    SpiaRegs.SPIPRI.bit.FREE = 1;
+	// Set FREE bit
+	// Halting on a breakpoint will not halt the SPI
+	SpiaRegs.SPIPRI.bit.FREE = 1;
 
-	    //
-	    // Release the SPI from reset
-	    SpiaRegs.SPICCR.bit.SPISWRESET = 1;
+	//
+	// Release the SPI from reset
+	SpiaRegs.SPICCR.bit.SPISWRESET = 1;
 }
 
 void setup_timers(unsigned short MainCycleTimer_uS, unsigned short CPUfreq_value_MHZ) {
