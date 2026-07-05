@@ -1,3 +1,6 @@
+`include "DATA_ADRESSES.vh"
+
+
 module PCON(
    input CLOCK_50,
    input CLOCK_12,
@@ -37,7 +40,7 @@ assign D_OUTP = out;
 reg [15:0] errors = 0;
 
 // Обмен с ADCHub
-localparam DATA_WIDTH = 36;
+localparam DATA_WIDTH = 24;
 
 // ADCHub1 - входное напряжение
 wire [DATA_WIDTH-1:0] rc_data_1;
@@ -57,7 +60,6 @@ defparam Receiver1.DATA_WIDTH = DATA_WIDTH;
 
 reg [11:0] current_1;
 reg [11:0] voltage_inp;
-reg [11:0] const_1;  // TEMP
 
 // ADCHub2 - выходное напряжение
 wire [DATA_WIDTH-1:0] rc_data_2;
@@ -77,7 +79,6 @@ defparam Receiver2.DATA_WIDTH = DATA_WIDTH;
 
 reg [11:0] current_2;
 reg [11:0] voltage_out;
-reg [11:0] const_2;  // TEMP
 
 
 // Обмен с f28m35
@@ -115,7 +116,6 @@ reg [11:0] pwm_counter;
 reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
-reg [15:0] const_4;  // TEMP
 
 always @(posedge CLOCK_50) begin
    errors[1] <= errors[1] | rc_connect_fail_1;
@@ -123,70 +123,47 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub1 приём
    if (rc_data_ready_1) begin
-      {const_1, voltage_inp, current_1} <= rc_data_1;
+      {voltage_inp, current_1} <= rc_data_1;
    end
    
    // ADCHub2 приём
    if (rc_data_ready_2) begin
-      {const_2, voltage_out, current_2} <= rc_data_2;
+      {voltage_out, current_2} <= rc_data_2;
    end
    
    // f28m35
    emif_state_counter <= emif_state_counter + 1;
    
-   // TEMP - Временный блок передачи констант
-   if          (emif_state_counter == 10) begin
-      emif_adress <= 5;
-      emif_data_to_micro <= const_1;
-      emif_wren <= 1;
-   end else if (emif_state_counter == 12) begin
-      emif_adress <= 6;
-      emif_data_to_micro <= const_2;
-      emif_wren <= 1;
-   end else if (emif_state_counter == 14) begin
-      emif_adress <= 7;
-      emif_data_to_micro <= 16'b0101_0000_1111_0110;
-      emif_wren <= 1;
-   end else if (emif_state_counter == 16) begin
-      emif_adress <= 8;
-      emif_data_to_micro <= const_4;
-      emif_wren <= 1;
-   end
    // Передача параметров с ADChubS
-   else if     (emif_state_counter == 18) begin
-      emif_adress <= 1;
+   if          (emif_state_counter == 18) begin
+      emif_adress <= `ADR_ERROR_PCON;
       emif_data_to_micro <= errors;
       emif_wren <= 1;
    end else if (emif_state_counter == 20) begin
-      emif_adress <= 10;
+      emif_adress <= `ADR_VOLTAGE_INP;
       emif_data_to_micro <= voltage_inp;
       emif_wren <= 1;
    end else if (emif_state_counter == 22) begin
-      emif_adress <= 11;
+      emif_adress <= `ADR_VOLTAGE_OUT;
       emif_data_to_micro <= voltage_out;
       emif_wren <= 1;
    end else if (emif_state_counter == 24) begin
-      emif_adress <= 12;
+      emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
    end else if (emif_state_counter == 26) begin
-      emif_adress <= 13;
+      emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;
    end
    // Чтение параметров
    else if (emif_state_counter == 50) begin
-      emif_adress <= 50;
+      emif_adress <= `ADR_WATCHDOG;
    end else if (emif_state_counter == 54) begin
       watch_dog_curr <= emif_data_from_micro;
-   end 
-   else if (emif_state_counter == 55) begin
-      emif_adress <= 55;
-   end else if (emif_state_counter == 59) begin
-      const_4 <= emif_data_from_micro;
-   end 
+   end
    else if (emif_state_counter == 60) begin
-      emif_adress <= 60;
+      emif_adress <= `ADR_PWM_COUNTER;
    end else if (emif_state_counter == 64) begin
       pwm_counter <= emif_data_from_micro;
    end
