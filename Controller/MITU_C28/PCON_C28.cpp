@@ -3,7 +3,7 @@
 #include "MemFunctions.h"
 #include "DataTransfer.h"
 #include "GlobalData.h"
-
+#include "FPGA_DataAddresses.h"
 
 void main(void) {
 	//GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
@@ -43,6 +43,7 @@ void main(void) {
 	// Настройка DMA
 	// DMASourceFPGA - память на FPGA, DMADestFPGA - локальная копия
 	INIT_Setup_DMA(&DMABufFPGA[0], 51);
+	DMABufFPGA[ADR_WATCHDOG] = 0;
 
 	Uint32 LedCounter = 0;
 
@@ -63,8 +64,7 @@ void main(void) {
 
     	ReadFPGAData();  // Чтение с FPGA в глобальные переменные
 
-    	// Взаимодействие с М3
-    	WriteOSCI_S6S7();
+    	WriteOSCI_S6S7();  // Взаимодействие с М3
 
     	WriteFPGAData();  // Запись в FPGA
 

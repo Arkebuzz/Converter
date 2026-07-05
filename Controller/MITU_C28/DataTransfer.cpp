@@ -76,8 +76,6 @@ void WriteOSCI_S6S7() {
 		Dest = S6_START;
 	}
 
-	startDest = (Uint32)Dest;
-
 	Uint16 CyclesCounter0 = (Uint16) ((CyclesCounter & 0x000000000000FFFF) >> 0);
 	Uint16 CyclesCounter1 = (Uint16) ((CyclesCounter & 0x00000000FFFF0000) >> 16);
 	Uint16 CyclesCounter2 = (Uint16) ((CyclesCounter & 0x0000FFFF00000000) >> 32);
