@@ -1,9 +1,12 @@
 /*
  * DataProcessing.c
  *
- *  Created on: 8 дек. 2016 г.
+ *  Created on: 8 пїЅпїЅпїЅ. 2016 пїЅ.
  *      Author: Volkodav
  */
+
+// IVAN: comment out to prevent build errors (it is copypasted in main)
+#if 0
 
 #include "GlobalData.h"
 
@@ -67,4 +70,4 @@ Void DataProcessor(UArg arg0, UArg arg1)
 
 }
 
-
+#endif

@@ -184,6 +184,8 @@ void main(void) {
 
 	// Проверка запуска М3
 	CtoMIpcRegs.CTOMIPCSET.bit.IPC1 = 1; 		   // Send data ready signal
+	// IVAN: we set it in M3 init
+	// LOOK IN README.TXT (9)
 	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0);  // Wait for M3 to read init data
 
 	// Настройка DMA

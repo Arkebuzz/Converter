@@ -91,9 +91,9 @@ void WriteToM3(const DataToM3 Data) {
 	static volatile Uint16 *Dest = S6_START;
 
 	if (NumIter == 64) {
-		// Пакет заполнился
+		// IVAN: Пакет заполнился
 
-		// чтобы сдвинуться на запись в след пакет проверяем обработалась ли уже инфа с него
+		// IVAN: чтобы сдвинуться на запись в след пакет проверяем обработалась ли уже инфа с него
 		if (NumPacket == 0) {
 			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC9  == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
 			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
@@ -128,16 +128,16 @@ void WriteToM3(const DataToM3 Data) {
 			CtoMIpcRegs.CTOMIPCSET.bit.IPC15 = 1;
 		}
 
-		NumIter = 0; // сбрасываем кол-во отправленых замеров в текущем пакете
+		NumIter = 0; // IVAN: сбрасываем кол-во отправленых замеров в текущем пакете
 		NumPacket++; // сдвигаем запись на след пакет
 	}
 	if (NumPacket == 8) {
-		// все пакеты заполнились => зацикливаемся на 0 пакет
+		// IVAN: все пакеты заполнились => зацикливаемся на 0 пакет
 		NumPacket = 0;
 		Dest = S6_START;
 	}
 
-	// CycleCounter размером 64 бита, слово у нас 16 бит
+	// IVAN: CycleCounter размером 64 бита, слово у нас 16 бит
 	// поэтому разбиваем его на 4 части
 	Uint16 CyclesCounter0 = (Uint16) ((Data.CycleCounter & 0x000000000000FFFF) >> 0);
 	Uint16 CyclesCounter1 = (Uint16) ((Data.CycleCounter & 0x00000000FFFF0000) >> 16);
@@ -158,7 +158,7 @@ void WriteToM3(const DataToM3 Data) {
 	*Dest = Data.Current_2;			Dest++;  // 11
 	*Dest = Data.WatchDog;			Dest++;  // 12
 	*Dest = Data.FreeTimeCounter;	Dest++;  // 13
-	// Записываем 14 слов за один замер
+	// IVAN: Записываем 14 слов за один замер
 	// (Артем написал что 16 но по факту Dest увеличивается на 14 слов ток, поэтому либо нужно не забыть на М3
 	// считать по 14 слов либо сюда добавить еще Dest += 2)
 

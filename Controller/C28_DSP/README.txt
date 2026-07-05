@@ -81,4 +81,11 @@ interrupt void my_critical_interrupt_handler(void) {}
     CPU_OUT2     = 53 <-> 6
     CPU_OUT3     = 54 <-> 7
     CPU_OUT4     = 55 <-> 8
-    
+   
+9. REGISTERS INFO:
+    CTOMIPCSET (Set):           C28 can write here to raise the flags
+    CTOMIPCFLG (Flag):          Read-only status register that reflects what's in the flag
+    CTOMIPCACK (Acknowledge):   This register belongs to the M3
+    So C28 can clear it's own flag - it can only set it
+    The flag can be cleared only when M3 sends ACK
+  
