@@ -8,34 +8,32 @@ int main(void)
 	long unsigned int i;
 	UInt16 DataSRAM;
 
-	for (i = 0; i < 1000000; i++);
+	for (i=0;i<1000000;i++);
+	{i=i+1;}
+
 
 	Task_Handle taskHandleData;
 	Task_Params taskParamsData;
 	Error_Block eb_Data;
 
-	// ѕолучение доступа к защищенным регистрам дл€ конфигурировани€ системы
+	// Disable Protection
 	HWREG(SYSCTL_MWRALLOW) =  0xA5A5A5A5;
 
-	// Ќастройка частот, M3 и C28 работают на 100 м√ц
-	SysCtlClockConfigSet(
-		SYSCTL_USE_PLL | (SYSCTL_SPLLIMULT_M & 0xA) |  // —истемна€ частота 10 м√ц (?), множитель 10 = 100 м√ц
-		SYSCTL_SYSDIV_1 | 							   // ƒелитель частоты C28 1 = 100 м√ц
-		SYSCTL_M3SSDIV_1 | 							   // ƒелитель частоты M3  1 = 100 м√ц
-		SYSCTL_XCLKDIV_4							   // ƒелитель частоты внешних устройств (хз что это) 4 = 25 м√ц
-	);
+	// Sets up PLL, M3 running at 100MHz and C28 running at 100MHz
+	SysCtlClockConfigSet(SYSCTL_USE_PLL | (SYSCTL_SPLLIMULT_M & 0xA) |
+							 SYSCTL_SYSDIV_1 | SYSCTL_M3SSDIV_1 |
+							 SYSCTL_XCLKDIV_4);
 
-	// ѕередача управлени€ SM6 и SM7 на C28
-	RAMMReqSharedMemAccess((S6_ACCESS | S7_ACCESS), SX_C28MASTER);
+	RAMMReqSharedMemAccess((S6_ACCESS | S7_ACCESS),SX_C28MASTER);
 
-    // »нициализаци€
-    Board_initGeneral();  // ¬ключение GPIO портов
-    Board_initGPIO();	  // Ќастройка GPIO є2
-    Board_initEMAC();	  // Ќастройка Ethernet
-    Board_initEPI();	  // Ќастройка EPI
-    Buffers_Init();		  // —оздание блока ошибок
+    /* Call board init functions */
+    Board_initGeneral();
+    Board_initGPIO();
+    Board_initEMAC();
+    Board_initEPI();
+    Buffers_Init();
 
-    for (i = 0; i < 1000000; i++);  //Wait for board powerup
+    for (i=0;i<10000000;i++)  	{i=i+1;} //Wait for board powerup
 
     System_printf("Init complete. Performing FPGA Test...\n");
     System_flush();

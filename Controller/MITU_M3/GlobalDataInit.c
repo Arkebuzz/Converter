@@ -32,8 +32,8 @@ short* MTOC_Data;
 unsigned short IO_Count;
 unsigned short IO_Success_Count;
 
-// unsigned short MTOC_IO_Count=0;
-// unsigned short CTOM_IO_Count=0;
+unsigned short MTOC_IO_Count=0;
+unsigned short CTOM_IO_Count=0;
 
 /* ----------------------- MBUS variables ---------------------------------*/
 USHORT   usRegInputStart = REG_INPUT_START;
