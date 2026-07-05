@@ -68,7 +68,7 @@ AMC1304M25_READER AMCReader (
 
 
 // Передача данных на центральный ПЛИС
-localparam DATA_WIDTH = 36;  // 1 ток 12 бит + 1 напряжение по 12 бит + константа 12 бит
+localparam DATA_WIDTH = 24;  // 1 ток 12 бит + 1 напряжение по 12 бит
 
 reg [DATA_WIDTH-1:0] data_to_send;
 wire ready_to_send;
@@ -81,11 +81,8 @@ DATA_TRANSMITTER Transmitter (
 );
 defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
 
-// Для теста корректности передачи:
-localparam const_1 = 12'b1100_0101_1100;
-
 always @(posedge ready_to_send) begin
-   data_to_send <= {const_1, voltage, current};
+   data_to_send <= {voltage, current};
 end
 
 endmodule
