@@ -89,7 +89,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="F28M35H52C1_c28.cmd|F28M35x_generic_C28_RAM.cmd|F28M35x_generic_wshared_C28_RAM.cmd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="F28M35H52C1_c28.cmd|F28M35x_generic_C28_RAM.cmd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -172,7 +172,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="F28M35H52C1_c28.cmd|F28M35x_generic_C28_RAM.cmd|F28M35x_generic_wshared_C28_RAM.cmd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="F28M35H52C1_c28.cmd|F28M35x_generic_C28_RAM.cmd" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

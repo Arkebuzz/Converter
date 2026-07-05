@@ -1,12 +1,11 @@
 /*
  * MemFunctions.h
- *
- *  Created on: 11.12.2014
- *      Author: VKD
  */
 
 #ifndef MEMFUNCTIONS_H_
 #define MEMFUNCTIONS_H_
+
+#include "DSP28x_Project.h"
 
 short ReadWordFrom_FPGA(short offset);
 short WriteWordTo_FPGA(short offset, short value);

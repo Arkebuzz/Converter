@@ -12,11 +12,11 @@
 short ReadWordFrom_FPGA(short offset) {
 	short *XMEM_pw;
 	short result;
-	if (offset > 0x80) {  // 128 слов
+	if (offset > 0x80) {  // 128 СЃР»РѕРІ
 		return (0);
 	}
 	else {
-		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x340080
+		XMEM_pw = (short *) (0x340000 + offset); // CS1 РІС‹РґРµР»РµРЅРѕ СЃ 0x340000 РїРѕ 0x340080
 		result = *XMEM_pw;
 		return result;
 	}
@@ -25,11 +25,11 @@ short ReadWordFrom_FPGA(short offset) {
 
 short WriteWordTo_FPGA(short offset, short value) {
 	short *XMEM_pw;
-	if (offset > 0x80) {  // 128 слов
+	if (offset > 0x80) {  // 128 СЃР»РѕРІ
 		return (-1);
 	}
 	else {
-		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x340080
+		XMEM_pw = (short *) (0x340000 + offset); // CS1 РІС‹РґРµР»РµРЅРѕ СЃ 0x340000 РїРѕ 0x340080
 		*XMEM_pw = value;
 		return 0;
 	}

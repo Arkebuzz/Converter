@@ -1,23 +1,20 @@
 /*
  * ErrorList.h
- *
- *  Created on: 23.01.2015
- *      Author: VKD
  */
 
 #ifndef ERRORLIST_H_
 #define ERRORLIST_H_
 
-#include "GlobalData.h"
+#include "DSP28x_Project.h"
 
-void ErrorSet(Uint32 ErrNum);
-void ErrorReset(void);
+void ErrorSet(Uint8 ErrNum);
+void ErrorReset(Uint8 ErrNum);
 
-#define OK 1000
+extern Uint16 ErrorLatch;
 
-#define ERROR_MAIN_TIMER_DEAD 		2  // Главный цикл завис, поскольку прерывание от таймера не пришло
-#define ERROR_CPU_OVERLOAD			3  // Цикл ожидания был пропущен
-#define ERROR_FPGA_CONNECT_FAIL		4  // Потеряно соединение с FPGA
-#define ERROR_OSCI_BUF_OVERFLOW		5  // M3 не успевает читать осцилограммы
+#define ERROR_MAIN_TIMER_DEAD 		0  // Р“Р»Р°РІРЅС‹Р№ С†РёРєР» Р·Р°РІРёСЃ, РїРѕСЃРєРѕР»СЊРєСѓ РїСЂРµСЂС‹РІР°РЅРёРµ РѕС‚ С‚Р°Р№РјРµСЂР° РЅРµ РїСЂРёС€Р»Рѕ
+#define ERROR_CPU_OVERLOAD			1  // Р¦РёРєР» РѕР¶РёРґР°РЅРёСЏ Р±С‹Р» РїСЂРѕРїСѓС‰РµРЅ
+#define ERROR_FPGA_CONNECT_FAIL		2  // РџРѕС‚РµСЂСЏРЅРѕ СЃРѕРµРґРёРЅРµРЅРёРµ СЃ FPGA
+#define ERROR_OSCI_BUF_OVERFLOW		3  // M3 РЅРµ СѓСЃРїРµРІР°РµС‚ С‡РёС‚Р°С‚СЊ РѕСЃС†РёР»РѕРіСЂР°РјРјС‹
 
 #endif /* ERRORLIST_H_ */

@@ -1,8 +1,5 @@
 /*
  * InitFunctions.c
- *
- *  Created on: 30.07.2014
- *      Author: Daler
  */
 
 #include "InitFunctions.h"
@@ -28,7 +25,7 @@ void Init_SPI()
 		// Enable TX FIFOs
 		// Enable TX FIFO interrupts
 		// Release FIFO from reset
-		    SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // в примере 4 у далера 6
+		    SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // РІ РїСЂРёРјРµСЂРµ 4 Сѓ РґР°Р»РµСЂР° 6
 		    SpiaRegs.SPIFFTX.bit.SPIFFENA = 1;
 		    SpiaRegs.SPIFFTX.bit.TXFFIENA = 1;
 		    SpiaRegs.SPIFFTX.bit.TXFIFO = 1;
@@ -39,7 +36,7 @@ void Init_SPI()
 		// Enable RX FIFO interrupts
 		// Release RX FIFO from reset
 		    SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0;
-		    SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // в примере 4 у далера 6
+		    SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // РІ РїСЂРёРјРµСЂРµ 4 Сѓ РґР°Р»РµСЂР° 6
 		    SpiaRegs.SPIFFRX.bit.RXFFINT = 1;
 		    SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1;
 
@@ -59,7 +56,7 @@ void Init_SPI()
 
 	    // Enable master (0 == slave, 1 == master)
 	    // Enable transmission (Talk)
-	    // Clock phase (0 == normal, 1 == delayed ВЫБРАЛ 1)
+	    // Clock phase (0 == normal, 1 == delayed Р’Р«Р‘Р РђР› 1)
 	    // SPI interrupts are disabled
 	    SpiaRegs.SPICTL.bit.MASTER_SLAVE = 1;
 	    SpiaRegs.SPICTL.bit.TALK = 1;
@@ -125,4 +122,3 @@ void INIT_Start_Timers(void)
 	CpuTimer1Regs.TCR.bit.TIE = 1; //Enable timer interrupt
 	CpuTimer1Regs.TCR.bit.TSS = 0; //Ensure timer start
 }
-

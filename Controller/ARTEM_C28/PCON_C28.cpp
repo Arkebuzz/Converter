@@ -1,27 +1,26 @@
+#include "PCON_C28.h"
 #include "ErrorList.h"
 #include "InitFunctions.h"
-#include "MemFunctions.h"
 #include "DataTransfer.h"
-#include "GlobalData.h"
-#include "FPGA_DataAddresses.h"
+
 
 void main(void) {
 	//GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
 	GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; 	 //Remove system OK flag to FPGA
 
-	// Стандартная инициализация
-	InitSysCtrl();  // Инициализация System Control
-	InitGpio();     // Инициализация GPIO
+	// РЎС‚Р°РЅРґР°СЂС‚РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
+	InitSysCtrl();  // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ System Control
+	InitGpio();     // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ GPIO
 
-	INIT_GPIO_Setup();  // Настройка портов GPIO
-	Init_SPI(); 		// Настройка flash, по факту не используем
+	INIT_GPIO_Setup();  // РќР°СЃС‚СЂРѕР№РєР° РїРѕСЂС‚РѕРІ GPIO
+	Init_SPI(); 		// РќР°СЃС‚СЂРѕР№РєР° flash, РїРѕ С„Р°РєС‚Сѓ РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј
 
-#ifdef _FLASH    // Step 4. Copy time critical code and Flash setup code to RAM
+#ifdef _FLASH    // Copy time critical code and Flash setup code to RAM
 	memcpy(&RamfuncsRunStart, &RamfuncsLoadStart, (size_t) &RamfuncsLoadSize);
 	InitFlash();
 #endif
 
-	// Инициализация системы прерываний
+	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРёСЃС‚РµРјС‹ РїСЂРµСЂС‹РІР°РЅРёР№
 	InitPieCtrl(); 		// Initialize the PIE control registers to their default state.
 	IER = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	IFR = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
@@ -30,29 +29,34 @@ void main(void) {
 	EINT;  // Enable Global interrupt INTM
 	ERTM;  // Enable Global realtime interrupt DBGM
 
-	//ErrorSet(ERR_EMERGENCY_STOP_ALG);  Исходно стартуем с прерывания, чтобы безопасно все было, когда систему ошибок поправим, вернем
+	//ErrorSet(ERR_EMERGENCY_STOP_ALG);  РСЃС…РѕРґРЅРѕ СЃС‚Р°СЂС‚СѓРµРј СЃ РїСЂРµСЂС‹РІР°РЅРёСЏ, С‡С‚РѕР±С‹ Р±РµР·РѕРїР°СЃРЅРѕ РІСЃРµ Р±С‹Р»Рѕ, РєРѕРіРґР° СЃРёСЃС‚РµРјСѓ РѕС€РёР±РѕРє РїРѕРїСЂР°РІРёРј, РІРµСЂРЅРµРј
 
-	// Запуска таймера на 300 мкс для главного цикла
+	// Р—Р°РїСѓСЃРєР° С‚Р°Р№РјРµСЂР° РЅР° 300 РјРєСЃ РґР»СЏ РіР»Р°РІРЅРѕРіРѕ С†РёРєР»Р°
 	INIT_Setup_Timers(MAIN_CYCLE_US, C28_FREQ);
     INIT_Start_Timers();
 
-    // Проверка запуска М3
+    // РџСЂРѕРІРµСЂРєР° Р·Р°РїСѓСЃРєР° Рњ3
 	CtoMIpcRegs.CTOMIPCSET.bit.IPC1 = 1; 		   // Send data ready signal
 	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0);  // Wait for M3 to read init data
 
-	// Настройка DMA
-	// DMASourceFPGA - память на FPGA, DMADestFPGA - локальная копия
+	// РќР°СЃС‚СЂРѕР№РєР° DMA
+	// DMASourceFPGA - РїР°РјСЏС‚СЊ РЅР° FPGA, DMADestFPGA - Р»РѕРєР°Р»СЊРЅР°СЏ РєРѕРїРёСЏ
+	Uint16 DMABufFPGA[128] = {};
 	INIT_Setup_DMA(&DMABufFPGA[0], 51);
-	DMABufFPGA[ADR_WATCHDOG] = 0;
 
-	Uint32 LedCounter = 0;
 
-    for(;;) {  // Итерации раз в 300 мкс
+	DataToM3 Data;
+	Uint16 FreeTimeCounter = 0;
+	Uint64 CycleCounter = 0;
+	Uint16 LedCounter = 0;
+	Uint8  WatchDog = 0;
+
+    for(;;) {  // РС‚РµСЂР°С†РёРё СЂР°Р· РІ 300 РјРєСЃ
     	if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS) {
-    		continue;  // Ждём пока DMA считает всё с FPGA
+    		continue;  // DMA Р·Р°РЅСЏС‚, Р¶РґРµРј
     	}
 
-        // Моргаем светодиодиком
+        // РњРѕСЂРіР°РµРј СЃРІРµС‚РѕРґРёРѕРґРёРєРѕРј
     	LedCounter++;
     	if (LedCounter == 500) {
     		GpioG1DataRegs.GPADAT.bit.GPIO8 = 0;
@@ -62,32 +66,40 @@ void main(void) {
     		LedCounter = 0;
     	}
 
-    	ReadFPGAData();  // Чтение с FPGA в глобальные переменные
+    	Data.CycleCounter = CycleCounter;
+    	Data.FreeTimeCounter = FreeTimeCounter;
 
-    	WriteOSCI_S6S7();  // Взаимодействие с М3
+    	ReadFPGAData(DMABufFPGA, Data);
+    	CheckFPGAConnect(Data, WatchDog);
 
-    	WriteFPGAData();  // Запись в FPGA
+    	Data.C28_Errors = ErrorLatch;
+    	WriteOSCI_S6S7(Data);  	  // Р’Р·Р°РёРјРѕРґРµР№СЃС‚РІРёРµ СЃ Рњ3
+
+    	WriteFPGAData(WatchDog);  // Р—Р°РїРёСЃСЊ РІ FPGA
 
     	EALLOW;
-		DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1;  // DMA запуск получения значений
+		DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1;  // DMA Р·Р°РїСѓСЃРє РїРѕР»СѓС‡РµРЅРёСЏ Р·РЅР°С‡РµРЅРёР№
 		EDIS;
 
-    	CPU_OverloadFlag = 1;
+    	bool   CPU_OverloadFlag = true;
     	Uint16 WaitCyclesCounter = 0;
-		// Ждем до 300 мкс (одна итерация 300 мкс)
+		// Р–РґРµРј РґРѕ 300 РјРєСЃ (РѕРґРЅР° РёС‚РµСЂР°С†РёСЏ 300 РјРєСЃ)
 		while (CpuTimer1Regs.TCR.bit.TIF == 0) {
 			FreeTimeCounter = CpuTimer1Regs.TIM.all;
-			CPU_OverloadFlag = 0;
+			CPU_OverloadFlag = false;
 			WaitCyclesCounter++;
 			if (WaitCyclesCounter > 30000) {
 				ErrorSet(ERROR_MAIN_TIMER_DEAD);
+				break;
 			}
 		}
-		if (CPU_OverloadFlag != 0) {
+		if (CPU_OverloadFlag != 0)
 			ErrorSet(ERROR_CPU_OVERLOAD);
-		}
-		CpuTimer1Regs.TCR.bit.TIF = 1; // Перезапуск таймера
+		else if (ErrorLatch & (1 << ERROR_CPU_OVERLOAD))
+			ErrorReset(ERROR_CPU_OVERLOAD);
 
-		CyclesCounter++;
+		CpuTimer1Regs.TCR.bit.TIF = 1; // РџРµСЂРµР·Р°РїСѓСЃРє С‚Р°Р№РјРµСЂР°
+
+		CycleCounter++;
     } //MAIN CYCLE END
 }

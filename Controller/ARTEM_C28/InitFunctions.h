@@ -1,14 +1,11 @@
 /*
  * InitFunctions.h
- *
- *  Created on: 30.07.2014
- *      Author: Daler
  */
 
 #ifndef INITFUNCTIONS_H_
 #define INITFUNCTIONS_H_
 
-#include "GlobalData.h"
+#include "DSP28x_Project.h"
 
 #ifdef __cplusplus
 extern "C" {
