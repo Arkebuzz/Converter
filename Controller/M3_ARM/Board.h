@@ -39,6 +39,7 @@ extern "C" {
 
 #include "TMDXDOCKH52C1.h"
 
+#define Board_initEPI 				PCON_EPI_INIT
 #define Board_initDMA               TMDXDOCKH52C1_initDMA
 #define Board_initEMAC              TMDXDOCKH52C1_initEMAC
 #define Board_initGeneral           TMDXDOCKH52C1_initGeneral

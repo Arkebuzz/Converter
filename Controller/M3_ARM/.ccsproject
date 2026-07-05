@@ -9,6 +9,8 @@
 	<isElfFormat value="true"/>
 	<rts value="rtsv7M3_T_le_eabi.lib"/>
 	<createSlaveProjects value=""/>
-	<templateProperties value="id=com.ti.rtsc.TIRTOSc2000.example_2,type=rtsc,products=com.ti.rtsc.TIRTOSc2000,xdcToolsVersion=3_32_00_06_core,target=ti.targets.arm.elf.M3,platform=ti.platforms.concertoM3:F28M35H52C1,buildProfile=release,isHybrid=true,configuroOptions=--compileOptions &quot;${COMPILER_FLAGS} &quot;,"/>
+	<templateProperties value="id=com_ti_rtsc_tirtosc2000_example_73.projectspec.tcpEcho_TMDXDOCKH52C1_M3_TI_F28M35H52C1_CortexM,type=rtsc,products=com.ti.rtsc.TIRTOSc2000,xdcToolsVersion=3_32_00_06_core,target=ti.targets.arm.elf.M3,platform=ti.platforms.concertoM3:F28M35H52C1,buildProfile=release,isHybrid=true,configuroOptions= --compileOptions &quot;${COMPILER_FLAGS} &quot;,"/>
+	<origin value="C:\ti\tirtos_c2000_2_16_00_08\resources\tmdxdockh52C1ExperimenterKit\networkExamples\tiNetworkExamples\ethernetExamples\com_ti_rtsc_tirtosc2000_example_73.projectspec"/>
 	<filesToOpen value=""/>
+	<isTargetManual value="true"/>
 </projectOptions>

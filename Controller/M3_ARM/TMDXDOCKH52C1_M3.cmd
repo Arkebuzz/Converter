@@ -40,7 +40,9 @@ MEMORY
     FLASH_BOOT (RWX): origin = 0x200030,   length = 0x4
     FLASH (RWX)     : origin = 0x200034,   length = 0x7FF9C
     C03SRAM (RWX)   : origin = 0x20000000, length = 0x8000
-    S07SHRAM (RWX)  : origin = 0x20008000, length = 0x10000
+
+    S07SHRAM (RWX)  : origin = 0x20008000, length = 0xC000
+
     CTOMMSGRAM (R)  : origin = 0x2007F000, length = 0x800
     MTOCMSGRAM (RW) : origin = 0x2007F800, length = 0x800
 }

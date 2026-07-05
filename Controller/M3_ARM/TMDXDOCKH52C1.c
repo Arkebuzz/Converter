@@ -49,6 +49,7 @@
 #include <inc/hw_memmap.h>
 #include <inc/hw_sysctl.h>
 #include <inc/hw_types.h>
+#include <inc/hw_epi.h>
 
 #include <driverlib/gpio.h>
 #include <driverlib/i2c.h>
@@ -56,8 +57,12 @@
 #include <driverlib/sysctl.h>
 #include <driverlib/uart.h>
 #include <driverlib/udma.h>
+#include <driverlib/epi.h>
+
 
 #include "TMDXDOCKH52C1.h"
+
+#define EPI_HB16_CSCFG_ALE_HIGH		  0x00080000
 
 /*
  *  =============================== DMA ===============================
@@ -124,7 +129,7 @@ EMACTiva_Object emacObjects[TMDXDOCKH52C1_EMACCOUNT];
  *  their boards.
  */
 #ifndef MACADDRESS
-#define MACADDRESS 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+#define MACADDRESS 0xD0,0xD0,0xD0,0x01,0x01,0x77
 #endif
 unsigned char macAddress[6] = {MACADDRESS};
 
@@ -154,88 +159,172 @@ const EMAC_Config EMAC_config[] = {
     {NULL, NULL, NULL}
 };
 
+
+
+void PCON_EPI_INIT(void)
+{
+	unsigned long ulBase;
+		unsigned long ulConfig;
+		unsigned long ulMap;
+
+		int a =0;
+		a = a +22;
+		//EPI PortC
+		GPIODirModeSet  (GPIO_PORTC_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTC_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PC4_EPI0S2);
+		GPIOPinConfigure(GPIO_PC5_EPI0S3);
+		GPIOPinConfigure(GPIO_PC6_EPI0S4);
+		GPIOPinConfigure(GPIO_PC7_EPI0S5);
+
+		//EPI PortE
+		GPIODirModeSet  (GPIO_PORTE_BASE, GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PE0_EPI0S8);
+		GPIOPinConfigure(GPIO_PE1_EPI0S9);
+		GPIOPinConfigure(GPIO_PE2_EPI0S24);
+		GPIOPinConfigure(GPIO_PE3_EPI0S25);
+
+		//EPI PortF
+		GPIODirModeSet  (GPIO_PORTF_BASE, GPIO_PIN_5|GPIO_PIN_4, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PF4_EPI0S12);
+		GPIOPinConfigure(GPIO_PF5_EPI0S15);
+
+		//EPI PortG
+		GPIODirModeSet  (GPIO_PORTG_BASE, GPIO_PIN_1|GPIO_PIN_0, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTG_BASE, GPIO_PIN_1|GPIO_PIN_0, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PG0_EPI0S13);
+		GPIOPinConfigure(GPIO_PG1_EPI0S14);
+
+		//EPI PortH
+		GPIODirModeSet  (GPIO_PORTH_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTH_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PH0_EPI0S6);
+		GPIOPinConfigure(GPIO_PH1_EPI0S7);
+		GPIOPinConfigure(GPIO_PH2_EPI0S1);
+		GPIOPinConfigure(GPIO_PH3_EPI0S0);
+		GPIOPinConfigure(GPIO_PH4_EPI0S10);
+		GPIOPinConfigure(GPIO_PH5_EPI0S11);
+		GPIOPinConfigure(GPIO_PH6_EPI0S26);
+		GPIOPinConfigure(GPIO_PH7_EPI0S27);
+
+		//EPI PortJ
+		GPIODirModeSet  (GPIO_PORTJ_BASE, GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_DIR_MODE_HW);
+		GPIOPadConfigSet(GPIO_PORTJ_BASE, GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_PIN_TYPE_STD_WPU);
+		GPIOPinConfigure(GPIO_PJ0_EPI0S16);
+		GPIOPinConfigure(GPIO_PJ1_EPI0S17);
+		GPIOPinConfigure(GPIO_PJ2_EPI0S18);
+		GPIOPinConfigure(GPIO_PJ3_EPI0S19);
+		GPIOPinConfigure(GPIO_PJ4_EPI0S28);
+		GPIOPinConfigure(GPIO_PJ5_EPI0S29);
+		GPIOPinConfigure(GPIO_PJ6_EPI0S30);
+
+		SysCtlPeripheralEnable(SYSCTL_PERIPH_EPI0);
+		SysCtlPeripheralReset(SYSCTL_PERIPH_EPI0);
+
+		// Set 16 Bit HostBus mode.
+		EPIModeSet(EPI0_BASE, EPI_MODE_HB16);
+
+
+		// PLL, M3 running at 100MHz and C28 running at 100MHz
+		//Set clock divider to 2 (divide by 4). With this EPI Frq will be 25MHz (M3-Frq/4).
+		EPIDividerSet(EPI0_BASE, 0x2);
+
+		// Read wait state = 0
+		// Write wait state = 0
+		// Address & Data are not muxed (ADNOMUX = 0x1).
+		//EPIConfigHB16Set(EPI0_BASE, (EPI_HB16_MODE_ADMUX | EPI_HB16_WRWAIT_0 | EPI_HB16_RDWAIT_0|EPI_HB16_CSCFG_ALE_DUAL_CS), 0);
+
+		EPIConfigHB16Set(EPI0_BASE, (EPI_HB16_MODE_ADMUX | EPI_HB16_WRWAIT_0 | EPI_HB16_RDWAIT_0|EPI_HB16_CSCFG_DUAL_CS|EPI_HB16_CSCFG_ALE_HIGH), 0);
+		ulConfig = (EPI_HB16_MODE_ADMUX | EPI_HB16_WRWAIT_0 | EPI_HB16_RDWAIT_0|EPI_HB16_CSCFG_DUAL_CS);
+		ulBase = EPI0_BASE;
+		HWREG(ulBase + EPI_O_HB16CFG2) = (((ulConfig & EPI_HB16_WORD_ACCESS) ?
+		                                       EPI_HB16CFG2_WORD : 0) |
+		                                      ((ulConfig & EPI_HB16_CSBAUD_DUAL) ?
+		                                       EPI_HB16CFG2_CSBAUD : 0) |
+		                                      ((ulConfig & EPI_HB16_CSCFG_MASK) << 15) |
+		                                      0x8000000);
+
+
+		//EPIAddressMapSet(EPI0_BASE, (EPI_ADDR_RAM_SIZE_16MB | EPI_ADDR_RAM_BASE_6) );
+
+		ulMap = 0xBB;
+		HWREG(ulBase + EPI_O_ADDRMAP) = ulMap;
+}
 /*
  *  ======== TMDXDOCKH52C1_initEMAC ========
  */
 void TMDXDOCKH52C1_initEMAC(void)
 {
-    /*
-     *  Set up the pins that are used for Ethernet
-     *  MII_TXD3
-     */
-    GPIODirModeSet(GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(GPIO_PORTC_BASE, GPIO_PIN_4, GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PC4_MIITXD3);
+			//-----------------------NEW SETUP-----------------------------------------
+			/* RXD0, TXER, MDIO, RXD3 -- PE4, PE5, PE6, PE7 -- 7,C,C,C */
+			GPIODirModeSet  (GPIO_PORTE_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_DIR_MODE_HW);
+			GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_TYPE_STD);
+			GPIOPinConfigure(GPIO_PE4_MIIRXD0);
+			GPIOPinConfigure(GPIO_PE5_MIITXER);
+			GPIOPinConfigure(GPIO_PE6_MIIMDIO);
+			GPIOPinConfigure(GPIO_PE7_MIIRXD3);
 
-    /* MII_MDIO */
-    GPIODirModeSet(GPIO_PORTE_BASE, GPIO_PIN_6, GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(GPIO_PORTE_BASE, GPIO_PIN_6, GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PE6_MIIMDIO);
+			/* CRS, RXD1 -- PB6, PB7 -- C,7 */
+			HWREG(GPIO_PORTB_BASE + GPIO_O_LOCK)= 0x4C4F434B;
+			HWREG(GPIO_PORTB_BASE + GPIO_O_CR)=   0x000000FF;
+			HWREG(GPIO_PORTB_BASE + GPIO_O_LOCK)= 0x4C4F434B;
+			GPIODirModeSet  (GPIO_PORTB_BASE, GPIO_PIN_7|GPIO_PIN_6, GPIO_DIR_MODE_HW);
+		    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_7|GPIO_PIN_6, GPIO_PIN_TYPE_STD);
+		    GPIOPinConfigure(GPIO_PB6_MIICRS);
+		    GPIOPinConfigure(GPIO_PB7_MIIRXD1);
+		    HWREG(GPIO_PORTB_BASE + GPIO_O_LOCK)= 0x4C4F434B;
+		    HWREG(GPIO_PORTB_BASE + GPIO_O_CR)=   0x0000007F;
+		    HWREG(GPIO_PORTB_BASE + GPIO_O_LOCK)= 0x00000001;
 
-    /* MII_RXD3 */
-    GPIODirModeSet(GPIO_PORTF_BASE, GPIO_PIN_5, GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_5, GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PF5_MIIRXD3);
+			/* COL, RXDV, TXEN, TXCK -- PG2, PG3, PG5, PG6 -- 3,C,3,3 */
+			GPIODirModeSet  (GPIO_PORTG_BASE, GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_3|GPIO_PIN_2, GPIO_DIR_MODE_HW);
+		    GPIOPadConfigSet(GPIO_PORTG_BASE, GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_3|GPIO_PIN_2, GPIO_PIN_TYPE_STD);
+		    GPIOPinConfigure(GPIO_PG2_MIICOL);
+		    GPIOPinConfigure(GPIO_PG3_MIIRXDV);
+		    GPIOPinConfigure(GPIO_PG5_MIITXEN);
+		    //GPIOPinConfigure(GPIO_PG6_MIITXCK); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			HWREG(GPIO_PORTG_BASE + GPIO_O_PCTL) &= 0xF0FFFFFF;
+			HWREG(GPIO_PORTG_BASE + GPIO_O_PCTL) |= 0x03000000;
 
-    /* MII_TXER , MII_RXDV , MII_RXD1 , MII_RXD2 */
-    GPIODirModeSet(GPIO_PORTG_BASE, GPIO_PIN_7|GPIO_PIN_3|GPIO_PIN_1|GPIO_PIN_0,
-                   GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(GPIO_PORTG_BASE, GPIO_PIN_7|GPIO_PIN_3|GPIO_PIN_1|
-                     GPIO_PIN_0,
-                     GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PG0_MIIRXD2);
-    GPIOPinConfigure(GPIO_PG1_MIIRXD1);
-    GPIOPinConfigure(GPIO_PG3_MIIRXDV);
-    GPIOPinConfigure(GPIO_PG7_MIITXER);
+			/* TXD3, TXD2, TXD1, TXD0 -- PD4, PD5, PD6, PD7 -- 4,4,4,4 */
+			GPIODirModeSet  (GPIO_PORTD_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_DIR_MODE_HW);
+			GPIOPadConfigSet(GPIO_PORTD_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_TYPE_STD);
+			GPIOPinConfigure(GPIO_PD4_MIITXD3);
+			GPIOPinConfigure(GPIO_PD5_MIITXD2);
+			GPIOPinConfigure(GPIO_PD6_MIITXD1);
+			GPIOPinConfigure(GPIO_PD7_MIITXD0);
 
-    /* MII_TXCK , MII_TXEN , MII_TXD0 , MII_TXD1 , MII_TXD2 , MII_RXD0 */
-    GPIODirModeSet(
-        GPIO_PORTH_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|
-        GPIO_PIN_3|
-        GPIO_PIN_1, GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(
-        GPIO_PORTH_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|
-        GPIO_PIN_3|
-        GPIO_PIN_1, GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PH1_MIIRXD0);
-    GPIOPinConfigure(GPIO_PH3_MIITXD2);
-    GPIOPinConfigure(GPIO_PH4_MIITXD1);
-    GPIOPinConfigure(GPIO_PH5_MIITXD0);
-    GPIOPinConfigure(GPIO_PH6_MIITXEN);
-    GPIOPinConfigure(GPIO_PH7_MIITXCK);
+			/* RXCK, RXER, PHYINTRn, MDC, RXD2 -- PF0, PF1, PF2, PF3, PF6 -- 4,4,3,3,3 */
+			GPIODirModeSet  (GPIO_PORTF_BASE,  GPIO_PIN_6|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_DIR_MODE_HW);
+			GPIOPadConfigSet(GPIO_PORTF_BASE,  GPIO_PIN_6|GPIO_PIN_3|GPIO_PIN_2|GPIO_PIN_1|GPIO_PIN_0, GPIO_PIN_TYPE_STD);
+			GPIOPinConfigure(GPIO_PF0_MIIRXCK);
+			GPIOPinConfigure(GPIO_PF1_MIIRXER);
+			GPIOPinConfigure(GPIO_PF2_MIIPHYINTRn);
+			GPIOPinConfigure(GPIO_PF3_MIIMDC);
+			//GPIOPinConfigure(GPIO_PF6_MIIRXD2); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			HWREG(GPIO_PORTF_BASE + GPIO_O_PCTL) &= 0xF0FFFFFF;
+			HWREG(GPIO_PORTF_BASE + GPIO_O_PCTL) |= 0x03000000;
 
-    /*
-     *  MII_PHYRSTn , MII_PHYINTRn , MII_CRS , MII_COL , MII_MDC , MII_RXCK ,
-     *  MII_RXER
-     */
-    GPIODirModeSet(
-        GPIO_PORTJ_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|
-        GPIO_PIN_3|
-        GPIO_PIN_2|GPIO_PIN_0, GPIO_DIR_MODE_HW);
-    GPIOPadConfigSet(
-        GPIO_PORTJ_BASE, GPIO_PIN_7|GPIO_PIN_6|GPIO_PIN_5|GPIO_PIN_4|
-        GPIO_PIN_3|
-        GPIO_PIN_2|GPIO_PIN_0, GPIO_PIN_TYPE_STD);
-    GPIOPinConfigure(GPIO_PJ0_MIIRXER);
-    GPIOPinConfigure(GPIO_PJ2_MIIRXCK);
-    GPIOPinConfigure(GPIO_PJ3_MIIMDC);
-    GPIOPinConfigure(GPIO_PJ4_MIICOL);
-    GPIOPinConfigure(GPIO_PJ5_MIICRS);
-    GPIOPinConfigure(GPIO_PJ6_MIIPHYINTRn);
-    GPIOPinConfigure(GPIO_PJ7_MIIPHYRSTn);
+			/* PHYRSTn - PJ7 - C*/
+			GPIODirModeSet  (GPIO_PORTJ_BASE, GPIO_PIN_7, GPIO_DIR_MODE_HW);
+			GPIOPadConfigSet(GPIO_PORTJ_BASE, GPIO_PIN_7, GPIO_PIN_TYPE_STD);
+			GPIOPinConfigure(GPIO_PJ7_MIIPHYRSTn);
+		    //-----------------------NEW SETUP-----------------------------------------
 
-    /* Enable and Reset the Ethernet Controller. */
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_ETH);
-    SysCtlPeripheralReset(SYSCTL_PERIPH_ETH);
+	    /* Enable and Reset the Ethernet Controller. */
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_ETH);
+	    SysCtlPeripheralReset(SYSCTL_PERIPH_ETH);
 
-    if (macAddress[0] == 0xff && macAddress[1] == 0xff &&
-        macAddress[2] == 0xff && macAddress[3] == 0xff &&
-        macAddress[4] == 0xff && macAddress[5] == 0xff) {
-        System_abort("Change the macAddress variable to match your board's MAC sticker");
-    }
+	    if (macAddress[0] == 0xff && macAddress[1] == 0xff &&
+	        macAddress[2] == 0xff && macAddress[3] == 0xff &&
+	        macAddress[4] == 0xff && macAddress[5] == 0xff) {
+	        System_abort("Change the macAddress variable to match your board's MAC sticker");
+	    }
 
-    /* Once EMAC_init is called, EMAC_config cannot be changed */
-    EMAC_init();
+	    /* Once EMAC_init is called, EMAC_config cannot be changed */
+	    EMAC_init();
 }
 
 /*
@@ -246,23 +335,23 @@ void TMDXDOCKH52C1_initEMAC(void)
  */
 void TMDXDOCKH52C1_initGeneral(void)
 {
-    /* Disable Protection */
-    HWREG(SYSCTL_MWRALLOW) =  0xA5A5A5A5;
+	/* Disable Protection */
+	    HWREG(SYSCTL_MWRALLOW) =  0xA5A5A5A5;
 
-    /* Enable clock supply for the following peripherals */
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);
+	    /* Enable clock supply for the following peripherals */
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOG);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOH);
+	    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ);
 
-    /* Disable clock supply for the watchdog modules */
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_WDOG1);
-    SysCtlPeripheralDisable(SYSCTL_PERIPH_WDOG0);
+	    /* Disable clock supply for the watchdog modules */
+	    SysCtlPeripheralDisable(SYSCTL_PERIPH_WDOG1);
+	    SysCtlPeripheralDisable(SYSCTL_PERIPH_WDOG0);
 }
 
 /*
@@ -283,15 +372,12 @@ void TMDXDOCKH52C1_initGeneral(void)
  *       reduce memory usage.
  */
 GPIO_PinConfig gpioPinConfigs[] = {
-    /* Input pins */
-    /* TMDXDOCKH52C1_BUTTON */
-    GPIOTiva_PB_4 | GPIO_CFG_IN_PU | GPIO_CFG_IN_INT_RISING,
 
     /* Output pins */
-    /* TMDXDOCKH52C1_LD2 */
-    GPIOTiva_PC_6 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW,
-    /* TMDXDOCKH52C1_LD3 */
-    GPIOTiva_PC_7 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW,
+    GPIOTiva_PB_2 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW,
+    GPIOTiva_PB_3 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW,
+	GPIOTiva_PA_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW,
+	GPIOTiva_PA_5 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_LOW,
 };
 
 /*
@@ -319,11 +405,23 @@ const GPIOTiva_Config GPIOTiva_config = {
  */
 void TMDXDOCKH52C1_initGPIO(void)
 {
-    /* Initialize peripheral and pins */
-    GPIO_init();
+	/* Setup the M3 GPIO pins used */
+	GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_2);
+	GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_3);
+	GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_2);
+	GPIOPinTypeGPIOOutput(GPIO_PORTA_BASE, GPIO_PIN_3);
 
-    GPIO_write(TMDXDOCKH52C1_LD2, TMDXDOCKH52C1_LED_OFF);
-    GPIO_write(TMDXDOCKH52C1_LD3, TMDXDOCKH52C1_LED_OFF);
+	/* Setup the C28 GPIO pins used */
+	GPIOPinConfigureCoreSelect(GPIO_PORTA_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_6|GPIO_PIN_7,GPIO_PIN_C_CORE_SELECT);
+	GPIOPinConfigureCoreSelect(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_C_CORE_SELECT);
+
+	GPIOPinConfigureCoreSelect(GPIO_PORTD_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_C_CORE_SELECT);
+
+	/* Once GPIO_init is called, GPIO_config cannot be changed */
+	GPIO_init();
+
+	GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_OFF);
+	GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_OFF);
 }
 
 /*

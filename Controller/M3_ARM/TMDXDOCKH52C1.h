@@ -50,9 +50,13 @@
 extern "C" {
 #endif
 
-/* LEDs on TMDXDOCKH52C1 are active low. */
-#define TMDXDOCKH52C1_LED_OFF (1)
-#define TMDXDOCKH52C1_LED_ON  (0)
+#include <ti/drivers/GPIO.h>
+
+#define GPIO_TURN_ON (~0)
+#define GPIO_TURN_OFF  (0)
+
+/* GPIO_Callbacks structure for GPIO interrupts */
+//extern const GPIO_Callbacks TMDXDOCKH52C1_gpioPortBCallbacks;
 
 /*!
  *  @def    TMDXDOCKH52C1_EMACName
@@ -69,9 +73,10 @@ typedef enum TMDXDOCKH52C1_EMACName {
  *  @brief  Enum of GPIO names on the TMDXDOCKH52C1 dev board
  */
 typedef enum TMDXDOCKH52C1_GPIOName {
-    TMDXDOCKH52C1_BUTTON = 0,
-    TMDXDOCKH52C1_LD2,
-    TMDXDOCKH52C1_LD3,
+    TMDXDOCKH52C1_LED,
+    TMDXDOCKH52C1_ERR,
+    TMDXDOCKH52C1_RES,
+    TMDXDOCKH52C1_WD,
 
     TMDXDOCKH52C1_GPIOCOUNT
 } TMDXDOCKH52C1_GPIOName;
@@ -264,6 +269,8 @@ extern void TMDXDOCKH52C1_initUSBMSCHFatFs(void);
  *  by the Watchdog_config variable.
  */
 extern void TMDXDOCKH52C1_initWatchdog(void);
+
+extern void PCON_EPI_INIT(void);
 
 #ifdef __cplusplus
 }
