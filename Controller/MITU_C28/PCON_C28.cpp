@@ -8,10 +8,14 @@ void main(void) {
 	//GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
 	GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; 	 //Remove system OK flag to FPGA
 
-	InitSysCtrl(); // Step. Initialize System Control
-	InitGpio(); // Step. Initialize GPIO
-	INIT_GPIO_Setup(); //Setup GPIO pins
-	Init_SPI(); //Setup SPI pins
+	// Стандартная инициализация
+	InitSysCtrl();  // Инициализация System Control
+	InitGpio();     // Инициализация GPIO
+
+
+	INIT_GPIO_Setup(); // Настройка портов GPIO
+
+	Init_SPI(); // Настройка flash, по факту не используем
 
 #ifdef _FLASH    // Step 4. Copy time critical code and Flash setup code to RAM
 	memcpy(&RamfuncsRunStart, &RamfuncsLoadStart, (size_t) &RamfuncsLoadSize);
@@ -31,12 +35,12 @@ void main(void) {
 
 	//ErrorSet(ERR_EMERGENCY_STOP_ALG);  Исходно стартуем с прерывания, чтобы безопасно все было, когда систему ошибок поправим, вернем
 
-	//Start system timers
-	INIT_Setup_Timers(MAIN_CYCLE_US, C28_FREQ); //Setup Timers
-    INIT_Start_Timers(); //Start timers operation
+	// Запуска таймера на 300 мкс для главного цикла
+	INIT_Setup_Timers(MAIN_CYCLE_US, C28_FREQ);
+    INIT_Start_Timers();
 
     // Проверка запуска М3
-	CtoMIpcRegs.CTOMIPCSET.bit.IPC1 = 1; //Send data ready signal
+	CtoMIpcRegs.CTOMIPCSET.bit.IPC1 = 1; // Send data ready signal
 	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0); //Wait for M3 to read init data.
 
 	// Настройка DMA
