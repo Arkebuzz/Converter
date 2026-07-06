@@ -90,3 +90,17 @@ interrupt void my_critical_interrupt_handler(void) {}
     So C28 can clear it's own flag - it can only set it
     The flag can be cleared only when M3 sends ACK
   
+    Для рускоговорящих:
+    Имеем регистры (передача M3 -> C28):
+    Ядро:   M3                 C28
+            MTOCIPCFLG    =    MTOCIPCSTS
+            MTOCIPCCLR         MTOCIPCACK       сброс бита в 0
+            MTOCIPCSET                          установка бита в 1
+
+    Для передачи С28 -> М28 аналогично:                   
+    Ядро:   C28                M3
+            CTOMIPCFLG    =    CTOMIPCSTS
+            CTOMIPCCLR         CTOMIPCACK       сброс бита в 0
+            CTOMIPCSET                          установка бита в 1
+
+    Первые четыре бита генерируют прерывание на получившем ядре.
