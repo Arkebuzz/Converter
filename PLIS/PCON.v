@@ -29,10 +29,6 @@ module PCON(
 );
 
 
-reg [20:1] out;
-assign D_OUTP = out;
-
-
 // Описание ошибок:
 // 0: Потерян сигнал с f28m35
 // 1: Потерян сигнал с ADCHub1
@@ -40,45 +36,88 @@ assign D_OUTP = out;
 reg [15:0] errors = 0;
 
 // Обмен с ADCHub
-localparam DATA_WIDTH = 24;
+localparam DATA_TO_ADC_WIDTH = 24;
+localparam DATA_FROM_ADC_WIDTH = 16;
 
-// ADCHub1 - входное напряжение
-wire [DATA_WIDTH-1:0] rc_data_1;
+// Получение с ADCHub1 - входное напряжение
+wire [DATA_TO_ADC_WIDTH-1:0] rc_data_1;
 wire rc_data_ready_1;
 wire rc_connect_fail_1;
 wire rc_invalid_data_1;
 
 DATA_RECEIVER Receiver1 (
-   .CLOCK_50(CLOCK_50), 
+   .CLOCK(CLOCK_50), 
    .FO_IN(D_INP[3]), 
    .DATA(rc_data_1),
    .DATA_READY(rc_data_ready_1),
    .ERR_CONNECT_FAIL(rc_connect_fail_1),
    .ERR_INVALID_DATA(rc_invalid_data_1)
 );
-defparam Receiver1.DATA_WIDTH = DATA_WIDTH;
+defparam Receiver1.DATA_WIDTH = DATA_TO_ADC_WIDTH;
+defparam Receiver1.TICK_LEN_RECEIV = 20;  // 50 мГц
+defparam Receiver1.PULSE_1_LEN     = 400;  
+defparam Receiver1.RESET_LEN       = 1000; 
+defparam Receiver1.MAX_ERROR       = 100; 
 
 reg [11:0] current_1;
 reg [11:0] voltage_inp;
 
+// Отправка на ADCHub1
+reg [DATA_FROM_ADC_WIDTH-1:0] data_to_send_1 = 1234;
+wire ready_to_send_1;
+
+DATA_TRANSMITTER Transmitter1 (
+   .CLOCK(CLOCK_50),
+   .DATA(data_to_send_1), 
+   .READY_TO_SEND(ready_to_send_1), 
+   .FO_OUT(D_OUTP[4])
+);
+defparam Transmitter1.DATA_WIDTH = DATA_FROM_ADC_WIDTH;
+defparam Transmitter1.TICK_LEN    = 20;  // 50 мГц
+defparam Transmitter1.PULSE_0_LEN = 100;
+defparam Transmitter1.PULSE_1_LEN = 400;
+defparam Transmitter1.BIT_LEN     = 600;    
+defparam Transmitter1.RESET_LEN   = 1000;
+
 // ADCHub2 - выходное напряжение
-wire [DATA_WIDTH-1:0] rc_data_2;
+wire [DATA_TO_ADC_WIDTH-1:0] rc_data_2;
 wire rc_data_ready_2;
 wire rc_connect_fail_2;
 wire rc_invalid_data_2;
 
 DATA_RECEIVER Receiver2 (
-   .CLOCK_50(CLOCK_50), 
+   .CLOCK(CLOCK_50), 
    .FO_IN(D_INP[4]), 
    .DATA(rc_data_2),
    .DATA_READY(rc_data_ready_2),
    .ERR_CONNECT_FAIL(rc_connect_fail_2),
    .ERR_INVALID_DATA(rc_invalid_data_2)
 );
-defparam Receiver2.DATA_WIDTH = DATA_WIDTH;
+defparam Receiver2.DATA_WIDTH = DATA_TO_ADC_WIDTH;
+defparam Receiver2.TICK_LEN_RECEIV = 20;   // 50 мГц
+defparam Receiver2.PULSE_1_LEN     = 400;  
+defparam Receiver2.RESET_LEN       = 1000; 
+defparam Receiver2.MAX_ERROR       = 100; 
 
 reg [11:0] current_2;
 reg [11:0] voltage_out;
+
+// Отправка на ADCHub2
+reg [DATA_FROM_ADC_WIDTH-1:0] data_to_send_2 = 1234;
+wire ready_to_send_2;
+
+DATA_TRANSMITTER Transmitter2 (
+   .CLOCK(CLOCK_50),
+   .DATA(data_to_send_2), 
+   .READY_TO_SEND(ready_to_send_2), 
+   .FO_OUT(D_OUTP[5])
+);
+defparam Transmitter2.DATA_WIDTH = DATA_FROM_ADC_WIDTH;
+defparam Transmitter2.TICK_LEN    = 20;  // 50 мГц
+defparam Transmitter2.PULSE_0_LEN = 100;
+defparam Transmitter2.PULSE_1_LEN = 400;
+defparam Transmitter2.BIT_LEN     = 600;    
+defparam Transmitter2.RESET_LEN   = 1000;
 
 
 // Обмен с f28m35

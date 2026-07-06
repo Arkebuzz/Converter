@@ -99,6 +99,7 @@ set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING OFF
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
 set_location_assignment PIN_12 -to CLOCK_20
 set_location_assignment PIN_14 -to CLOCK_50
+set_global_assignment -name VERILOG_FILE DATA_RECEIVER.v
 set_global_assignment -name VERILOG_FILE AMC1304M25_READER.v
 set_global_assignment -name VERILOG_FILE DATA_TRANSMITTER.v
 set_global_assignment -name VERILOG_FILE ADS7886_READER.v

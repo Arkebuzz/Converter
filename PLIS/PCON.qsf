@@ -140,6 +140,7 @@ set_location_assignment PIN_7 -to CPU_DIN[5]
 set_location_assignment PIN_80 -to CPU_DIN[6]
 set_location_assignment PIN_22 -to CLOCK_12
 set_location_assignment PIN_23 -to CLOCK_50
+set_global_assignment -name VERILOG_FILE DATA_TRANSMITTER.v
 set_global_assignment -name VERILOG_FILE MPU_RAM.v
 set_global_assignment -name VERILOG_FILE EMIF.v
 set_global_assignment -name VERILOG_FILE DATA_RECEIVER.v
