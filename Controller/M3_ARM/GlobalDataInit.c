@@ -1,7 +1,7 @@
 /*
  * GlobalDataInit.c
  *
- *  Created on: 7 дек. 2016 г.
+ *  Created on: 7 РґРµРє. 2016 Рі.
  *      Author: Volkodav
  */
 #include "GlobalData.h"
@@ -17,10 +17,10 @@ short FirstThreadRun = 1;
 short SecondThreadRun = 0;
 
 short* osciBuf;
-int osciBufSize = 0;  // размер массива osciBuf
-int osciBufCnt = 0;	// текущее количество элементов в массиве osciBuf
-int lastSent = 0;	// индекс последнего отправленного элемента в массиве osciBuf
-int lastWritten = 0;	// индекс последнего записанного элемента в массиве osciBuf
+int osciBufSize = 0;  // СЂР°Р·РјРµСЂ РјР°СЃСЃРёРІР° osciBuf
+int osciBufCnt = 0;	// С‚РµРєСѓС‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЌР»РµРјРµРЅС‚РѕРІ РІ РјР°СЃСЃРёРІРµ osciBuf
+int lastSent = 0;	// РёРЅРґРµРєСЃ РїРѕСЃР»РµРґРЅРµРіРѕ РѕС‚РїСЂР°РІР»РµРЅРЅРѕРіРѕ СЌР»РµРјРµРЅС‚Р° РІ РјР°СЃСЃРёРІРµ osciBuf
+int lastWritten = 0;	// РёРЅРґРµРєСЃ РїРѕСЃР»РµРґРЅРµРіРѕ Р·Р°РїРёСЃР°РЅРЅРѕРіРѕ СЌР»РµРјРµРЅС‚Р° РІ РјР°СЃСЃРёРІРµ osciBuf
 char bOverload = 0;
 
 unsigned int PWMAmpData=0;

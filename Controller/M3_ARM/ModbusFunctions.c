@@ -1,7 +1,7 @@
 /*
  * ModbusFunctions.c
  *
- *  Created on: 7 δεκ. 2016 γ.
+ *  Created on: 7 Π΄ΠµΠΊ. 2016 Π³.
  *      Author: Volkodav
  */
 

@@ -1,7 +1,7 @@
 /*
  * MemFunctions.c
  *
- *  Created on: 07 ìàÿ 2015 ã.
+ *  Created on: 07 Ð¼Ð°Ñ 2015 Ð³.
  *      Author: MATLAB_user
  */
 
@@ -15,7 +15,7 @@ short WriteTo_FPGA_TEST(long offset, long value) // ONLY for pins integrity test
 	if (offset>0x80000) {return (-1);}
 	else
 	{
-		XMEM_pw = (long *)(0x80000000 + offset*2); // 14 áèò = 0x3FFF
+		XMEM_pw = (long *)(0x80000000 + offset*2); // 14 Ð±Ð¸Ñ‚ = 0x3FFF
 		*XMEM_pw  =  value;
 		return 0;
 	}
@@ -28,7 +28,7 @@ short WriteTo_FPGA(short offset, short value)
 	if (offset>0x2000) {return (-1);}
 	else
 	{
-		XMEM_pw = (short *)(0x80000000 + offset*2); // 14 áèò = 0x3FFF
+		XMEM_pw = (short *)(0x80000000 + offset*2); // 14 Ð±Ð¸Ñ‚ = 0x3FFF
 		*XMEM_pw  =  value;
 		return 0;
 	}
@@ -38,7 +38,7 @@ short WriteTo_FPGA(short offset, short value)
 short WriteTo_SRAM(long offset, short value)
 {
 	short *XMEM_pw;
-	if (offset>0xFFFFF) {return (-1);} // 19 áèò = 0xFFFFF
+	if (offset>0xFFFFF) {return (-1);} // 19 Ð±Ð¸Ñ‚ = 0xFFFFF
 	else
 	{
 		XMEM_pw = (short *)(0x60000000 + offset*2);
@@ -53,7 +53,7 @@ short ReadFrom_FPGA(short offset)
 {
 	short *XMEM_pw;
 	short result;
-	if (offset>0x2000) {return (0);} // 14 áèò = 0x3FFF
+	if (offset>0x2000) {return (0);} // 14 Ð±Ð¸Ñ‚ = 0x3FFF
 	else
 		{
 			XMEM_pw = (short *)(0x80000000 + offset*2);
@@ -68,7 +68,7 @@ short ReadFrom_SRAM(long offset)
 {
 	short *XMEM_pw;
 	short result;
-	if (offset>0xFFFFF) {return (0);} // 19 áèò = 0xFFFFF
+	if (offset>0xFFFFF) {return (0);} // 19 Ð±Ð¸Ñ‚ = 0xFFFFF
 	else
 		{
 			XMEM_pw = (short *)(0x60000000 + offset*2);

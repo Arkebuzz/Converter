@@ -1,7 +1,7 @@
 /*
  * MemFunctions.h
  *
- *  Created on: 07 мая 2015 г.
+ *  Created on: 07 РјР°СЏ 2015 Рі.
  *      Author: MATLAB_user
  */
 
