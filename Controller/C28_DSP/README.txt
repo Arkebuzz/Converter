@@ -26,6 +26,7 @@ interrupt void my_critical_interrupt_handler(void) {}
     Port E: пины GPIO128 до GPIO159.
  
     Direction = Input (0) / Output (1)
+    
 5. Арм стартует первым, запускает ДСП, ДСП встает в режим ожидания,
 Арм посылает прерывание (MTOCIPCINT1 = Master To Control IPC Interrupt 1) на ДСП и запускает его,
 Арм говорит ДСП откуда брать код: с Флеш или ОП.
