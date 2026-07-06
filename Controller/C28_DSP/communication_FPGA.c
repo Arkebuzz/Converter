@@ -12,9 +12,8 @@ void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
 	Data->Current_2    = Source[ADR_CURRENT_2];
 	Data->Voltage_Inp  = Source[ADR_VOLTAGE_INP];
 	Data->Voltage_Out  = Source[ADR_VOLTAGE_OUT];
-	Data->PCON_Errors  = Source[ADR_ERROR_PCON];
-	Data->ADCH1_Errors = Source[ADR_ERROR_ADCH1];
-	Data->ADCH2_Errors = Source[ADR_ERROR_ADCH2];
+	Data->FPGA_Errors  = Source[ADR_ERRORS];
+	Data->FPGA_Errors_Latch = Source[ADR_ERRORS_LATCH];
 }
 
 

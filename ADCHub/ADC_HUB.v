@@ -139,6 +139,8 @@ always @(posedge CLOCK_20) begin
       reset_errors <= 0;
    end
    
+   converter_on <= converter_on && (errors_latch == 0);
+   
    if (ready_to_send) begin
       data_to_send <= {voltage, current, errors_latch, errors};
    end   

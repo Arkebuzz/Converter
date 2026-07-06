@@ -149,15 +149,15 @@ void WriteToM3(const DataToM3 Data) {
 	*Dest = CyclesCounter2; 		Dest++;  // 2
 	*Dest = CyclesCounter3; 		Dest++;  // 3
 	*Dest = Data.C28_Errors;		Dest++;  // 4
-	*Dest = Data.PCON_Errors; 		Dest++;  // 5
-	*Dest = Data.ADCH1_Errors; 		Dest++;  // 6
-	*Dest = Data.ADCH2_Errors; 		Dest++;  // 7
-	*Dest = Data.Voltage_Inp;		Dest++;  // 8
-	*Dest = Data.Voltage_Out;		Dest++;  // 9
-	*Dest = Data.Current_1;			Dest++;  // 10
-	*Dest = Data.Current_2;			Dest++;  // 11
-	*Dest = Data.WatchDog;			Dest++;  // 12
-	*Dest = Data.FreeTimeCounter;	Dest++;  // 13
+	*Dest = Data.FPGA_Errors; 		Dest++;  // 5
+	*Dest = Data.FPGA_Errors_Latch; Dest++;  // 6
+	*Dest = Data.Voltage_Inp;		Dest++;  // 7
+	*Dest = Data.Voltage_Out;		Dest++;  // 8
+	*Dest = Data.Current_1;			Dest++;  // 9
+	*Dest = Data.Current_2;			Dest++;  // 10
+	*Dest = Data.WatchDog;			Dest++;  // 11
+	*Dest = Data.FreeTimeCounter;	Dest++;  // 12
+	Dest++;  // 13
 	Dest++;  // 14
 	Dest++;  // 15
 
