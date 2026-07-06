@@ -236,8 +236,8 @@ always @(posedge CLOCK_50) begin
       emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
-   end else if (emif_state_counter == 28) begin
-      emif_adress <= `ADR_CURRENT_1;
+   end else if (emif_state_counter == 26) begin
+      emif_adress <= `ADR_CURRENT_2;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;
    end
