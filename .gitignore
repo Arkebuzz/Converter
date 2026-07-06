@@ -6,6 +6,7 @@ incremental_db/
 output_files/
 __Previews/
 *_auto_stripped.stp
+greybox_tmp/
 
 # Файлы симуляций
 simulation/
@@ -40,7 +41,7 @@ FLASH/
 .settings
 .config
 .metadata
-
+Controller/RemoteSystemsTempFiles/
 
 #------------Ещё------------#
 

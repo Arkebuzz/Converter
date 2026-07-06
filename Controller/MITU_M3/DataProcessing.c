@@ -48,7 +48,7 @@ Void DataProcessor(UArg arg0, UArg arg1)
 				CTOM_Data[k] = ReadFrom_CTOM_MSGRAM(k);
 			}
 		//	HWREG(MTOCIPC_BASE + IPC_O_CTOMIPCACK)|=IPC_CTOMIPCSTS_IPC7;
-			CTOM_IO_Count++;
+		//	CTOM_IO_Count++;
 		//}
 
 
@@ -59,7 +59,7 @@ Void DataProcessor(UArg arg0, UArg arg1)
 				WriteTo_MTOC_MSGRAM(k,MTOC_Data[k]);
 				}
 		//	HWREG(MTOCIPC_BASE + IPC_O_MTOCIPCSET)|=IPC_MTOCIPCSET_IPC8;
-			MTOC_IO_Count++;
+		//	MTOC_IO_Count++;
 		//}
 
 		Task_sleep(25);

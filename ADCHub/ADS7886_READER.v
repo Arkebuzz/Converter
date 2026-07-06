@@ -9,8 +9,7 @@ module ADS7886_READER (
    input  [3:1]  ADC_DATA,    // Данные 3-х АЦП, по биту на каждый
    output [3:1]  ADC_CLK,     // Часы АЦП, 5 мГц
    output [3:1]  ADC_NCS,     // Сигнал выбор чипа, 1->0 для запуска передачи данных
-   output [11:0] CURRENT_1,   // Измеренные токи
-   output [11:0] CURRENT_2
+   output [11:0] CURRENT      // Измеренный ток
 );
 
 localparam ST_OFF  = 0;
@@ -21,22 +20,19 @@ reg [1:0] state = ST_OFF;
 
 reg [3:0] counter;
 
-reg [11:0] data_1 = 0;
-reg [11:0] data_2 = 0;
+reg [11:0] data = 0;
 
-reg [11:0] current_1;
-reg [11:0] current_2;
-assign CURRENT_1 = current_1;
-assign CURRENT_2 = current_2;
+reg [11:0] current;
+assign CURRENT = current;
 
 assign ADC_CLK[1] = CLOCK_5;
-assign ADC_CLK[2] = CLOCK_5;
-assign ADC_CLK[3] = 0;  // 3й не используется
+assign ADC_CLK[2] = 0;  // не используется
+assign ADC_CLK[3] = 0;  // не используется
 
 reg nCS = 0;   // chip select
 assign ADC_NCS[1] = nCS;
-assign ADC_NCS[2] = nCS;
-assign ADC_NCS[3] = 1;  // 3й не используется
+assign ADC_NCS[2] = 1;  // не используется
+assign ADC_NCS[3] = 1;  // не используется
 
 // Такт = 200 нс
 // Один замер считывается за 18 циклов
@@ -53,8 +49,7 @@ always @(posedge CLOCK_5) begin
       end
       
       ST_READ: begin
-         data_1[counter] <= ADC_DATA[1];
-         data_2[counter] <= ADC_DATA[2];
+         data[counter] <= ADC_DATA[1];
          
          if (counter == 0) begin
             state <= ST_OFF;
@@ -72,8 +67,7 @@ always @(posedge CLOCK_5) begin
          nCS <= 0;   // включаем АЦП
          state <= ST_SKIP;
          
-         current_1 <= data_1;
-         current_2 <= data_2;
+         current <= data;
       end
    endcase
 end

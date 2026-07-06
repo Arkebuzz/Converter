@@ -7,11 +7,11 @@ module ADC_HUB (
    input VSENS_ERR, 
    input nPGOOD,
 
-   // АЦП AMC1304M25 сигма-дельта на напряжение и температуру, 4 штуки
+   // АЦП AMC1304M25 сигма-дельта 1-3 на температуру и 4 на напряжение
    input  [4:1] AMC_DATA,  // Данные 4-х АЦП, по биту на каждый
    output [4:1] AMC_CLK,   // Назначены часы 20 мГц
 
-   // АЦП ADS7886 - поток бит на ток, 3 штуки
+   // АЦП ADS7886 - поток бит на ток, используем 1-й
    input  [3:1] ADC_DATA,  // Данные 3-х АЦП, по биту на каждый
    output [3:1] ADC_CLK,   // Часы 5 мГц
    output [3:1] ADC_NCS,   // Сигнал выбор чипа, 1->0 для запуска передачи данных
@@ -45,34 +45,30 @@ end
 
 
 // АЦП ADS7886
-wire [11:0] current_1;
-wire [11:0] current_2;
+wire [11:0] current;
 
 ADS7886_READER ADSReader(
    .CLOCK_5(CLOCK_5),   
    .ADC_DATA(ADC_DATA),  
    .ADC_CLK(ADC_CLK),
    .ADC_NCS(ADC_NCS),
-   .CURRENT_1(current_1), 
-   .CURRENT_2(current_2)
+   .CURRENT(current)
 );
 
 
 // АЦП AMC1304M25
-wire [9:0] voltage_1;
-wire [9:0] voltage_2;
+wire [11:0] voltage;
 
 AMC1304M25_READER AMCReader (
    .CLOCK_20(CLOCK_20),
    .AMC_DATA(AMC_DATA),
    .AMC_CLK(AMC_CLK),
-   .VOLTAGE_1(voltage_1),
-   .VOLTAGE_2(voltage_2)
+   .VOLTAGE(voltage)
 );
 
 
 // Передача данных на центральный ПЛИС
-localparam DATA_WIDTH = 56;  // 2 тока по 12 бит + 2 напряжения по 10 бит + константа 12 бит
+localparam DATA_WIDTH = 36;  // 1 ток 12 бит + 1 напряжение по 12 бит + константа 12 бит
 
 reg [DATA_WIDTH-1:0] data_to_send;
 wire ready_to_send;
@@ -89,7 +85,7 @@ defparam Transmitter.DATA_WIDTH = DATA_WIDTH;
 localparam const_1 = 12'b1100_0101_1100;
 
 always @(posedge ready_to_send) begin
-   data_to_send <= {const_1, voltage_2, voltage_1, current_2, current_1};
+   data_to_send <= {const_1, voltage, current};
 end
 
 endmodule

@@ -138,13 +138,16 @@ set_location_assignment PIN_54 -to CPU_DIN[3]
 set_location_assignment PIN_55 -to CPU_DIN[4]
 set_location_assignment PIN_7 -to CPU_DIN[5]
 set_location_assignment PIN_80 -to CPU_DIN[6]
+set_location_assignment PIN_22 -to CLOCK_12
+set_location_assignment PIN_23 -to CLOCK_50
+set_global_assignment -name VERILOG_FILE MPU_RAM.v
+set_global_assignment -name VERILOG_FILE EMIF.v
 set_global_assignment -name VERILOG_FILE DATA_RECEIVER.v
 set_global_assignment -name VERILOG_FILE PCON.v
 set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name CDF_FILE output_files/Chain3.cdf
 set_global_assignment -name CDF_FILE output_files/Chain6.cdf
 set_global_assignment -name CDF_FILE output_files/Chain7.cdf
-set_location_assignment PIN_22 -to CLOCK_12
-set_location_assignment PIN_23 -to CLOCK_50
+set_global_assignment -name QIP_FILE MPU_RAM.qip
 set_global_assignment -name SLD_FILE "C:/Users/Arkebuzz/Documents/Converter/Converter/PLIS/stp1_auto_stripped.stp"
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
