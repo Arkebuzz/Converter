@@ -107,3 +107,4 @@ set_global_assignment -name VERILOG_FILE ADC_HUB.v
 set_global_assignment -name CDF_FILE output_files/Chain1.cdf
 set_global_assignment -name CDF_FILE output_files/Chain2.cdf
 set_global_assignment -name CDF_FILE output_files/Chain5.cdf
+set_global_assignment -name VERILOG_FILE PWM.v

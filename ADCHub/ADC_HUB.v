@@ -33,15 +33,28 @@ assign FO_nEN = 0;
 
 // Часы меньшей герцовки
 reg [1:0] div_counter = 0;
-// reg CLOCK_10;
 reg CLOCK_5;
 
 // Такт = 50 нс
 always @(posedge CLOCK_20) begin
    div_counter <= div_counter + 2'b1;
-   // CLOCK_10 <= div_counter[0];  // 10 мГц
    CLOCK_5 <= div_counter[1];   // 5  мГц
 end
+
+
+// Управление транзисторами
+reg converter_on = 0;
+reg mode_up;
+reg [12:0] pwm_counter;
+
+PWM_GENERATOR GenPWM (
+   .CLOCK_20(CLOCK_20), 
+   .CONVERTER_ON(converter_on),
+   .MODE_UP(mode_up),
+   .PWM(pwm_counter),
+   .CTRL_TOP(CTRL_TOP[1]),  // Хз че с индексами
+   .CTRL_BOT(CTRL_BOT[2])   // Хз че с индексами
+);
 
 
 // АЦП ADS7886
@@ -49,9 +62,9 @@ wire [11:0] current;
 
 ADS7886_READER ADSReader(
    .CLOCK_5(CLOCK_5),   
-   .ADC_DATA(ADC_DATA),  
-   .ADC_CLK(ADC_CLK),
-   .ADC_NCS(ADC_NCS),
+   .ADC_DATA(ADC_DATA[1]),  
+   .ADC_CLK(ADC_CLK[1]),
+   .ADC_NCS(ADC_NCS[1]),
    .CURRENT(current)
 );
 
@@ -68,7 +81,7 @@ AMC1304M25_READER AMCReader (
 
 
 // Передача данных на центральный ПЛИС
-localparam DATA_OUT_WIDTH = 24;  // 1 ток 12 бит + 1 напряжение по 12 бит
+localparam DATA_OUT_WIDTH = 32;  // 1 ток 12 бит + 1 напряжение по 12 бит + 8 бит ошибок
 
 reg [DATA_OUT_WIDTH-1:0] data_to_send;
 wire ready_to_send;
@@ -90,8 +103,6 @@ defparam Transmitter.RESET_LEN = 1000;
 // Получение данных с центрального ПЛИС
 localparam DATA_INP_WIDTH = 16;
 
-reg [DATA_INP_WIDTH-1:0] data;
-
 wire [DATA_INP_WIDTH-1:0] receiv_data;
 wire rc_data_ready;
 wire rc_connect_fail;
@@ -111,13 +122,29 @@ defparam Receiver.PULSE_1_LEN     = 400;
 defparam Receiver.RESET_LEN       = 1000; 
 defparam Receiver.MAX_ERROR       = 100; 
 
-always @(posedge CLOCK_20) begin
-   if (ready_to_send) begin
-      data_to_send <= {voltage, current};
-   end
+reg reset_errors;
+reg [3:0] errors;
+reg [3:0] errors_latch;
 
+always @(posedge CLOCK_20) begin
+   errors[0] <= (~IGBT_ERR[1]) || (~IGBT_ERR[2]);
+   errors[1] <= (~IGBT_ERR[3]) || (~IGBT_ERR[4]);
+   errors[2] <= current > 3208 || current < 204;  // хз что тут за пределы, надо спросить
+   errors[3] <= rc_connect_fail | rc_invalid_data;
+   
+   errors_latch <= errors_latch | errors;  
+   // Сброс защелки только по сигналу свыше
+   if (reset_errors) begin
+      errors_latch <= 0;
+      reset_errors <= 0;
+   end
+   
+   if (ready_to_send) begin
+      data_to_send <= {voltage, current, errors_latch, errors};
+   end   
+   
    if (rc_data_ready && rc_invalid_data == 0) begin
-      data <= receiv_data;
+      {pwm_counter, mode_up, converter_on, reset_errors} <= receiv_data;
    end
 end
 
