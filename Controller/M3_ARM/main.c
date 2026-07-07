@@ -1,5 +1,3 @@
-#include <string.h> // for memset
-
 #include "Board.h"
 
 #include <xdc/runtime/Error.h>
@@ -21,38 +19,6 @@ extern char * IPAddr_cfg;
 extern char * SubnetMask_cfg;
 extern char * DomainName_cfg;
 
-// IVAN: TODO: what is ext data and ext control
-#define EXT_DATA_SIZE 100
-short* ExtControl_Data;
-
-#include <xdc/runtime/Memory.h>
-
-// IVAN: originally called Buffers_Init
-void setup_buffers(void) {
-	/* Make sure Error_Block is initialized */
-	Error_Block eb;
-	Error_init(&eb);
-
-	// IVAN: CTOM_Data and MTOC_Data are statically allocated now
-//	CTOM_Data = Memory_alloc(NULL, CTOM_DATA_SIZE*sizeof(short), 0, &eb);
-//	    if (CTOM_Data == NULL) {
-//	        System_printf("failed to alloc memory!! \n");
-//	    }
-//	memset(CTOM_Data,0,CTOM_DATA_SIZE*sizeof(short));
-//
-//	MTOC_Data = Memory_alloc(NULL, MTOC_DATA_SIZE*sizeof(short), 0, &eb);
-//		    if (MTOC_Data == NULL) {
-//		        System_printf("failed to alloc memory!! \n");
-//		    }
-//	memset(MTOC_Data,0,MTOC_DATA_SIZE*sizeof(short));
-
-	ExtControl_Data = Memory_alloc(NULL, EXT_DATA_SIZE*sizeof(short), 0, &eb);
-		if (ExtControl_Data == NULL) {
-		 System_printf("failed to alloc memory!! \n");
-		}
-	memset(ExtControl_Data,0,EXT_DATA_SIZE*sizeof(short));
-}
-
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
 volatile Uint8 CTOM_MSGRAM[0x800];
 
@@ -63,7 +29,11 @@ volatile Uint8 MTOC_MSGRAM[0x800];
 Uint16 CTOM_Data[100];
 Uint16 MTOC_Data[100];
 
+// IVAN: TODO: what is ext data and ext control
+//Uint16* ExtControl_Data[100];
+
 // IVAN: ЗНАЧЕНИЕ С НИХ НИГДЕ В КОДЕ ДАЛЕРА НЕ СЧИТЫВАЕТСЯ
+// TODO: удалить?
 unsigned short MTOC_IO_Count = 0;
 unsigned short CTOM_IO_Count = 0;
 
@@ -139,7 +109,6 @@ int main(void) {
     Board_initGPIO();
     Board_initEMAC();
     Board_initEPI();
-    setup_buffers();
 
     // IVAN: likely needed for network interface to set up properly
     for (Uint32 i=0; i < 10000000; i++) {} //DALER: Wait for board powerup
@@ -149,33 +118,6 @@ int main(void) {
     // PC via the JTAG debug probe (TI's System Analyzer)
     System_printf("Init complete. Performing FPGA Test...\n");
     System_flush();
-
-	// IVAN: diagnostic tests
-	// LIKELY NOT NEEDED
-	/*
-	UInt16 DataSRAM;
-	DataSRAM = 100; // IVAN: try to send random data to FPGA
-	for (Uint32 i = 1000; i < 0x2000; i++) {
-		WriteTo_FPGA((unsigned short)i,DataSRAM);
-		DataSRAM++;
-	}
-	DataSRAM = 100;
-	for (Uint32 i = 1000; i < 0x2000; i++) {
-		if (DataSRAM != (UInt16)ReadFrom_FPGA((unsigned short)i))
-		{
-		System_printf("Error testing FPGA! \n");
-		System_printf("Data at adress %d ", i);
-		System_printf(" = %d \n", (UInt16)ReadFrom_FPGA((unsigned short)i));
-		System_printf("Stopping operation. \n");
-		System_flush();
-		goto blocking_loop;
-		}
-		WriteTo_SRAM(i,0);
-		DataSRAM++;
-	}
-	System_printf("FPGA Test complete.\n");
-	System_flush();
-	*/
 
     System_printf("Initializing C28 core.\n");
     System_flush();
@@ -203,11 +145,7 @@ int main(void) {
 	DomainName_cfg = "PMCB";
 
     System_printf("C28 core init complete. Creating tasks...\n");
-    //System_printf("Sizeof Int= %d \n", sizeof(int));
-    //System_printf("Sizeof Short= %d \n", sizeof(short));
-    //System_printf("Sizeof long int= %d \n", sizeof(long int));
     System_flush();
-
 
     // DALER: Create the task for data exchange between M3 and C28 cores.
 	Task_Params taskParamsData;
@@ -235,7 +173,4 @@ int main(void) {
 
     // IVAN: unreachable since BIOS_start never returns
     return 0;
-
-//    blocking_loop:
-//	while (true) {}
 }
