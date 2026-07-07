@@ -1,12 +1,61 @@
-#include <xdc/std.h>
 
-char * IPAddr_cfg = "10.1.3.12";
-char * SubnetMask_cfg = "255.0.0.0";
-char * DomainName_cfg = "PMCB";
+// ИВАН: основной хедер для работы с сетью ndk
+#include <ti/ndk/inc/netmain.h>
 
-short* ExtControl_Data;
+char *IPAddr_cfg = "10.1.3.12";
+char *SubnetMask_cfg = "255.0.0.0";
+char *DomainName_cfg = "PMCB";
 
-void netOpenHook() {}
+// Это присваивается в main.c
+// И какой из них оставить??
+// IPAddr_cfg = "10.3.5.38";
+// SubnetMask_cfg = "255.255.255.0";
+// DomainName_cfg = "PMCB";
+
+// ИВАН: этот хук вызовется как только IP и Ethernet уже засетапились
+// => можно создавать TCP
+void netOpenHook() {
+	// ИВАН: айпи адрес, маска и т.д. можно настроить в .cfg файлике
+	// через интерфейс, но мы делаем это в коде
+	// наверное на случай если прямо во время работы когда-либо понадобится поменять
+	// эти настройки
+	// Конфиг это дерево из ключей, достаем оттуда нужные ключи,
+	// удаляем их, заменяем своими
+
+	HANDLE hCfgIpAddr;
+	if (CfgGetEntry(
+			NULL,               // hCfg: NULL - глобальный конфиг
+			CFGTAG_IPNET,       // Tag: IP Network
+			1,                  // Item: 1й физический интерфейс (EMAC порт)
+			1,                  // Index: 1й IP адрес назначеный на этот интерфейс
+								// (к одному интерфейсу может быть прикреплено несколько IP)
+			&hCfgIpAddr         // Output: Засовывает найденое значение в hCfgIpAddr
+	) == 1) {
+		CfgRemoveEntry(
+		    NULL,               // hCfg: NULL - глобальный конфиг
+		    hCfgIpAddr          // hCfgEntry: только что найденый ключ
+		);
+	}
+
+	CI_IPNET IPNet_cfg_instance = {
+		.NetType = 0,
+		.IPAddr = inet_addr(IPAddr_cfg),
+		.IPMask = inet_addr(SubnetMask_cfg),
+		.hBind = 0,
+		.Domain = {0},
+	};
+	strncpy(IPNet_cfg_instance.Domain, DomainName_cfg, CFG_DOMAIN_MAX - 1);
+
+	CfgAddEntry(
+	    NULL,               			// hCfg: NULL - глобальный конфиг
+	    CFGTAG_IPNET,       			// Tag: IP Network
+	    1,                  			// Item: 1й физический интерфейс (EMAC порт)
+	    0,                  			// Mode: 0 - "Default behavior" (Применить найстройку прямо сейчас)
+	    sizeof(IPNet_cfg_instance),     // Size: Размер засовываемой структуры
+	    (UINT8 *)&IPNet_cfg_instance,   // pData: Засовываемая структура
+	    NULL               			    // Output: NULL - нам не нужен хендл обратно
+	);
+}
 
 
 // COPY PASTE
@@ -50,8 +99,8 @@ void netOpenHook() {}
 ///* ----------------------- MBUS variables ---------------------------------*/
 //Semaphore_Handle g_regLock;
 //Semaphore_Handle g_connSlots;
-
-
+//
+//
 //Void OscillogrammsListener(UArg arg0, UArg arg1)
 //{
 //    int lSocket;
@@ -129,7 +178,7 @@ void netOpenHook() {}
 //		close(lSocket);
 //	}
 //}
-
+//
 //#define MAX_CONN_WORKERS  8        // cap concurrent client
 //void netOpenHook()
 //{

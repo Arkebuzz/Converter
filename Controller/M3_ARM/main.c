@@ -15,10 +15,6 @@
 #include "driverlib/ipc.h"
 #include "driverlib/sysctl.h"
 
-extern char * IPAddr_cfg;
-extern char * SubnetMask_cfg;
-extern char * DomainName_cfg;
-
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
 volatile Uint8 CTOM_MSGRAM[0x800];
 
@@ -137,12 +133,6 @@ int main(void) {
     // until we set CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 to 0 via ACK
     // LOOK IN README.TXT (9)
     HWREG(MTOCIPC_BASE + IPC_O_CTOMIPCACK) |= IPC_CTOMIPCSTS_IPC1;
-
-    // IVAN: hardcoding net addresses
-    // TODO: move where it belongs
-    IPAddr_cfg = "10.3.5.38";
-	SubnetMask_cfg = "255.255.255.0";
-	DomainName_cfg = "PMCB";
 
     System_printf("C28 core init complete. Creating tasks...\n");
     System_flush();

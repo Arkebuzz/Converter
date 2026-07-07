@@ -66,10 +66,10 @@ float ReadFrom_MTOC_MSGRAM_Float(short offset) {
 
 // Communication with M3 uses SRAM6-SRAM7
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
-volatile Uint8 SHARERAMS6[0x1000];
+volatile Uint16 SHARERAMS6[0x1000];
 
 #pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
-volatile Uint8 SHARERAMS7[0x1000];
+volatile Uint16 SHARERAMS7[0x1000];
 
 #define S6_START SHARERAMS6
 #define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
