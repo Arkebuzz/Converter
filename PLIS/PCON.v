@@ -50,9 +50,11 @@ reg reset_errors = 0;
 reg [11:0] reset_errors_delay = 0;
 localparam RESET_ERRORS_DELAY = 4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
 
+
 // Обмен с ADCHub
 localparam DATA_TO_ADC_WIDTH = 16;
 localparam DATA_FROM_ADC_WIDTH = 32;
+
 
 // Получение с ADCHub1 - входное напряжение
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_1;
@@ -77,17 +79,21 @@ defparam Receiver1.MAX_ERROR       = 100;
 reg [11:0] current_1;
 reg [11:0] voltage_inp;
 
+
 // Отправка на ADCHub1
 reg mode_up;
 reg converter_on;
-reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1 = 1234;
+
+reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
 wire ready_to_send_1;
+wire fo_out_1;
+assign D_OUTP[4] = ~fo_out_1;
 
 DATA_TRANSMITTER Transmitter1 (
    .CLOCK(CLOCK_50),
    .DATA(data_to_send_1), 
    .READY_TO_SEND(ready_to_send_1), 
-   .FO_OUT(D_OUTP[4])
+   .FO_OUT(fo_out_1)
 );
 defparam Transmitter1.DATA_WIDTH = DATA_TO_ADC_WIDTH;
 defparam Transmitter1.TICK_LEN    = 20;  // 50 мГц
@@ -95,6 +101,7 @@ defparam Transmitter1.PULSE_0_LEN = 100;
 defparam Transmitter1.PULSE_1_LEN = 400;
 defparam Transmitter1.BIT_LEN     = 600;    
 defparam Transmitter1.RESET_LEN   = 1000;
+
 
 // ADCHub2 - выходное напряжение
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_2;
@@ -119,15 +126,18 @@ defparam Receiver2.MAX_ERROR       = 100;
 reg [11:0] current_2;
 reg [11:0] voltage_out;
 
+
 // Отправка на ADCHub2
-reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_2 = 1234;
+reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_2;
 wire ready_to_send_2;
+wire fo_out_2;
+assign D_OUTP[5] = ~fo_out_2;
 
 DATA_TRANSMITTER Transmitter2 (
    .CLOCK(CLOCK_50),
    .DATA(data_to_send_2), 
    .READY_TO_SEND(ready_to_send_2), 
-   .FO_OUT(D_OUTP[5])
+   .FO_OUT(fo_out_2)
 );
 defparam Transmitter2.DATA_WIDTH = DATA_TO_ADC_WIDTH;
 defparam Transmitter2.TICK_LEN    = 20;  // 50 мГц
@@ -173,6 +183,7 @@ reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
 
+
 always @(posedge CLOCK_50) begin
    errors[1] <= errors[1] | rc_connect_fail_1;
    errors[2] <= errors[2] | rc_connect_fail_2;
@@ -190,7 +201,8 @@ always @(posedge CLOCK_50) begin
    if (reset_errors_delay > 0) begin
       reset_errors_delay <= reset_errors_delay - 1;
    end
-
+   
+   converter_on <= converter_on && (errors_latch == 0);
 
    // ADCHub1 приём
    if (rc_data_ready_1) begin
