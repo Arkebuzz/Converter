@@ -46,7 +46,7 @@ always @* begin
    
    if (nCS0 != 1 || nCS1 != 0) begin
       wren = 0;
-      buffer = 16'bz;
+      buffer = 'bz;
    end
    else begin
       wren = ~WE;
@@ -62,7 +62,7 @@ always @* begin
       if (OE == 0) begin
          buffer = q_ram;
       end else begin
-         buffer = 16'bz;
+         buffer = 'bz;
       end
    end
 end

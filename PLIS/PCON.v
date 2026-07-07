@@ -29,56 +29,122 @@ module PCON(
 );
 
 
-reg [20:1] out;
-assign D_OUTP = out;
-
-
 // Описание ошибок:
 // 0: Потерян сигнал с f28m35
 // 1: Потерян сигнал с ADCHub1
 // 2: Потерян сигнал с ADCHub2
+//    ADCHub1:
+// 3: Ошибки транизисторов 1
+// 4: Ошибки транизисторов 2
+// 5: Превышение порога тока
+// 6: Потеря соединения с PCON
+//    ADCHub2:
+// 7: Ошибки транизисторов 1
+// 8: Ошибки транизисторов 2
+// 9: Превышение порога тока
+// 10: Потеря соединения с PCON
 reg [15:0] errors = 0;
+reg [15:0] errors_latch = 0;
+reg reset_errors_inp = 0;
+reg reset_errors = 0;
+reg [11:0] reset_errors_delay = 0;
+localparam RESET_ERRORS_DELAY = 4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
+
 
 // Обмен с ADCHub
-localparam DATA_WIDTH = 24;
+localparam DATA_TO_ADC_WIDTH = 16;
+localparam DATA_FROM_ADC_WIDTH = 32;
 
-// ADCHub1 - входное напряжение
-wire [DATA_WIDTH-1:0] rc_data_1;
+
+// Получение с ADCHub1 - входное напряжение
+wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_1;
 wire rc_data_ready_1;
 wire rc_connect_fail_1;
 wire rc_invalid_data_1;
 
 DATA_RECEIVER Receiver1 (
-   .CLOCK_50(CLOCK_50), 
+   .CLOCK(CLOCK_50), 
    .FO_IN(D_INP[3]), 
    .DATA(rc_data_1),
    .DATA_READY(rc_data_ready_1),
    .ERR_CONNECT_FAIL(rc_connect_fail_1),
    .ERR_INVALID_DATA(rc_invalid_data_1)
 );
-defparam Receiver1.DATA_WIDTH = DATA_WIDTH;
+defparam Receiver1.DATA_WIDTH = DATA_FROM_ADC_WIDTH;
+defparam Receiver1.TICK_LEN_RECEIV = 20;  // 50 мГц
+defparam Receiver1.PULSE_1_LEN     = 400;  
+defparam Receiver1.RESET_LEN       = 1000; 
+defparam Receiver1.MAX_ERROR       = 100; 
 
 reg [11:0] current_1;
 reg [11:0] voltage_inp;
 
+
+// Отправка на ADCHub1
+reg mode_up;
+reg converter_on;
+
+reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
+wire ready_to_send_1;
+wire fo_out_1;
+assign D_OUTP[4] = ~fo_out_1;
+
+DATA_TRANSMITTER Transmitter1 (
+   .CLOCK(CLOCK_50),
+   .DATA(data_to_send_1), 
+   .READY_TO_SEND(ready_to_send_1), 
+   .FO_OUT(fo_out_1)
+);
+defparam Transmitter1.DATA_WIDTH = DATA_TO_ADC_WIDTH;
+defparam Transmitter1.TICK_LEN    = 20;  // 50 мГц
+defparam Transmitter1.PULSE_0_LEN = 100;
+defparam Transmitter1.PULSE_1_LEN = 400;
+defparam Transmitter1.BIT_LEN     = 600;    
+defparam Transmitter1.RESET_LEN   = 1000;
+
+
 // ADCHub2 - выходное напряжение
-wire [DATA_WIDTH-1:0] rc_data_2;
+wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_2;
 wire rc_data_ready_2;
 wire rc_connect_fail_2;
 wire rc_invalid_data_2;
 
 DATA_RECEIVER Receiver2 (
-   .CLOCK_50(CLOCK_50), 
+   .CLOCK(CLOCK_50), 
    .FO_IN(D_INP[4]), 
    .DATA(rc_data_2),
    .DATA_READY(rc_data_ready_2),
    .ERR_CONNECT_FAIL(rc_connect_fail_2),
    .ERR_INVALID_DATA(rc_invalid_data_2)
 );
-defparam Receiver2.DATA_WIDTH = DATA_WIDTH;
+defparam Receiver2.DATA_WIDTH = DATA_FROM_ADC_WIDTH;
+defparam Receiver2.TICK_LEN_RECEIV = 20;   // 50 мГц
+defparam Receiver2.PULSE_1_LEN     = 400;  
+defparam Receiver2.RESET_LEN       = 1000; 
+defparam Receiver2.MAX_ERROR       = 100; 
 
 reg [11:0] current_2;
 reg [11:0] voltage_out;
+
+
+// Отправка на ADCHub2
+reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_2;
+wire ready_to_send_2;
+wire fo_out_2;
+assign D_OUTP[5] = ~fo_out_2;
+
+DATA_TRANSMITTER Transmitter2 (
+   .CLOCK(CLOCK_50),
+   .DATA(data_to_send_2), 
+   .READY_TO_SEND(ready_to_send_2), 
+   .FO_OUT(fo_out_2)
+);
+defparam Transmitter2.DATA_WIDTH = DATA_TO_ADC_WIDTH;
+defparam Transmitter2.TICK_LEN    = 20;  // 50 мГц
+defparam Transmitter2.PULSE_0_LEN = 100;
+defparam Transmitter2.PULSE_1_LEN = 400;
+defparam Transmitter2.BIT_LEN     = 600;    
+defparam Transmitter2.RESET_LEN   = 1000;
 
 
 // Обмен с f28m35
@@ -117,37 +183,68 @@ reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
 
+
 always @(posedge CLOCK_50) begin
    errors[1] <= errors[1] | rc_connect_fail_1;
    errors[2] <= errors[2] | rc_connect_fail_2;
+   errors_latch <= errors_latch | errors;
    
+   if (reset_errors_inp) begin
+      reset_errors <= 1;
+      reset_errors_inp <= 0;
+      reset_errors_delay <= RESET_ERRORS_DELAY;
+   end
+   if (reset_errors_delay == 1) begin
+      errors_latch <= 0;
+      reset_errors <= 0;
+   end
+   if (reset_errors_delay > 0) begin
+      reset_errors_delay <= reset_errors_delay - 1;
+   end
+   
+   converter_on <= converter_on && (errors_latch == 0);
+
    // ADCHub1 приём
    if (rc_data_ready_1) begin
-      {voltage_inp, current_1} <= rc_data_1;
+      {voltage_inp, current_1, errors_latch[6:3], errors[6:3]} <= rc_data_1;
    end
+   
+   // ADCHub1 отправка
+   if (ready_to_send_1) begin
+      data_to_send_1 <= {pwm_counter, mode_up, converter_on, reset_errors};
+   end   
    
    // ADCHub2 приём
    if (rc_data_ready_2) begin
-      {voltage_out, current_2} <= rc_data_2;
+      {voltage_out, current_2, errors_latch[10:7], errors[10:7]} <= rc_data_2;
    end
+   
+   // ADCHub2 отправка
+   if (ready_to_send_2) begin
+      data_to_send_2 <= {13'b0, 1'b0, 1'b0, reset_errors};
+   end 
    
    // f28m35
    emif_state_counter <= emif_state_counter + 1;
    
    // Передача параметров с ADChubS
    if          (emif_state_counter == 18) begin
-      emif_adress <= `ADR_ERROR_PCON;
+      emif_adress <= `ADR_ERRORS;
       emif_data_to_micro <= errors;
       emif_wren <= 1;
    end else if (emif_state_counter == 20) begin
+      emif_adress <= `ADR_ERRORS_LATCH;
+      emif_data_to_micro <= errors_latch;
+      emif_wren <= 1;
+   end else if (emif_state_counter == 22) begin
       emif_adress <= `ADR_VOLTAGE_INP;
       emif_data_to_micro <= voltage_inp;
       emif_wren <= 1;
-   end else if (emif_state_counter == 22) begin
+   end else if (emif_state_counter == 24) begin
       emif_adress <= `ADR_VOLTAGE_OUT;
       emif_data_to_micro <= voltage_out;
       emif_wren <= 1;
-   end else if (emif_state_counter == 24) begin
+   end else if (emif_state_counter == 26) begin
       emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
@@ -161,6 +258,11 @@ always @(posedge CLOCK_50) begin
       emif_adress <= `ADR_WATCHDOG;
    end else if (emif_state_counter == 54) begin
       watch_dog_curr <= emif_data_from_micro;
+   end
+   else if (emif_state_counter == 55) begin
+      emif_adress <= `ADR_CONV_CTRL;
+   end else if (emif_state_counter == 59) begin
+      {mode_up, converter_on, reset_errors_inp} <= emif_data_from_micro;
    end
    else if (emif_state_counter == 60) begin
       emif_adress <= `ADR_PWM_COUNTER;

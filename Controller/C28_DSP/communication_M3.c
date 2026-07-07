@@ -1,6 +1,6 @@
-
 #include "communication_M3.h"
 #include "error_handling.h"
+
 
 short WriteTo_CTOM_MSGRAM_Float(unsigned short offset, float value) {
 	// COPY_PASTE
@@ -16,6 +16,7 @@ short WriteTo_CTOM_MSGRAM_Float(unsigned short offset, float value) {
 	}
 }
 
+
 short WriteTo_CTOM_MSGRAM(unsigned short offset, short value) {
 	// COPY_PASTE
 
@@ -29,6 +30,7 @@ short WriteTo_CTOM_MSGRAM(unsigned short offset, short value) {
 		return 0;
 	}
 }
+
 
 short ReadFrom_MTOC_MSGRAM(short offset) {
 	// COPY_PASTE
@@ -45,6 +47,7 @@ short ReadFrom_MTOC_MSGRAM(short offset) {
 	}
 }
 
+
 float ReadFrom_MTOC_MSGRAM_Float(short offset) {
 	// COPY_PASTE
 
@@ -60,6 +63,7 @@ float ReadFrom_MTOC_MSGRAM_Float(short offset) {
 	}
 }
 
+
 // Communication with M3 uses SRAM6-SRAM7
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
 volatile Uint8 SHARERAMS6[0x1000];
@@ -70,7 +74,13 @@ volatile Uint8 SHARERAMS7[0x1000];
 #define S6_START SHARERAMS6
 #define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
-void WriteToM3(const DataToM3 Data) {
+void WriteToM3Data(const DataToM3 Data) {
+	// Продублируем ошибки в CtoM:
+	WriteTo_CTOM_MSGRAM(0, Data.C28_Errors);
+	WriteTo_CTOM_MSGRAM(1, Data.C28_Errors_Latch);
+	WriteTo_CTOM_MSGRAM(2, Data.FPGA_Errors);
+	WriteTo_CTOM_MSGRAM(3, Data.FPGA_Errors_Latch);
+
 	// АРТЕМ:
 	// Отправляем сигналы на M3 при заполнении пакетов.
 	// Имеем 8192 слова, пакеты по 1024 слова => 8 пакетов.
@@ -93,40 +103,7 @@ void WriteToM3(const DataToM3 Data) {
 	if (NumIter == 64) {
 		// IVAN: Пакет заполнился
 
-		// IVAN: чтобы сдвинуться на запись в след пакет проверяем обработалась ли уже инфа с него
-		if (NumPacket == 0) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC9  == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC8 = 1;
-		} else if (NumPacket == 1) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC10 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC9 = 1;
-		} else if (NumPacket == 2) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC11 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC10 = 1;
-		} else if (NumPacket == 3) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC12 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC11 = 1;
-		} else if (NumPacket == 4) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC13 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC12 = 1;
-		} else if (NumPacket == 5) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC14 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC13 = 1;
-		} else if (NumPacket == 6) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC15 == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC14 = 1;
-		} else if (NumPacket == 7) {
-			if (CtoMIpcRegs.CTOMIPCFLG.bit.IPC8  == 1)  ErrorSet(ERROR_OSCI_BUF_OVERFLOW);
-			else ErrorReset(ERROR_OSCI_BUF_OVERFLOW);
-			CtoMIpcRegs.CTOMIPCSET.bit.IPC15 = 1;
-		}
+		WriteTo_CTOM_MSGRAM(10, NumPacket);  // Информируем М3 о готовности пакета
 
 		NumIter = 0; // IVAN: сбрасываем кол-во отправленых замеров в текущем пакете
 		NumPacket++; // сдвигаем запись на след пакет
@@ -149,18 +126,20 @@ void WriteToM3(const DataToM3 Data) {
 	*Dest = CyclesCounter2; 		Dest++;  // 2
 	*Dest = CyclesCounter3; 		Dest++;  // 3
 	*Dest = Data.C28_Errors;		Dest++;  // 4
-	*Dest = Data.PCON_Errors; 		Dest++;  // 5
-	*Dest = Data.ADCH1_Errors; 		Dest++;  // 6
-	*Dest = Data.ADCH2_Errors; 		Dest++;  // 7
+	*Dest = Data.C28_Errors_Latch;  Dest++;  // 5
+	*Dest = Data.FPGA_Errors; 		Dest++;  // 6
+	*Dest = Data.FPGA_Errors_Latch; Dest++;  // 7
 	*Dest = Data.Voltage_Inp;		Dest++;  // 8
 	*Dest = Data.Voltage_Out;		Dest++;  // 9
 	*Dest = Data.Current_1;			Dest++;  // 10
 	*Dest = Data.Current_2;			Dest++;  // 11
 	*Dest = Data.WatchDog;			Dest++;  // 12
 	*Dest = Data.FreeTimeCounter;	Dest++;  // 13
-	// IVAN: Записываем 14 слов за один замер
-	// (Артем написал что 16 но по факту Dest увеличивается на 14 слов ток, поэтому либо нужно не забыть на М3
-	// считать по 14 слов либо сюда добавить еще Dest += 2)
+	Dest++;  // 14
+	Dest++;  // 15
+
+	// IVAN:  Записываем 14 слов за один замер
+	// ARTEM: Для простоты деления памяти на блоки, один замер занимает 16 слов
 
 	NumIter++;
 }

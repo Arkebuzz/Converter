@@ -26,6 +26,7 @@ interrupt void my_critical_interrupt_handler(void) {}
     Port E: пины GPIO128 до GPIO159.
  
     Direction = Input (0) / Output (1)
+    
 5. Арм стартует первым, запускает ДСП, ДСП встает в режим ожидания,
 Арм посылает прерывание (MTOCIPCINT1 = Master To Control IPC Interrupt 1) на ДСП и запускает его,
 Арм говорит ДСП откуда брать код: с Флеш или ОП.
@@ -89,3 +90,17 @@ interrupt void my_critical_interrupt_handler(void) {}
     So C28 can clear it's own flag - it can only set it
     The flag can be cleared only when M3 sends ACK
   
+    Для рускоговорящих:
+    Имеем регистры (передача M3 -> C28):
+    Ядро:   M3                 C28
+            MTOCIPCFLG    =    MTOCIPCSTS
+            MTOCIPCCLR         MTOCIPCACK       сброс бита в 0
+            MTOCIPCSET                          установка бита в 1
+
+    Для передачи С28 -> М28 аналогично:                   
+    Ядро:   C28                M3
+            CTOMIPCFLG    =    CTOMIPCSTS
+            CTOMIPCCLR         CTOMIPCACK       сброс бита в 0
+            CTOMIPCSET                          установка бита в 1
+
+    Первые четыре бита генерируют прерывание на получившем ядре.

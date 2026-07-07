@@ -8,6 +8,6 @@ short WriteTo_CTOM_MSGRAM(unsigned short offset, short value);
 short ReadFrom_MTOC_MSGRAM(short offset);
 float ReadFrom_MTOC_MSGRAM_Float(short offset);
 
-void WriteToM3(const DataToM3 Data);
+void WriteToM3Data(const DataToM3 Data);
 
 #endif // COMMUNICATION_M3_H
