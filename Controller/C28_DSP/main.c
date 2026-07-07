@@ -220,11 +220,26 @@ void main(void) {
 		ReadFPGAData(DMABufFPGA, &Data);
 		CheckFPGAConnect(Data, &WatchDog);
 
+		// TODO: Считывание сигналов с M3:
+		Uint16 reset_errors = 0;
+		Uint16 converter_on = 0;
+		Uint16 mode_up = 0;
+
+		// TODO: Расчет pwm:
+		Uint16 CTRL_Converter = (mode_up << 2) | (converter_on << 1) | reset_errors;
+		Uint16 PWM_Counter = 0;
+
 		Data.C28_Errors = ErrorGetCurrent();
 		Data.C28_Errors_Latch = ErrorGetLatch();
 		WriteToM3Data(Data);  // Отправляем замер на М3
 
-		WriteFPGAData(WatchDog);  // Запись в FPGA
+		WriteFPGAData(CTRL_Converter, PWM_Counter);  // Запись в FPGA
+
+		if (reset_errors) {
+			reset_errors = 0;
+			// 300 мкс должно хватить на передачу сигнала до ADCHub и обратно
+			ErrorResetAll();
+		}
 
 		EALLOW;
 		DmaRegs.CH1.CONTROL.bit.PERINTFRC = 1;  // DMA запуск получения значений

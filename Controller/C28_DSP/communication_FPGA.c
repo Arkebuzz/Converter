@@ -14,21 +14,17 @@ void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
 
 
 void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {
-	// COPY PASTE
-
 	if (*WatchDog != Data.WatchDog) {
 		ErrorSet(ERROR_FPGA_CONNECT_FAIL);
 	} else {
 		ErrorReset(ERROR_FPGA_CONNECT_FAIL);
 	}
-
 	*WatchDog++;
+	WriteWordToFPGA(ADR_WATCHDOG, WatchDog);
 }
 
 
 short WriteWordToFPGA(short offset, short value) {
-	// COPY PASTE
-
 	short *XMEM_pw;
 	if (offset > 0x80) {  // 128 слов
 		return -1;
@@ -40,8 +36,7 @@ short WriteWordToFPGA(short offset, short value) {
 }
 
 
-void WriteFPGAData(Uint8 WatchDog) {
-	// COPY PASTE
-
-	WriteWordToFPGA(ADR_WATCHDOG, WatchDog);
+void WriteFPGAData(Uint16 CTRL_Converter, Uint16 PWM_Counter) {
+	WriteWordToFPGA(ADR_CONV_CTRL, CTRL_Converter);
+	WriteWordToFPGA(ADR_PWM_COUNTER, PWM_Counter);
 }
