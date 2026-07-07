@@ -1,12 +1,8 @@
-
-#include "F28M35x_Device.h"
-
 #include "communication_FPGA.h"
 #include "error_handling.h"
 
-void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
-	// COPY PASTE
 
+void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
 	Data->WatchDog     = Source[ADR_WATCHDOG];
 	Data->Current_1    = Source[ADR_CURRENT_1];
 	Data->Current_2    = Source[ADR_CURRENT_2];
@@ -22,7 +18,7 @@ void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {
 
 	if (*WatchDog != Data.WatchDog) {
 		ErrorSet(ERROR_FPGA_CONNECT_FAIL);
-	} else if (ErrorLatch & (1 << ERROR_FPGA_CONNECT_FAIL)) {
+	} else {
 		ErrorReset(ERROR_FPGA_CONNECT_FAIL);
 	}
 
@@ -42,6 +38,7 @@ short WriteWordToFPGA(short offset, short value) {
 		return 0;
 	}
 }
+
 
 void WriteFPGAData(Uint8 WatchDog) {
 	// COPY PASTE

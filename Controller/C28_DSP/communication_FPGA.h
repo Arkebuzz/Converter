@@ -11,6 +11,7 @@ typedef struct {
     Uint16 Voltage_Inp;
     Uint16 Voltage_Out;
     Uint16 C28_Errors;
+    Uint16 C28_Errors_Latch;
     Uint16 FPGA_Errors;
     Uint16 FPGA_Errors_Latch;
     Uint16 FreeTimeCounter;

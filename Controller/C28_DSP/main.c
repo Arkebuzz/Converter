@@ -220,8 +220,9 @@ void main(void) {
 		ReadFPGAData(DMABufFPGA, &Data);
 		CheckFPGAConnect(Data, &WatchDog);
 
-		Data.C28_Errors = ErrorLatch;
-		WriteToM3(Data);	// Отправляем замер на М3
+		Data.C28_Errors = ErrorGetCurrent();
+		Data.C28_Errors_Latch = ErrorGetLatch();
+		WriteToM3Data(Data);  // Отправляем замер на М3
 
 		WriteFPGAData(WatchDog);  // Запись в FPGA
 
@@ -244,7 +245,7 @@ void main(void) {
 
 		if (CPU_OverloadFlag != 0) {
 			ErrorSet(ERROR_CPU_OVERLOAD);
-		} else if (ErrorLatch & (1 << ERROR_CPU_OVERLOAD)) {
+		} else {
 			ErrorReset(ERROR_CPU_OVERLOAD);
 		}
 
