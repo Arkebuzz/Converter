@@ -68,6 +68,9 @@ SECTIONS
     .neardata   : > C03SRAM
     .rodata     : > C03SRAM
     .args       : > C03SRAM
+
+    CTOM_MSGRAM : > CTOMMSGRAM
+    MTOC_MSGRAM : > MTOCMSGRAM
 }
 
 __STACK_TOP = __stack + 256;

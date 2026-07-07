@@ -1,185 +1,50 @@
+#include <string.h> // for memset
 
-// COPY PASTE FORM GlobalData.h
-
-#include <string.h>
-
-#include <xdc/std.h>
-#include <xdc/cfg/global.h>
-#include <xdc/runtime/Error.h>
-#include <xdc/runtime/Memory.h>
-#include <xdc/runtime/System.h>
-#include <xdc/runtime/IHeap.h>
-#include <xdc/runtime/Diags.h>
-
-/* BIOS Header files */
-#include <ti/sysbios/BIOS.h>
-#include <ti/sysbios/knl/Clock.h>
-#include <ti/sysbios/knl/Task.h>
-#include <ti/sysbios/heaps/HeapBuf.h>
-
-#include <ti/sysbios/knl/Semaphore.h>
-
-
-/* NDK BSD support */
-#include <sys/socket.h>
-
-/* Example/Board Header file */
 #include "Board.h"
 
-/* TI-RTOS Header files */
-#include <ti/drivers/GPIO.h>
+#include <xdc/runtime/Error.h>
+#include <xdc/runtime/System.h>
 
-//Driverlib header files
-#include "inc/hw_ints.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_nvic.h"
-#include "inc/hw_gpio.h"
+#include <ti/sysbios/BIOS.h>
+#include <ti/sysbios/knl/Task.h>
+
 #include "inc/hw_ipc.h"
 #include "inc/hw_types.h"
+#include "inc/hw_memmap.h"
 #include "inc/hw_sysctl.h"
-#include "inc/hw_ram.h"
-#include "driverlib/debug.h"
-#include "driverlib/flash.h"
-#include "driverlib/ipc.h"
-#include "driverlib/interrupt.h"
-#include "driverlib/sysctl.h"
-#include "driverlib/gpio.h"
-#include <driverlib/epi.h>
-#include "driverlib/ipc.h"
+
 #include "driverlib/ram.h"
+#include "driverlib/ipc.h"
 #include "driverlib/sysctl.h"
-
-#include "Memfunctions.h"
-
-/* ----------------------- Modbus includes ----------------------------------*/
-#include "mb.h"
-#include "mbport.h"
-/* ----------------------- Modbus Defines ------------------------------------------*/
-
-#define REG_INPUT_START 1000
-#define REG_INPUT_NREGS 4
-#define REG_HOLDING_START 1
-#define REG_HOLDING_NREGS 255
-
-
-
-#define CTOM_DATA_SIZE 100
-#define MTOC_DATA_SIZE 100
-#define EXT_DATA_SIZE 100
-
-#define SETUP_DATA_SIZE 600
-#define SETUP_DATA_START_ADDR 200
-#define SETUP_UINT_DATA_COUNT 50
-#define SETUP_FLOAT_DATA_COUNT 150
-
-#define OSCI_SETUP_DATA_START_ADDR 1000
-
-#define NUMTCPWORKERS 1
-#define TCPPACKETSIZE 256
-
-#define MODBUS_TCP_PORT 502         // for multi-client task
-#define MODBUS_MAX_PDU  253         // spec: 253 bytes PDU
-#define MODBUS_MAX_ADU  (7 + MODBUS_MAX_PDU)
-#define MAX_CONN_WORKERS  8        // cap concurrent clients
-
-#define MODBUS_FC_READ_HOLDING_REGS 0x03
-#define MODBUS_FC_WRITE_SINGLE_REG  0x06
-
-
-#define TOTAL_CHANNELS 30
-#define HEADER_SIZE 12
-#define PACK_SIZE 3
-#define DATA_PACKS_TOTAL    33
-#define SHMEM_BUFFER_SIZE    1024
-#define SHMEM_BUFFERS_COUNT    7
-
-#define MEM_SIZE                0x00008000 //32KB - 16K Words
-
-#define TCPHANDLERSTACK 800
-
-/* ----------------------- MBUS functions ---------------------------------*/
-extern enum ThreadState eGetPollingThreadState( void );
-extern void     eSetPollingThreadState( enum ThreadState eNewState );
-extern void* pvPollingThread( void *pvParameter );
-
-/* Prototypes */
-extern Void tcpHandler(UArg arg0, UArg arg1);
-extern Void tcpHandler1(UArg arg0, UArg arg1);
-extern Void DataExchangeListener(UArg arg0, UArg arg1);
-extern Void OscillogrammsListener(UArg arg0, UArg arg1);
-extern Void ModbusThread(UArg arg0, UArg arg1);
-extern Void ModbusThread2(UArg arg0, UArg arg1);
-
-extern Void ModbusServerTask(UArg arg0, UArg arg1);
-
-extern void Buffers_Init(void);
-//extern Void DataProcessor(UArg arg0, UArg arg1);
-
-static enum ThreadState
-{
-    STOPPED,
-    RUNNING,
-    SHUTDOWN
-} ePollThreadState, ePollThreadState2;
 
 extern char * IPAddr_cfg;
 extern char * SubnetMask_cfg;
 extern char * DomainName_cfg;
 
-extern short ModbusControlledInput;
+// IVAN: TODO: what is ext data and ext control
+#define EXT_DATA_SIZE 100
+short* ExtControl_Data;
 
-extern short FirstThreadRun;
-extern short SecondThreadRun;
+#include <xdc/runtime/Memory.h>
 
-extern short* osciBuf;
-extern int osciBufSize;
-extern int osciBufCnt;
-extern int lastSent;
-extern int lastWritten;
-extern char bOverload;
-
-extern unsigned int PWMAmpData;
-
-extern short* CTOM_Data;
-extern short* ExtControl_Data;
-extern short* MTOC_Data;
-
-extern unsigned short IO_Count;
-extern unsigned short IO_Success_Count;
-
-extern unsigned short MTOC_IO_Count;
-extern unsigned short CTOM_IO_Count;
-
-extern USHORT   usRegInputStart;
-extern USHORT   usRegInputBuf[REG_INPUT_NREGS];
-extern USHORT   usRegHoldingStart;
-extern USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
-
-
-// Protect register writes across worker tasks
-extern Semaphore_Handle g_regLock;
-extern Semaphore_Handle g_connSlots;
-
-// COPY END
-
-// COPY PASTE FROM GlobalDataInit.c
 // IVAN: originally called Buffers_Init
 void setup_buffers(void) {
 	/* Make sure Error_Block is initialized */
 	Error_Block eb;
 	Error_init(&eb);
 
-	CTOM_Data = Memory_alloc(NULL, CTOM_DATA_SIZE*sizeof(short), 0, &eb);
-	    if (CTOM_Data == NULL) {
-	        System_printf("failed to alloc memory!! \n");
-	    }
-	memset(CTOM_Data,0,CTOM_DATA_SIZE*sizeof(short));
-
-	MTOC_Data = Memory_alloc(NULL, MTOC_DATA_SIZE*sizeof(short), 0, &eb);
-		    if (MTOC_Data == NULL) {
-		        System_printf("failed to alloc memory!! \n");
-		    }
-	memset(MTOC_Data,0,MTOC_DATA_SIZE*sizeof(short));
+	// IVAN: CTOM_Data and MTOC_Data are statically allocated now
+//	CTOM_Data = Memory_alloc(NULL, CTOM_DATA_SIZE*sizeof(short), 0, &eb);
+//	    if (CTOM_Data == NULL) {
+//	        System_printf("failed to alloc memory!! \n");
+//	    }
+//	memset(CTOM_Data,0,CTOM_DATA_SIZE*sizeof(short));
+//
+//	MTOC_Data = Memory_alloc(NULL, MTOC_DATA_SIZE*sizeof(short), 0, &eb);
+//		    if (MTOC_Data == NULL) {
+//		        System_printf("failed to alloc memory!! \n");
+//		    }
+//	memset(MTOC_Data,0,MTOC_DATA_SIZE*sizeof(short));
 
 	ExtControl_Data = Memory_alloc(NULL, EXT_DATA_SIZE*sizeof(short), 0, &eb);
 		if (ExtControl_Data == NULL) {
@@ -188,7 +53,19 @@ void setup_buffers(void) {
 	memset(ExtControl_Data,0,EXT_DATA_SIZE*sizeof(short));
 }
 
-// COPY END
+#pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
+volatile Uint8 CTOM_MSGRAM[0x800];
+
+#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
+volatile Uint8 MTOC_MSGRAM[0x800];
+
+// IVAN: data size IN 16 BIT WORDS
+Uint16 CTOM_Data[100];
+Uint16 MTOC_Data[100];
+
+// IVAN: ЗНАЧЕНИЕ С НИХ НИГДЕ В КОДЕ ДАЛЕРА НЕ СЧИТЫВАЕТСЯ
+unsigned short MTOC_IO_Count = 0;
+unsigned short CTOM_IO_Count = 0;
 
 // IVAN: moves data between C28 and M3, toggles the watchdog chip
 Void DataProcessor(UArg arg0, UArg arg1) {
@@ -198,7 +75,7 @@ Void DataProcessor(UArg arg0, UArg arg1) {
 	// IVAN: the task runs forever
 	Uint16 i = 0; // IVAN: for watchdog pin
 	Uint16 j = 0; // IVAN: for LED
-	while (true) {
+	while (1) {
 		i++;
 		j++;
 
@@ -210,7 +87,6 @@ Void DataProcessor(UArg arg0, UArg arg1) {
 			GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_OFF);
 		}
 
-
 		// IVAN: pulses the watchdog hardware
 		// watchdog is a safety chip that requires being pulsed to show
 		// that CPU is still alive (or else it will reset the CPU)
@@ -221,14 +97,14 @@ Void DataProcessor(UArg arg0, UArg arg1) {
 		}
 
 		// IVAN: copy data from C28 to M3
-		for (Uint16 k = 0; k < CTOM_DATA_SIZE; k++) {
-			CTOM_Data[k] = ReadFrom_CTOM_MSGRAM(k);
+		for (Uint16 k = 0; k < sizeof(CTOM_Data) / sizeof(CTOM_Data[0]); k++) {
+			CTOM_Data[k] = ((volatile Uint16 *)CTOM_MSGRAM)[k];
 		}
 		CTOM_IO_Count++;
 
 		// IVAN: copy data from M3 to C28
-		for (Uint16 k = 0; k < MTOC_DATA_SIZE; k++)	{
-			WriteTo_MTOC_MSGRAM(k,MTOC_Data[k]);
+		for (Uint16 k = 0; k < sizeof(MTOC_Data) / sizeof(MTOC_Data[0]); k++) {
+			((volatile Uint16 *)MTOC_MSGRAM)[k] = MTOC_Data[k];
 		}
 		MTOC_IO_Count++;
 

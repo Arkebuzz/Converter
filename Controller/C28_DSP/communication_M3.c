@@ -61,14 +61,14 @@ float ReadFrom_MTOC_MSGRAM_Float(short offset) {
 }
 
 // Communication with M3 uses SRAM6-SRAM7
-#pragma DATA_SECTION(M3CommMemS6, "SHARERAMS6")
-volatile Uint16 M3CommMemS6[0x1000];
+#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
+volatile Uint8 SHARERAMS6[0x1000];
 
-#pragma DATA_SECTION(M3CommMemS7, "SHARERAMS7")
-volatile Uint16 M3CommMemS7[0x1000];
+#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
+volatile Uint8 SHARERAMS7[0x1000];
 
-#define S6_START M3CommMemS6
-#define S7_END   (&M3CommMemS7[sizeof(M3CommMemS7) / sizeof(M3CommMemS7[0])])
+#define S6_START SHARERAMS6
+#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
 void WriteToM3(const DataToM3 Data) {
 	// АРТЕМ:
@@ -88,7 +88,7 @@ void WriteToM3(const DataToM3 Data) {
 
 	static Uint8 NumPacket = 0;
 	static Uint8 NumIter = 0;
-	static volatile Uint16 *Dest = S6_START;
+	static volatile Uint16 *Dest = (Uint16 *)S6_START;
 
 	if (NumIter == 64) {
 		// IVAN: Пакет заполнился
@@ -134,7 +134,7 @@ void WriteToM3(const DataToM3 Data) {
 	if (NumPacket == 8) {
 		// IVAN: все пакеты заполнились => зацикливаемся на 0 пакет
 		NumPacket = 0;
-		Dest = S6_START;
+		Dest = (Uint16 *)S6_START;
 	}
 
 	// IVAN: CycleCounter размером 64 бита, слово у нас 16 бит
