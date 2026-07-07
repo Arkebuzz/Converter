@@ -190,69 +190,52 @@ void setup_buffers(void) {
 
 // COPY END
 
-// COPY PASTE FROM DataProcessing.c
-
-Void DataProcessor(UArg arg0, UArg arg1)
-{
-	unsigned int i=0;
-	unsigned int j=0;
-
-	int k;
-
+// IVAN: moves data between C28 and M3, toggles the watchdog chip
+Void DataProcessor(UArg arg0, UArg arg1) {
+	// IVAN: toggles on some error pin likely to indicate that the task has started
 	GPIO_write(TMDXDOCKH52C1_ERR, GPIO_TURN_ON);
 
-	while (true)
-	{
+	// IVAN: the task runs forever
+	Uint16 i = 0; // IVAN: for watchdog pin
+	Uint16 j = 0; // IVAN: for LED
+	while (true) {
 		i++;
 		j++;
 
-		if (j==40)
-		{
+		// IVAN: blink the LED
+		if (j == 40) {
 			GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_ON);
-		}
-		else if (j>80)
-		{
-			j=0;
+		} else if (j > 80) {
+			j = 0;
 			GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_OFF);
 		}
 
 
-		if (i%2==0)
-		{
+		// IVAN: pulses the watchdog hardware
+		// watchdog is a safety chip that requires being pulsed to show
+		// that CPU is still alive (or else it will reset the CPU)
+		if (i % 2 == 0) {
 			GPIO_write(TMDXDOCKH52C1_WD, GPIO_TURN_OFF);
-		}
-		else
-		{
+		} else {
 			GPIO_write(TMDXDOCKH52C1_WD, GPIO_TURN_ON);
 		}
 
-		//if ( (HWREG(MTOCIPC_BASE + IPC_O_CTOMIPCSTS) & IPC_CTOMIPCSTS_IPC7) == IPC_CTOMIPCSTS_IPC7)
-		//{
-			for (k=0;k<CTOM_DATA_SIZE;k++)
-			{
-				CTOM_Data[k] = ReadFrom_CTOM_MSGRAM(k);
-			}
-		//	HWREG(MTOCIPC_BASE + IPC_O_CTOMIPCACK)|=IPC_CTOMIPCSTS_IPC7;
-			CTOM_IO_Count++;
-		//}
+		// IVAN: copy data from C28 to M3
+		for (Uint16 k = 0; k < CTOM_DATA_SIZE; k++) {
+			CTOM_Data[k] = ReadFrom_CTOM_MSGRAM(k);
+		}
+		CTOM_IO_Count++;
 
+		// IVAN: copy data from M3 to C28
+		for (Uint16 k = 0; k < MTOC_DATA_SIZE; k++)	{
+			WriteTo_MTOC_MSGRAM(k,MTOC_Data[k]);
+		}
+		MTOC_IO_Count++;
 
-		//if ( (HWREG(MTOCIPC_BASE + IPC_O_MTOCIPCFLG) & IPC_MTOCIPCFLG_IPC8) == 0)
-		//{
-			for (k=0;k<MTOC_DATA_SIZE;k++)
-				{
-				WriteTo_MTOC_MSGRAM(k,MTOC_Data[k]);
-				}
-		//	HWREG(MTOCIPC_BASE + IPC_O_MTOCIPCSET)|=IPC_MTOCIPCSET_IPC8;
-			MTOC_IO_Count++;
-		//}
-
+		// IVAN: sleep 25 system clock ticks
 		Task_sleep(25);
 	}
-
 }
-
-// COPY END
 
 int main(void) {
 	// IVAN: warming up the cpu a little
