@@ -69,6 +69,8 @@ SECTIONS
     .rodata     : > C03SRAM
     .args       : > C03SRAM
 
+	// IVAN: added this
+	// !!!!!!!!!!!!!!!!!!!!!!!1
     CTOM_MSGRAM : > CTOMMSGRAM
     MTOC_MSGRAM : > MTOCMSGRAM
 }

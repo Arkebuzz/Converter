@@ -15,69 +15,8 @@
 #include "driverlib/ipc.h"
 #include "driverlib/sysctl.h"
 
-#pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
-volatile Uint8 CTOM_MSGRAM[0x800];
+#include "communication.h"
 
-#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
-volatile Uint8 MTOC_MSGRAM[0x800];
-
-// IVAN: data size IN 16 BIT WORDS
-Uint16 CTOM_Data[100];
-Uint16 MTOC_Data[100];
-
-// IVAN: TODO: what is ext data and ext control
-//Uint16* ExtControl_Data[100];
-
-// IVAN: ЗНАЧЕНИЕ С НИХ НИГДЕ В КОДЕ ДАЛЕРА НЕ СЧИТЫВАЕТСЯ
-// TODO: удалить?
-unsigned short MTOC_IO_Count = 0;
-unsigned short CTOM_IO_Count = 0;
-
-// IVAN: moves data between C28 and M3, toggles the watchdog chip
-Void DataProcessor(UArg arg0, UArg arg1) {
-	// IVAN: toggles on some error pin likely to indicate that the task has started
-	GPIO_write(TMDXDOCKH52C1_ERR, GPIO_TURN_ON);
-
-	// IVAN: the task runs forever
-	Uint16 i = 0; // IVAN: for watchdog pin
-	Uint16 j = 0; // IVAN: for LED
-	while (1) {
-		i++;
-		j++;
-
-		// IVAN: blink the LED
-		if (j == 40) {
-			GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_ON);
-		} else if (j > 80) {
-			j = 0;
-			GPIO_write(TMDXDOCKH52C1_LED, GPIO_TURN_OFF);
-		}
-
-		// IVAN: pulses the watchdog hardware
-		// watchdog is a safety chip that requires being pulsed to show
-		// that CPU is still alive (or else it will reset the CPU)
-		if (i % 2 == 0) {
-			GPIO_write(TMDXDOCKH52C1_WD, GPIO_TURN_OFF);
-		} else {
-			GPIO_write(TMDXDOCKH52C1_WD, GPIO_TURN_ON);
-		}
-
-		// IVAN: copy data from C28 to M3
-		for (Uint16 k = 0; k < sizeof(CTOM_Data) / sizeof(CTOM_Data[0]); k++) {
-			CTOM_Data[k] = ((volatile Uint16 *)CTOM_MSGRAM)[k];
-		}
-		CTOM_IO_Count++;
-
-		// IVAN: copy data from M3 to C28
-		for (Uint16 k = 0; k < sizeof(MTOC_Data) / sizeof(MTOC_Data[0]); k++) {
-			((volatile Uint16 *)MTOC_MSGRAM)[k] = MTOC_Data[k];
-		}
-		MTOC_IO_Count++;
-
-		// IVAN: sleep 25 system clock ticks
-		Task_sleep(25);
-	}
-}
 
 int main(void) {
 	// IVAN: warming up the cpu a little

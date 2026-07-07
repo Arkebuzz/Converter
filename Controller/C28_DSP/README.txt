@@ -104,3 +104,29 @@ interrupt void my_critical_interrupt_handler(void) {}
             CTOMIPCSET                          установка бита в 1
 
     Первые четыре бита генерируют прерывание на получившем ядре.
+    
+    
+10. Кароче я немного запутался
+	По идее далер использует MTOC и CTOM для обмена маленькими мелкими
+	штучками, хотя в линкере С28 на этих местах уже определены
+	секции которые занимают системные штуки:
+	   GROUP : > CTOMRAM, PAGE = 1
+   {
+       PUTBUFFER
+       PUTWRITEIDX
+       GETREADIDX
+   }
+
+   GROUP : > MTOCRAM, PAGE = 1
+   {
+       GETBUFFER   :  TYPE = DSECT
+       GETWRITEIDX :  TYPE = DSECT
+       PUTREADIDX  :  TYPE = DSECT
+   }
+   
+   По хорошему MTOC и CTOM я бы побоялся использовать, чтобы не затереть
+   их случайно. К тому же у нас есть SRAM еще миллиард, так что можно
+   ее использовать
+   
+   Пока думаю буду реализовывать опцию отказа от MTOC и CTOM вообще
+

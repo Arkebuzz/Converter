@@ -123,11 +123,11 @@ SECTIONS
    csm_rsvd            : > CSM_RSVD    PAGE = 0
    
    /* The following section definitions are required when using the IPC API Drivers */ 
-   GROUP : > CTOMRAM, PAGE = 1 
+   GROUP : > CTOMRAM, PAGE = 1
    {
-       PUTBUFFER 
-       PUTWRITEIDX 
-       GETREADIDX 
+       PUTBUFFER
+       PUTWRITEIDX
+       GETREADIDX
    }
 
    GROUP : > MTOCRAM, PAGE = 1
@@ -136,6 +136,11 @@ SECTIONS
        GETWRITEIDX :  TYPE = DSECT
        PUTREADIDX  :  TYPE = DSECT
    }
+
+   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!111
+   // ????????????????????????????????????????????
+   //CTOM_MSGRAM : > CTOMRAM, PAGE = 1
+   //MTOC_MSGRAM : > MTOCRAM, PAGE = 1
 
    SHARERAMS0          : > RAMS0,        PAGE = 1
    SHARERAMS1          : > RAMS1,        PAGE = 1

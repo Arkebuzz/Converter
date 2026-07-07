@@ -1,68 +1,16 @@
 #include "communication_M3.h"
 #include "error_handling.h"
 
+// IVAN: docs say 0x400, linker file says 0x380 :/
+#pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
+volatile Uint16 CTOM_MSGRAM[0x380];
 
-short WriteTo_CTOM_MSGRAM_Float(unsigned short offset, float value) {
-	// COPY_PASTE
+#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
+volatile Uint16 MTOC_MSGRAM[0x380];
 
-	float *XMEM_pw;
-	if (offset > 0x3FF) {
-		return -1;
-	}
-	else {
-		XMEM_pw = (float *) (0x0003F800 + offset);
-		*XMEM_pw = value;
-		return 0;
-	}
-}
-
-
-short WriteTo_CTOM_MSGRAM(unsigned short offset, short value) {
-	// COPY_PASTE
-
-	short *XMEM_pw;
-	if (offset > 0x3FF) {
-		return -1;
-	}
-	else {
-		XMEM_pw = (short *) (0x0003F800 + offset);
-		*XMEM_pw = value;
-		return 0;
-	}
-}
-
-
-short ReadFrom_MTOC_MSGRAM(short offset) {
-	// COPY_PASTE
-
-	short *XMEM_pw;
-	short result;
-	if (offset > 0x3FF) {
-		return 0;
-	}
-	else {
-		XMEM_pw = (short *) (0x0003FC00 + offset);
-		result = *XMEM_pw;
-		return result;
-	}
-}
-
-
-float ReadFrom_MTOC_MSGRAM_Float(short offset) {
-	// COPY_PASTE
-
-	float *XMEM_pw;
-	float result;
-	if (offset > 0x3FF) {
-		return 0;
-	}
-	else {
-		XMEM_pw = (float *) (0x0003FC00 + offset);
-		result = *XMEM_pw;
-		return result;
-	}
-}
-
+//// IVAN: data size IN 16 BIT WORDS
+//Uint16 CTOM_Data[100];
+//Uint16 MTOC_Data[100];
 
 // Communication with M3 uses SRAM6-SRAM7
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
@@ -75,11 +23,17 @@ volatile Uint16 SHARERAMS7[0x1000];
 #define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
 void WriteToM3Data(const DataToM3 Data) {
+	Uint16 *CTOM_ptr = (Uint16 *)CTOM_MSGRAM;
+	*CTOM_ptr = Data.C28_Errors;		CTOM_ptr++;
+	*CTOM_ptr = Data.C28_Errors_Latch;	CTOM_ptr++;
+	*CTOM_ptr = Data.FPGA_Errors;		CTOM_ptr++;
+	*CTOM_ptr = Data.FPGA_Errors_Latch;	CTOM_ptr++;
+
 	// Продублируем ошибки в CtoM:
-	WriteTo_CTOM_MSGRAM(0, Data.C28_Errors);
-	WriteTo_CTOM_MSGRAM(1, Data.C28_Errors_Latch);
-	WriteTo_CTOM_MSGRAM(2, Data.FPGA_Errors);
-	WriteTo_CTOM_MSGRAM(3, Data.FPGA_Errors_Latch);
+//	WriteTo_CTOM_MSGRAM(0, Data.C28_Errors);
+//	WriteTo_CTOM_MSGRAM(1, Data.C28_Errors_Latch);
+//	WriteTo_CTOM_MSGRAM(2, Data.FPGA_Errors);
+//	WriteTo_CTOM_MSGRAM(3, Data.FPGA_Errors_Latch);
 
 	// АРТЕМ:
 	// Отправляем сигналы на M3 при заполнении пакетов.
@@ -98,12 +52,13 @@ void WriteToM3Data(const DataToM3 Data) {
 
 	static Uint8 NumPacket = 0;
 	static Uint8 NumIter = 0;
-	static volatile Uint16 *Dest = (Uint16 *)S6_START;
+	static volatile Uint16 *SRAM_ptr = (Uint16 *)S6_START;
 
 	if (NumIter == 64) {
 		// IVAN: Пакет заполнился
 
-		WriteTo_CTOM_MSGRAM(10, NumPacket);  // Информируем М3 о готовности пакета
+		*CTOM_ptr = NumPacket;
+//		WriteTo_CTOM_MSGRAM(10, NumPacket);  // Информируем М3 о готовности пакета
 
 		NumIter = 0; // IVAN: сбрасываем кол-во отправленых замеров в текущем пакете
 		NumPacket++; // сдвигаем запись на след пакет
@@ -111,32 +66,34 @@ void WriteToM3Data(const DataToM3 Data) {
 	if (NumPacket == 8) {
 		// IVAN: все пакеты заполнились => зацикливаемся на 0 пакет
 		NumPacket = 0;
-		Dest = (Uint16 *)S6_START;
+		SRAM_ptr = (Uint16 *)S6_START;
 	}
 
 	// IVAN: CycleCounter размером 64 бита, слово у нас 16 бит
 	// поэтому разбиваем его на 4 части
-	Uint16 CyclesCounter0 = (Uint16) ((Data.CycleCounter & 0x000000000000FFFF) >> 0);
-	Uint16 CyclesCounter1 = (Uint16) ((Data.CycleCounter & 0x00000000FFFF0000) >> 16);
-	Uint16 CyclesCounter2 = (Uint16) ((Data.CycleCounter & 0x0000FFFF00000000) >> 32);
-	Uint16 CyclesCounter3 = (Uint16) ((Data.CycleCounter & 0xFFFF000000000000) >> 48);
+//	Uint16 CyclesCounter0 = (Uint16) ((Data.CycleCounter & 0x000000000000FFFF) >> 0);
+//	Uint16 CyclesCounter1 = (Uint16) ((Data.CycleCounter & 0x00000000FFFF0000) >> 16);
+//	Uint16 CyclesCounter2 = (Uint16) ((Data.CycleCounter & 0x0000FFFF00000000) >> 32);
+//	Uint16 CyclesCounter3 = (Uint16) ((Data.CycleCounter & 0xFFFF000000000000) >> 48);
 
-	*Dest = CyclesCounter0; 		Dest++;  // 0
-	*Dest = CyclesCounter1; 		Dest++;  // 1
-	*Dest = CyclesCounter2; 		Dest++;  // 2
-	*Dest = CyclesCounter3; 		Dest++;  // 3
-	*Dest = Data.C28_Errors;		Dest++;  // 4
-	*Dest = Data.C28_Errors_Latch;  Dest++;  // 5
-	*Dest = Data.FPGA_Errors; 		Dest++;  // 6
-	*Dest = Data.FPGA_Errors_Latch; Dest++;  // 7
-	*Dest = Data.Voltage_Inp;		Dest++;  // 8
-	*Dest = Data.Voltage_Out;		Dest++;  // 9
-	*Dest = Data.Current_1;			Dest++;  // 10
-	*Dest = Data.Current_2;			Dest++;  // 11
-	*Dest = Data.WatchDog;			Dest++;  // 12
-	*Dest = Data.FreeTimeCounter;	Dest++;  // 13
-	Dest++;  // 14
-	Dest++;  // 15
+	Uint16 *CyclesCounter = (Uint16 *)Data.CycleCounter;
+
+	*SRAM_ptr = CyclesCounter[0]; 		SRAM_ptr++;  // 0
+	*SRAM_ptr = CyclesCounter[1]; 		SRAM_ptr++;  // 1
+	*SRAM_ptr = CyclesCounter[2]; 		SRAM_ptr++;  // 2
+	*SRAM_ptr = CyclesCounter[3]; 		SRAM_ptr++;  // 3
+	*SRAM_ptr = Data.C28_Errors;		SRAM_ptr++;  // 4
+	*SRAM_ptr = Data.C28_Errors_Latch;  SRAM_ptr++;  // 5
+	*SRAM_ptr = Data.FPGA_Errors; 		SRAM_ptr++;  // 6
+	*SRAM_ptr = Data.FPGA_Errors_Latch; SRAM_ptr++;  // 7
+	*SRAM_ptr = Data.Voltage_Inp;		SRAM_ptr++;  // 8
+	*SRAM_ptr = Data.Voltage_Out;		SRAM_ptr++;  // 9
+	*SRAM_ptr = Data.Current_1;			SRAM_ptr++;  // 10
+	*SRAM_ptr = Data.Current_2;			SRAM_ptr++;  // 11
+	*SRAM_ptr = Data.WatchDog;			SRAM_ptr++;  // 12
+	*SRAM_ptr = Data.FreeTimeCounter;	SRAM_ptr++;  // 13
+	SRAM_ptr++;  // 14
+	SRAM_ptr++;  // 15
 
 	// IVAN:  Записываем 14 слов за один замер
 	// ARTEM: Для простоты деления памяти на блоки, один замер занимает 16 слов
