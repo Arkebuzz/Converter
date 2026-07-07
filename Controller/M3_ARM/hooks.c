@@ -1,16 +1,119 @@
 
-// ИВАН: основной хедер для работы с сетью ndk
 #include <ti/ndk/inc/netmain.h>
+//#include <sys/socket.h>
 
-char *IPAddr_cfg = "10.1.3.12";
+#include <ti/sysbios/knl/Task.h>
+
+#include <xdc/runtime/System.h>
+#include <xdc/runtime/Error.h>
+
+// по идее может быть любым от 1024 до 65535
+#define TCPPORT_OSCI 1124
+
+#define NUM_TCP_WORKERS 1
+
+// Эти были обьявлены глобально гдето в файлах
+char *IPAddr_cfg = "10.1.3.12"; // по идее этот айпи зависит от того какой у компа айпи в локальной сети
 char *SubnetMask_cfg = "255.0.0.0";
-char *DomainName_cfg = "PMCB";
+char *DomainName_cfg = "PMCB"; // сюда по идее чо угодно можно писать
 
 // Это присваивается в main.c
 // И какой из них оставить??
 // IPAddr_cfg = "10.3.5.38";
 // SubnetMask_cfg = "255.255.255.0";
 // DomainName_cfg = "PMCB";
+
+Void OscillogrammsWorker(UArg arg0, UArg arg1) {}
+
+// TCP сервер на BSD сокетах
+// Сидим ждем пока ПК законнектится
+// когда коннект случится спавним таск который его обработает
+Void OscillogrammsTask(UArg arg0, UArg arg1) {
+	SOCKET server_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (server_fd == INVALID_SOCKET) {
+		System_printf("OscillogrammsTask: socket failed\n");
+		return;
+	}
+
+    int status;
+    struct sockaddr_in server_addr = {0};
+    Uint16 port = arg0;
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_port = htons(port);
+
+	status = bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+	if (status < 0) {
+		System_printf("OscillogrammsTask: bind failed\n");
+		fdClose(server_fd);
+		return;
+	}
+
+	status = listen(server_fd, NUM_TCP_WORKERS);
+	if (status < 0) {
+		System_printf("OscillogrammsTask: listen failed\n");
+		fdClose(server_fd);
+		return;
+	}
+
+	// IVAN: ставим SO_KEEPALIVE чтобы если вдруг выдернули кабель коннект сам закрылся
+	// не дожидаясь FIN и не посылая данные в пустоту
+    int opt;
+	opt = 1;
+	status = setsockopt(server_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt));
+	if (status < 0) {
+		System_printf("OscillogrammsTask: setsockopt SO_KEEPALIVE failed\n");
+		fdClose(server_fd);
+		return;
+	}
+
+	// IVAN: ставим TCP_NODELAY чтобы отключить фичу TCP когда перед отправкой
+	// данных ждет не захотим ли мы еще что-нибудь отправить
+	// таким образом когда вызовем send() данные отправятся моментально, без ожиданий
+	opt = 1;
+	status = setsockopt(server_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
+	if (status < 0) {
+		System_printf("OscillogrammsTask: setsockopt TCP_NODELAY failed\n");
+		fdClose(server_fd);
+		return;
+	}
+
+	// IVAN: accept TCP requests
+	while (1) {
+	    struct sockaddr_in client_addr = {0};
+	    int client_addr_len = sizeof(client_addr);
+		SOCKET client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_addr_len);
+		if (client_fd == INVALID_SOCKET) {
+			System_printf("OscillogrammsTask: accept failed\n");
+			fdClose(server_fd);
+			return;
+		}
+
+		System_printf("OscillogrammsTask: Creating thread to handle client_fd = %d\n", client_fd);
+
+		// IVAN: create new Task to handle new connection
+		Error_Block eb;
+		Error_init(&eb);
+
+		Task_Params taskParams;
+		Task_Params_init(&taskParams);
+		taskParams.arg0 = (UArg)client_fd;
+		// IVAN: In TI docks it is recommended to use > 4096 stack for a TCP task
+		taskParams.stackSize = 4096;
+//		taskParams.stackSize = 1024;
+
+		Task_Handle taskHandle = Task_create(
+			(Task_FuncPtr)OscillogrammsWorker,
+			&taskParams,
+			&eb
+		);
+		if (taskHandle == NULL) {
+			System_printf("OscillogrammsTask: failed to create new task for OscillogramsWorker\n");
+			fdClose(client_fd);
+		}
+	}
+}
 
 // ИВАН: этот хук вызовется как только IP и Ethernet уже засетапились
 // => можно создавать TCP
@@ -23,14 +126,15 @@ void netOpenHook() {
 	// удаляем их, заменяем своими
 
 	HANDLE hCfgIpAddr;
-	if (CfgGetEntry(
+	int entry_found = CfgGetEntry(
 			NULL,               // hCfg: NULL - глобальный конфиг
 			CFGTAG_IPNET,       // Tag: IP Network
 			1,                  // Item: 1й физический интерфейс (EMAC порт)
 			1,                  // Index: 1й IP адрес назначеный на этот интерфейс
 								// (к одному интерфейсу может быть прикреплено несколько IP)
 			&hCfgIpAddr         // Output: Засовывает найденое значение в hCfgIpAddr
-	) == 1) {
+	);
+	if (entry_found == 1) {
 		CfgRemoveEntry(
 		    NULL,               // hCfg: NULL - глобальный конфиг
 		    hCfgIpAddr          // hCfgEntry: только что найденый ключ
@@ -55,282 +159,27 @@ void netOpenHook() {
 	    (UINT8 *)&IPNet_cfg_instance,   // pData: Засовываемая структура
 	    NULL               			    // Output: NULL - нам не нужен хендл обратно
 	);
+
+	// DALER: Create the task for oscillogramms sending
+	Error_Block eb_Osci;
+	Error_init(&eb_Osci);
+
+	Task_Params taskParamsOsci;
+	Task_Params_init(&taskParamsOsci);
+	taskParamsOsci.stackSize = 1024;
+	taskParamsOsci.priority = 1;
+	// IVAN: arg0 - первый аргумент которфй будет передан в OscillogrammsListener
+	taskParamsOsci.arg0 = TCPPORT_OSCI;
+
+	Task_Handle taskHandleOsci = Task_create(
+		(Task_FuncPtr)OscillogrammsTask,
+		&taskParamsOsci,
+		&eb_Osci
+	);
+	if (taskHandleOsci == NULL) {
+		System_printf("netOpenHook: failed to start OscillogrammsTask task\n");
+	} else {
+		System_printf("netOpenHook: started OscillogrammsTask task\n");
+	}
+	System_flush();
 }
-
-
-// COPY PASTE
-
-//#include <xdc/runtime/Error.h>
-//#include <xdc/runtime/System.h>
-//
-//
-///* BIOS Header files */
-//#include <ti/sysbios/BIOS.h>
-//#include <ti/sysbios/knl/Task.h>
-//#include <ti/sysbios/knl/Semaphore.h>
-//
-//#define TCPPORT_ECHO 1003
-//#define TCPPORT_ECHO2 1004
-//#define TCPPORT_EXCHANGE 1000
-//
-////#define TCPPORT_OSCI 1001
-//#define TCPPORT_OSCI 1124
-//
-//#define TCPHANDLERSTACK 800
-//
-//typedef unsigned char  UINT8;
-//typedef void *         HANDLE;
-//typedef unsigned int   UINT32;
-//typedef unsigned int   uint;
-//typedef UINT32         IPN;             /* IP Address in NETWORK format */
-//#define CFG_DOMAIN_MAX  64
-//#define CFGTAG_IPNET            0x0004          /* IP Network */
-//
-///* IPNet Instance */
-//typedef struct _ci_ipnet {
-//        uint    NetType;                /* Network address type flags */
-//        IPN     IPAddr;                 /* IP Address */
-//        IPN     IPMask;                 /* Subnet Mask */
-//        HANDLE  hBind;                  /* Binding handle (resets to NULL) */
-//        char    Domain[CFG_DOMAIN_MAX]; /* IPNet Domain Name */
-//        } CI_IPNET;
-//
-//
-///* ----------------------- MBUS variables ---------------------------------*/
-//Semaphore_Handle g_regLock;
-//Semaphore_Handle g_connSlots;
-//
-//
-//Void OscillogrammsListener(UArg arg0, UArg arg1)
-//{
-//    int lSocket;
-//    struct sockaddr_in sLocalAddr;
-//    int clientfd;
-//    struct sockaddr_in client_addr;
-//    int addrlen=sizeof(client_addr);
-//    int optval;
-//    int optlen = sizeof(optval);
-//    int status;
-//    Task_Handle taskHandle;
-//    Task_Params taskParams;
-//    Error_Block eb;
-//
-//    lSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-//    if (lSocket < 0) {
-//        System_printf("tcpHandler: socket failed\n");
-//        goto shutdown;
-//    }
-//
-//    memset((char *)&sLocalAddr, 0, sizeof(sLocalAddr));
-//    sLocalAddr.sin_family = AF_INET;
-//    sLocalAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-//    sLocalAddr.sin_port = htons(arg0);
-//
-//    status = bind(lSocket, (struct sockaddr *)&sLocalAddr, sizeof(sLocalAddr));
-//    if (status < 0) {
-//        System_printf("tcpHandler: bind failed\n");
-//        goto shutdown;
-//    }
-//
-//    status = listen(lSocket, NUMTCPWORKERS);
-//	if (status == -1) {
-//		System_printf("Error: listen failed.\n");
-//		goto shutdown;
-//	}
-//
-//	optval = 1;
-//    if (setsockopt(lSocket, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
-//        System_printf("tcpHandler: setsockopt failed\n");
-//        goto shutdown;
-//    }
-//
-//    optval = 1;
-//    if (setsockopt(lSocket, IPPROTO_TCP, TCP_NODELAY, &optval, optlen) < 0) {
-//		System_printf("tcpHandler: setsockopt TCP_NODELAY failed\n");
-//		goto shutdown;
-//	}
-//
-//
-//    /* Wait for incoming request */
-//    while ((clientfd =
-//       		accept(lSocket, (struct sockaddr*)&client_addr, &addrlen)) != -1) {
-//        System_printf("tcpHandler: Creating thread clientfd = %d\n", clientfd);
-//
-//        /* Init the Error_Block */
-//        Error_init(&eb);
-//
-//        /* Initialize the defaults and set the parameters. */
-//        Task_Params_init(&taskParams);
-//        taskParams.arg0 = (UArg)clientfd;
-//        taskParams.stackSize = 1024;
-//        taskHandle = Task_create((Task_FuncPtr)OscillogrammsWorker, &taskParams, &eb);
-//        if (taskHandle == NULL) {
-//            System_printf("tcpHandler: Failed to create new Task\n");
-//            close(clientfd);
-//		}
-//
-//		/* addrlen is a value-result param, must reset for next accept call */
-//		addrlen = sizeof(client_addr);
-//    }
-//
-//    shutdown:
-//	if (lSocket > 0) {
-//		close(lSocket);
-//	}
-//}
-//
-//#define MAX_CONN_WORKERS  8        // cap concurrent client
-//void netOpenHook()
-//{
-//    /*Task_Handle taskHandle;
-//    Task_Params taskParams;
-//    Error_Block eb;
-//
-//    Task_Handle taskHandle2;
-//	Task_Params taskParams2;
-//	Error_Block eb2;*/
-//
-//	Task_Handle taskHandleOsci;
-//	Task_Params taskParamsOsci;
-//	Error_Block eb_Osci;
-//
-//	Task_Handle taskHandleExchange;
-//	Task_Params taskParamsExchange;
-//	Error_Block eb_Exchange;
-//
-//	Task_Handle taskHandle_MBUS;
-//	Task_Params taskParams_MBUS;
-//	Error_Block eb_MBUS;
-//
-//    Task_Handle taskHandle_MBUS_v2;
-//    Task_Params taskParams_MBUS_v2;
-//    Error_Block eb_MBUS_v2;
-//
-//
-//	Task_Handle taskHandle_MBUS2;
-//	Task_Params taskParams_MBUS2;
-//	Error_Block eb_MBUS2;
-//
-//
-//    CI_IPNET NA;
-//	HANDLE      hCfgIpAddr;
-//
-//	/* Setup manual IP address */
-//	bzero(&NA, sizeof(NA));
-//	NA.IPAddr  = inet_addr(IPAddr_cfg);
-//	NA.IPMask  = inet_addr(SubnetMask_cfg);
-//	strcpy(NA.Domain, DomainName_cfg);
-//	NA.NetType = 0;
-//
-//	/* get the current static IP entry */
-//	CfgGetEntry(0, CFGTAG_IPNET, 1, 1, &hCfgIpAddr);
-//
-//	/* remove the current static IP entry */
-//	CfgRemoveEntry(0, hCfgIpAddr);
-//
-//	/* add a new static IP entry */
-//	CfgAddEntry(0, CFGTAG_IPNET, 1, 0, sizeof(CI_IPNET), (UINT8 *)&NA, 0);
-//
-//
-//    // Create the Task that farms out incoming TCP connections. arg0 will be the port that this task listens to
-//    /*Error_init(&eb); // Make sure Error_Block is initialized
-//    Task_Params_init(&taskParams);
-//    taskParams.stackSize = TCPHANDLERSTACK;
-//    taskParams.priority = 1;
-//    taskParams.arg0 = TCPPORT_ECHO;
-//    taskHandle = Task_create((Task_FuncPtr)tcpHandler, &taskParams, &eb);
-//    if (taskHandle == NULL) {
-//        System_printf("netOpenHook: Failed to create tcpHandler Task\n");
-//    }
-//    System_flush();*/
-//
-//
-//    //Create the task for data exchange with external controls.
-//	/*Task_Params_init(&taskParamsExchange);
-//	Error_init(&eb_Exchange);
-//	taskParamsExchange.stackSize = TCPHANDLERSTACK;
-//	taskParamsExchange.priority = 1;
-//	taskParamsExchange.arg0 = TCPPORT_EXCHANGE;
-//	taskHandleExchange = Task_create((Task_FuncPtr)DataExchangeListener, &taskParamsExchange, &eb_Exchange);
-//	if (taskHandleExchange == NULL) {System_printf("Failed to create Common Data Exchange thread \n");}
-//	else{System_printf("Started Common Data Exchange thread. Initializing Oscillogramms thread... \n");}
-//	System_flush();*/
-//
-//	//Create the task for oscillogramms sending
-//	Task_Params_init(&taskParamsOsci);
-//	Error_init(&eb_Osci);
-//	taskParamsOsci.stackSize = 1024;
-//	taskParamsOsci.priority = 1;
-//	taskParamsOsci.arg0 = TCPPORT_OSCI;
-//	taskHandleOsci = Task_create((Task_FuncPtr)OscillogrammsListener, &taskParamsOsci, &eb_Osci);
-//	if (taskHandleOsci == NULL) {
-//		System_printf("Failed to create Oscillogramms Data Exchange thread \n");
-//		}
-//	System_printf("Started Oscillogramms Data Exchange thread. Initializing Modbus thread...\n");
-//	System_flush();
-//
-//	////////////////////////////////////
-//	// Modbus Initialization
-//
-//	// CLASSIC driver (on 502 port)
-//    Task_Params_init(&taskParams_MBUS);
-//    Error_init(&eb_MBUS);
-//    taskParams_MBUS.stackSize = 1024;
-//    taskParams_MBUS.priority = 1;
-//    taskHandle_MBUS = Task_create((Task_FuncPtr)ModbusThread, &taskParams_MBUS, &eb_MBUS);
-//    if (taskHandle_MBUS == NULL)
-//    {System_printf("Can't start protocol stack!\n"); System_flush();}
-//    System_printf("Started Modbus thread \n");
-//    System_flush();
-//
-//
-//
-//    // NEW multi-client driver (on 504 port)
-//	// Create binary semaphore (mutex) for register map
-//    Semaphore_Params sp1;
-//    Semaphore_Params_init(&sp1);
-//    g_regLock = Semaphore_create(1, &sp1, NULL);
-//
-//    // Pre-create a counting semaphore to limit concurrent workers
-//    Semaphore_Params sp2;
-//    Semaphore_Params_init(&sp2);
-//    g_connSlots = Semaphore_create(MAX_CONN_WORKERS, &sp2, NULL);
-//
-//
-///*
-//	Task_Params_init(&taskParams_MBUS_v2);
-//    Error_init(&eb_MBUS_v2);
-//    taskParams_MBUS_v2.stackSize = 1024;
-//    taskParams_MBUS_v2.priority = 2;
-//    taskHandle_MBUS = Task_create((Task_FuncPtr)ModbusServerTask, &taskParams_MBUS_v2, &eb_MBUS_v2);
-//    if (taskHandle_MBUS == NULL)
-//    {System_printf("Can't start protocol stack!\n"); System_flush();}
-//    System_printf("Started Modbus thread \n");
-//    System_flush();
-//*/
-//
-//
-//
-//	//Task_Params_init(&taskParams_MBUS2);
-//	//Error_init(&eb_MBUS2);
-//    //taskParams_MBUS2.stackSize = 1024;
-//    //taskParams_MBUS2.priority = 1;
-//    //taskHandle_MBUS2 = Task_create((Task_FuncPtr)ModbusThread2, &taskParams_MBUS2, &eb_MBUS2);
-//    //if (taskHandle_MBUS2 == NULL)
-//    //{System_printf("Can't start protocol stack #2!\n"); System_flush();}
-//    //System_printf("Started Modbus thread #2 \n");
-//    //System_flush();
-//
-//   /*Task_Params_init(&taskParams2);
-//     Error_init(&eb2);
-//     taskParams2.stackSize = TCPHANDLERSTACK;
-//     taskParams2.priority = 1;
-//     taskParams2.arg0 = TCPPORT_ECHO2;
-//     taskHandle2 = Task_create((Task_FuncPtr)tcpHandler, &taskParams2, &eb2);
-//     if (taskHandle2 == NULL) {
-//       System_printf("netOpenHook: Failed to create tcpHandler 2 Task\n");
-//       System_printf("Err ID: %d\n",eb2.id);
-//       }
-//    System_flush();*/
-//
-//}
