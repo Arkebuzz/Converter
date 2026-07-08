@@ -252,8 +252,9 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 		SOCKET client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_addr_len);
 		if (client_fd == INVALID_SOCKET) {
 			System_printf("OscillogrammsTask: accept failed\n");
-			fdClose(server_fd);
-			return;
+			continue;
+//			fdClose(server_fd);
+//			return;
 		}
 
 		System_printf("OscillogrammsTask: Creating thread to handle client_fd = %d\n", client_fd);
@@ -283,8 +284,10 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 
 Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 	SOCKET client_fd = (SOCKET)arg0;
-	Uint8 recv_buffer[sizeof(Osci_Request)];
-	Uint8 send_buffer[sizeof(Osci_Response) + MAX_PACKETS_REQUEST_CNT * sizeof(Osci_Packet)];
+	Uint16 recv_buffer[sizeof(Osci_Request) / sizeof(Uint16)];
+	Uint16 send_buffer[
+		(sizeof(Osci_Response) + MAX_PACKETS_REQUEST_CNT * sizeof(Osci_Packet)) / sizeof(Uint16)
+	];
 
 	System_printf("OscillogrammsWorker: started processing client_fd = %i", client_fd);
 
@@ -346,6 +349,7 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 					"OscillogrammsWorker: client_fd = %i sent unknown "
 					"cmd = %i", client_fd, cmd
 				);
+				continue;
 			}
 		}
 
