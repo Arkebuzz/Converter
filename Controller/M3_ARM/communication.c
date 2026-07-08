@@ -78,6 +78,11 @@ typedef struct {
 
 typedef struct {
 	Uint16 cmd;
+	Uint16 arg;
+} Osci_Request;
+
+typedef struct {
+	Uint16 cmd;
 	Uint16 len;
 	Osci_Errors errors;
 	Osci_Packet packets[];
@@ -278,22 +283,36 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 
 Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 	SOCKET client_fd = (SOCKET)arg0;
-	Uint16 recv_buffer[2];
-	Uint16 send_buffer[sizeof(Osci_Response) + MAX_PACKETS_REQUEST_CNT * sizeof(Osci_Packet)];
+	Uint8 recv_buffer[sizeof(Osci_Request)];
+	Uint8 send_buffer[sizeof(Osci_Response) + MAX_PACKETS_REQUEST_CNT * sizeof(Osci_Packet)];
 
 	System_printf("OscillogrammsWorker: started processing client_fd = %i", client_fd);
 
 	while (1) {
-		int n_bytes = recv(client_fd, recv_buffer, sizeof(recv_buffer), 0);
-		if (n_bytes <= 0) {
+		// IVAN: read the request from the PC
+		size_t bytes_read = 0;
+		while (bytes_read < sizeof(Osci_Request)) {
+			int read = recv(
+				client_fd,
+				((Uint8 *)recv_buffer) + bytes_read,
+				sizeof(Osci_Request) - bytes_read,
+				0
+			);
+			if (read <= 0) {
+				System_printf("OscillogrammsWorker: read() failed\n");
+				break;
+			}
+			bytes_read += read;
+		}
+		if (bytes_read != sizeof(Osci_Request)) {
 			break;
 		}
-
-		Uint16 cmd = recv_buffer[0];
-		Uint16 arg = recv_buffer[1];
-		size_t msg_len = sizeof(Osci_Response);
+		Osci_Request *request = (Osci_Request *)recv_buffer;
+		Uint16 cmd = request->cmd;
+		Uint16 arg = request->arg;
 
 		// IVAN: forming the response
+		size_t msg_len = sizeof(Osci_Response);
 		volatile CTOM_Data *ctom_data = (CTOM_Data *)CTOM_MSGRAM;
 		Osci_Response *osci_response = (Osci_Response *)send_buffer;
 		osci_response->errors = ctom_data->errors;
@@ -333,7 +352,7 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 		// IVAN: sending the response
 		size_t bytes_sent = 0;
 		while (bytes_sent < msg_len) {
-		    size_t sent = send(
+		    int sent = send(
 		    	client_fd,
 				((Uint8 *)osci_response) + bytes_sent,
 				msg_len - bytes_sent,
