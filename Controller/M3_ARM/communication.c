@@ -252,6 +252,7 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 		SOCKET client_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_addr_len);
 		if (client_fd == INVALID_SOCKET) {
 			System_printf("OscillogrammsTask: accept failed\n");
+			Task_sleep(25);
 			continue;
 //			fdClose(server_fd);
 //			return;
