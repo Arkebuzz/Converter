@@ -1,6 +1,5 @@
 #include "F28M35x_Device.h"
 #include "F28M35x_Examples.h"
-#include "F28M35x_Ipc.h"
 
 #include <string.h>
 #include <stdbool.h>

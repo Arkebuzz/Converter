@@ -85,8 +85,10 @@ PAGE 1 :   /* Data Memory */
    RAMS6       : origin = 0x012000, length = 0x001000     /* on-chip Shared RAM block S6 */
    RAMS7       : origin = 0x013000, length = 0x001000     /* on-chip Shared RAM block S7 */
 
-   CTOMRAM     : origin = 0x03F800, length = 0x000380     /* C28 to M3 Message RAM */
-   MTOCRAM     : origin = 0x03FC00, length = 0x000380     /* M3 to C28 Message RAM */
+   // !!!!!!!!!!!!!!!!!!!!!!!!!1
+   // IVAN: changed 0x380 to 0x400 because spec tells it's 0x400
+   CTOMRAM     : origin = 0x03F800, length = 0x000400     /* C28 to M3 Message RAM */
+   MTOCRAM     : origin = 0x03FC00, length = 0x000400     /* M3 to C28 Message RAM */
    
    FLASHB      : origin = 0x13C000, length = 0x002000     /* on-chip FLASH */
 }
@@ -123,11 +125,13 @@ SECTIONS
    csm_rsvd            : > CSM_RSVD    PAGE = 0
    
    /* The following section definitions are required when using the IPC API Drivers */ 
+   // !!!!!!!!!!!!!!!!!!!!1111111111111
+   // IVAN: REDACTED: ADDED TYPE = DSECT
    GROUP : > CTOMRAM, PAGE = 1
    {
-       PUTBUFFER
-       PUTWRITEIDX
-       GETREADIDX
+       PUTBUFFER	: TYPE = DSECT
+       PUTWRITEIDX	: TYPE = DSECT
+       GETREADIDX	: TYPE = DSECT
    }
 
    GROUP : > MTOCRAM, PAGE = 1
@@ -137,10 +141,9 @@ SECTIONS
        PUTREADIDX  :  TYPE = DSECT
    }
 
-   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!111
-   // ????????????????????????????????????????????
-   //CTOM_MSGRAM : > CTOMRAM, PAGE = 1
-   //MTOC_MSGRAM : > MTOCRAM, PAGE = 1
+   // !!!!!!!!!!!!
+   CTOM_MSGRAM : > CTOMRAM, PAGE = 1
+   MTOC_MSGRAM : > MTOCRAM, PAGE = 1
 
    SHARERAMS0          : > RAMS0,        PAGE = 1
    SHARERAMS1          : > RAMS1,        PAGE = 1

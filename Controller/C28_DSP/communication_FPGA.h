@@ -4,17 +4,17 @@
 #include "F28M35x_Device.h"
 
 typedef struct {
-	Uint64 CycleCounter;
-	Uint8  WatchDog;
-    Uint16 Current_1;
-    Uint16 Current_2;
-    Uint16 Voltage_Inp;
-    Uint16 Voltage_Out;
     Uint16 C28_Errors;
     Uint16 C28_Errors_Latch;
     Uint16 FPGA_Errors;
     Uint16 FPGA_Errors_Latch;
+	Uint64 CycleCounter;
+    Uint16 Current_1;
+    Uint16 Current_2;
+    Uint16 Voltage_Inp;
+    Uint16 Voltage_Out;
     Uint16 FreeTimeCounter;
+	Uint8  WatchDog;
 } DataToM3;
 
 void ReadFPGAData(const Uint16 *Source, DataToM3 *Data);

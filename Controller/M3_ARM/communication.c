@@ -25,30 +25,30 @@ char *DomainName_cfg = "PMCB"; // сюда по идее чо угодно мо�
 // SubnetMask_cfg = "255.255.255.0";
 // DomainName_cfg = "PMCB";
 
-#define TCP_PACKET_MAX_SIZE 256
 #define NUM_TCP_WORKERS 1
 
 #define PACKET_CMD_OSCI 0
 #define PACKET_CMD_ECHO 1
 
-// IVAN: TODO: Don't use CTOM and MTOC
+// IVAN: max amount of measurement packets that can be requested
+// in PACKET_CMD_OSCI
+#define MAX_PACKETS_REQUEST_CNT 16
+
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
-volatile Uint8 CTOM_MSGRAM[0x800];
+volatile Uint16 CTOM_MSGRAM[0x100];
 
-#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
-volatile Uint8 MTOC_MSGRAM[0x800];
+//#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
+//volatile Uint16 MTOC_MSGRAM[0x100];
 
-// IVAN: data size IN 16 BIT WORDS
-Uint16 CTOM_Data[100];
-Uint16 MTOC_Data[100];
+typedef __attribute__((packed)) struct {
+	Uint16 C28_Errors;
+	Uint16 C28_Errors_Latch;
+	Uint16 FPGA_Errors;
+	Uint16 FPGA_Errors_Latch;
+	Uint16 SRAM_offset;
+} CTOM_Data;
 
-// IVAN: TODO: what is ext data and ext control
-//Uint16* ExtControl_Data[100];
-
-// IVAN: ЗНАЧЕНИЕ С НИХ НИГДЕ В КОДЕ ДАЛЕРА НЕ СЧИТЫВАЕТСЯ
-// TODO: удалить?
-unsigned short MTOC_IO_Count = 0;
-unsigned short CTOM_IO_Count = 0;
+CTOM_Data ctom_data = {0};
 
 // IVAN: moves data between C28 and M3, toggles the watchdog chip
 Void DataProcessor(UArg arg0, UArg arg1) {
@@ -80,16 +80,7 @@ Void DataProcessor(UArg arg0, UArg arg1) {
 		}
 
 		// IVAN: copy data from C28 to M3
-		for (Uint16 k = 0; k < sizeof(CTOM_Data) / sizeof(CTOM_Data[0]); k++) {
-			CTOM_Data[k] = ((volatile Uint16 *)CTOM_MSGRAM)[k];
-		}
-		CTOM_IO_Count++;
-
-		// IVAN: copy data from M3 to C28
-		for (Uint16 k = 0; k < sizeof(MTOC_Data) / sizeof(MTOC_Data[0]); k++) {
-			((volatile Uint16 *)MTOC_MSGRAM)[k] = MTOC_Data[k];
-		}
-		MTOC_IO_Count++;
+		memcpy(&ctom_data, CTOM_MSGRAM, sizeof(data));
 
 		// IVAN: sleep 25 system clock ticks
 		Task_sleep(25);
@@ -254,6 +245,13 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 		}
 	}
 }
+
+//#define PACKET_CMD_OSCI 0
+//#define PACKET_CMD_ECHO 1
+//
+//// IVAN: max amount of measurement packets that can be requested
+//// in PACKET_CMD_OSCI
+//#define MAX_PACKETS_REQUEST_CNT 16
 
 Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 	SOCKET client_fd = (SOCKET)arg0;
