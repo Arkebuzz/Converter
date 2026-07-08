@@ -41,7 +41,13 @@ MEMORY
     FLASH (RWX)     : origin = 0x200034,   length = 0x7FF9C
     C03SRAM (RWX)   : origin = 0x20000000, length = 0x8000
 
+
     S07SHRAM (RWX)  : origin = 0x20008000, length = 0xC000
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!11
+	// IVAN: added RAMS6 and RAMS7
+	RAMS6 (RWX)     : origin = 0x20014000, length = 0x2000
+    RAMS7 (RWX)     : origin = 0x20016000, length = 0x2000
 
     CTOMMSGRAM (R)  : origin = 0x2007F000, length = 0x800
     MTOCMSGRAM (RW) : origin = 0x2007F800, length = 0x800
@@ -73,6 +79,9 @@ SECTIONS
 	// !!!!!!!!!!!!!!!!!!!!!!!1
     CTOM_MSGRAM : > CTOMMSGRAM
     MTOC_MSGRAM : > MTOCMSGRAM
+
+	SHARERAMS6  : > RAMS6
+	SHARERAMS7  : > RAMS7
 }
 
 __STACK_TOP = __stack + 256;

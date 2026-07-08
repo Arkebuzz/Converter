@@ -5,12 +5,17 @@
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
 volatile Uint16 CTOM_MSGRAM[0x100];
 
-// 5 u16
+// 4 u16
 typedef struct {
 	Uint16 C28_Errors;
 	Uint16 C28_Errors_Latch;
 	Uint16 FPGA_Errors;
 	Uint16 FPGA_Errors_Latch;
+} Osci_Errors;
+
+// 5 u16
+typedef struct {
+	Osci_Errors errors;
 	Uint16 SRAM_offset;
 } CTOM_Data;
 
@@ -39,14 +44,6 @@ volatile Uint16 SHARERAMS7[0x1000];
 void WriteToM3Data(const DataToM3 Data) {
 	static volatile Osci_Packet *osci_packet_ptr = (volatile Osci_Packet *)S6_START;
 
-	// IVAN: запишем данные (ошибки и оффсет в буфере) в CTOM
-	static volatile CTOM_Data *ctom_data = (volatile CTOM_Data *)CTOM_MSGRAM;
-	ctom_data->C28_Errors 			= Data.C28_Errors;
-	ctom_data->C28_Errors_Latch		= Data.C28_Errors_Latch;
-	ctom_data->FPGA_Errors 			= Data.FPGA_Errors;
-	ctom_data->FPGA_Errors_Latch 	= Data.FPGA_Errors_Latch;
-	ctom_data->SRAM_offset 			= (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
-
 	// IVAN: записываем пакет измерения
 	Uint16 *cycle_counter = (Uint16 *)&Data.CycleCounter;
 	osci_packet_ptr->CycleCounter[0] = cycle_counter[0];
@@ -59,6 +56,15 @@ void WriteToM3Data(const DataToM3 Data) {
 	osci_packet_ptr->Voltage_Out 	 = Data.Voltage_Out;
 	osci_packet_ptr->FreeTimeCounter = Data.FreeTimeCounter;
 	osci_packet_ptr->WatchDog 		 = (Uint16)Data.WatchDog;
+
+	// IVAN: запишем данные (ошибки и оффсет в буфере) в CTOM
+	volatile CTOM_Data *ctom_data = (volatile CTOM_Data *)CTOM_MSGRAM;
+	ctom_data->errors.C28_Errors 		= Data.C28_Errors;
+	ctom_data->errors.C28_Errors_Latch	= Data.C28_Errors_Latch;
+	ctom_data->errors.FPGA_Errors 		= Data.FPGA_Errors;
+	ctom_data->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
+	ctom_data->SRAM_offset =
+			(Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
 
 	osci_packet_ptr++;
 	if ((Uint16 *)osci_packet_ptr >= (Uint16*)S7_END) {

@@ -37,18 +37,51 @@ char *DomainName_cfg = "PMCB"; // сюда по идее чо угодно мо�
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
 volatile Uint16 CTOM_MSGRAM[0x100];
 
-//#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
-//volatile Uint16 MTOC_MSGRAM[0x100];
+#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
+volatile Uint16 SHARERAMS6[0x1000];
 
-typedef __attribute__((packed)) struct {
+#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
+volatile Uint16 SHARERAMS7[0x1000];
+
+#define S6_START SHARERAMS6
+#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
+
+// IVAN: max amount of measurement packets that can be requested
+// in PACKET_CMD_OSCI
+#define MAX_PACKETS_REQUEST_CNT 16
+
+// 4 u16
+typedef struct {
 	Uint16 C28_Errors;
 	Uint16 C28_Errors_Latch;
 	Uint16 FPGA_Errors;
 	Uint16 FPGA_Errors_Latch;
+} Osci_Errors;
+
+// 5 u16
+typedef struct {
+	Osci_Errors errors;
 	Uint16 SRAM_offset;
 } CTOM_Data;
 
-CTOM_Data ctom_data = {0};
+// 16 u16
+typedef struct {
+	Uint16 CycleCounter[4];
+	Uint16 Current_1;
+	Uint16 Current_2;
+	Uint16 Voltage_Inp;
+	Uint16 Voltage_Out;
+	Uint16 FreeTimeCounter;
+	Uint16 WatchDog;
+	Uint16 __pad[6];
+} Osci_Packet;
+
+typedef struct {
+	Uint16 cmd;
+	Uint16 len;
+	Osci_Errors errors;
+	Osci_Packet packets[];
+} Osci_Response;
 
 // IVAN: moves data between C28 and M3, toggles the watchdog chip
 Void DataProcessor(UArg arg0, UArg arg1) {
@@ -78,9 +111,6 @@ Void DataProcessor(UArg arg0, UArg arg1) {
 		} else {
 			GPIO_write(TMDXDOCKH52C1_WD, GPIO_TURN_ON);
 		}
-
-		// IVAN: copy data from C28 to M3
-		memcpy(&ctom_data, CTOM_MSGRAM, sizeof(data));
 
 		// IVAN: sleep 25 system clock ticks
 		Task_sleep(25);
@@ -231,8 +261,8 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 		Task_Params_init(&taskParams);
 		taskParams.arg0 = (UArg)client_fd;
 		// IVAN: In TI docks it is recommended to use > 4096 stack for a TCP task
-//		taskParams.stackSize = 4096;
-		taskParams.stackSize = 1024;
+		taskParams.stackSize = 4096;
+//		taskParams.stackSize = 1024;
 
 		Task_Handle taskHandle = Task_create(
 			(Task_FuncPtr)OscillogrammsWorker,
@@ -246,61 +276,50 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 	}
 }
 
-//#define PACKET_CMD_OSCI 0
-//#define PACKET_CMD_ECHO 1
-//
-//// IVAN: max amount of measurement packets that can be requested
-//// in PACKET_CMD_OSCI
-//#define MAX_PACKETS_REQUEST_CNT 16
-
 Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 	SOCKET client_fd = (SOCKET)arg0;
-	Uint8 recv_buffer[TCP_PACKET_MAX_SIZE];
+	Uint16 recv_buffer[2];
+	Uint16 send_buffer[sizeof(Osci_Response) + MAX_PACKETS_REQUEST_CNT * sizeof(Osci_Packet)];
 
 	System_printf("OscillogrammsWorker: started processing client_fd = %i", client_fd);
 
 	while (1) {
-		int n_bytes = recv(client_fd, recv_buffer, TCP_PACKET_MAX_SIZE, 0);
+		int n_bytes = recv(client_fd, recv_buffer, sizeof(recv_buffer), 0);
 		if (n_bytes <= 0) {
 			break;
 		}
 
 		Uint16 cmd = recv_buffer[0];
+		Uint16 arg = recv_buffer[1];
+		size_t msg_len = sizeof(Osci_Response);
+
+		// IVAN: forming the response
+		volatile CTOM_Data *ctom_data = (CTOM_Data *)CTOM_MSGRAM;
+		Osci_Response *osci_response = (Osci_Response *)send_buffer;
+		osci_response->errors = ctom_data->errors;
 		switch (cmd) {
 			case PACKET_CMD_OSCI: {
-//				typedef struct {
-//					Uint64 CycleCounter;
-//					Uint8  WatchDog;
-//				    Uint16 Current_1;
-//				    Uint16 Current_2;
-//				    Uint16 Voltage_Inp;
-//				    Uint16 Voltage_Out;
-//				    Uint16 C28_Errors;
-//				    Uint16 C28_Errors_Latch;
-//				    Uint16 FPGA_Errors;
-//				    Uint16 FPGA_Errors_Latch;
-//				    Uint16 FreeTimeCounter;
-//				} DataToM3;
-//				*Dest = CyclesCounter0; 		Dest++;  // 0
-//				*Dest = CyclesCounter1; 		Dest++;  // 1
-//				*Dest = CyclesCounter2; 		Dest++;  // 2
-//				*Dest = CyclesCounter3; 		Dest++;  // 3
-//				*Dest = Data.C28_Errors;		Dest++;  // 4
-//				*Dest = Data.C28_Errors_Latch;  Dest++;  // 5
-//				*Dest = Data.FPGA_Errors; 		Dest++;  // 6
-//				*Dest = Data.FPGA_Errors_Latch; Dest++;  // 7
-//				*Dest = Data.Voltage_Inp;		Dest++;  // 8
-//				*Dest = Data.Voltage_Out;		Dest++;  // 9
-//				*Dest = Data.Current_1;			Dest++;  // 10
-//				*Dest = Data.Current_2;			Dest++;  // 11
-//				*Dest = Data.WatchDog;			Dest++;  // 12
-//				*Dest = Data.FreeTimeCounter;	Dest++;  // 13
-//				Dest++;  // 14
-//				Dest++;  // 15
+				if (arg > MAX_PACKETS_REQUEST_CNT) {
+					arg = MAX_PACKETS_REQUEST_CNT;
+				}
+				msg_len += arg * sizeof(Osci_Packet);
+				osci_response->cmd = PACKET_CMD_OSCI;
+				osci_response->len = msg_len;
+
+				volatile Osci_Packet *packet_ptr =
+						(Osci_Packet *)((Uint16 *)S6_START + ctom_data->SRAM_offset);
+				for (Uint16 i = 0; i < arg; i++) {
+					if ((Uint16 *)packet_ptr < (Uint16 *)S6_START) {
+						packet_ptr = ((Osci_Packet *)S7_END) - 1;
+					}
+					osci_response->packets[i] = *packet_ptr;
+					packet_ptr--;
+				}
 			} break;
 
 			case PACKET_CMD_ECHO: {
-
+				osci_response->cmd = PACKET_CMD_ECHO;
+				osci_response->len = sizeof(Osci_Response);
 			} break;
 
 			default: {
@@ -309,6 +328,22 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 					"cmd = %i", client_fd, cmd
 				);
 			}
+		}
+
+		// IVAN: sending the response
+		size_t bytes_sent = 0;
+		while (bytes_sent < msg_len) {
+		    size_t sent = send(
+		    	client_fd,
+				((Uint8 *)osci_response) + bytes_sent,
+				msg_len - bytes_sent,
+				0
+			);
+		    if (sent <= 0) {
+		        System_printf("OscillogrammsWorker: send() failed\n");
+		        break;
+		    }
+		    bytes_sent += sent;
 		}
 	}
 
