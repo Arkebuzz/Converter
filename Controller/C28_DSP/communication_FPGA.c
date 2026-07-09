@@ -2,6 +2,18 @@
 #include "error_handling.h"
 
 
+short WriteWordToFPGA(short offset, short value) {
+	short *XMEM_pw;
+	if (offset > 0x80) {  // 128 слов
+		return -1;
+	} else {
+		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x340080
+		*XMEM_pw = value;
+		return 0;
+	}
+}
+
+
 void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
 	Data->WatchDog     = Source[ADR_WATCHDOG];
 	Data->Current_1    = Source[ADR_CURRENT_1];
@@ -20,19 +32,7 @@ void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {
 		ErrorReset(ERROR_FPGA_CONNECT_FAIL);
 	}
 	*WatchDog++;
-	WriteWordToFPGA(ADR_WATCHDOG, WatchDog);
-}
-
-
-short WriteWordToFPGA(short offset, short value) {
-	short *XMEM_pw;
-	if (offset > 0x80) {  // 128 слов
-		return -1;
-	} else {
-		XMEM_pw = (short *) (0x340000 + offset); // CS1 выделено с 0x340000 по 0x340080
-		*XMEM_pw = value;
-		return 0;
-	}
+	WriteWordToFPGA(ADR_WATCHDOG, *WatchDog);
 }
 
 

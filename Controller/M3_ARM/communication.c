@@ -67,13 +67,14 @@ typedef struct {
 // 16 u16
 typedef struct {
 	Uint16 CycleCounter[4];
+	Osci_Errors errors;
 	Uint16 Current_1;
 	Uint16 Current_2;
 	Uint16 Voltage_Inp;
 	Uint16 Voltage_Out;
 	Uint16 FreeTimeCounter;
 	Uint16 WatchDog;
-	Uint16 __pad[6];
+	Uint16 __pad[2];
 } Osci_Packet;
 
 typedef struct {
@@ -175,7 +176,7 @@ void netOpenHook() {
 	Task_Params_init(&taskParamsOsci);
 	taskParamsOsci.stackSize = 1024;
 	taskParamsOsci.priority = 1;
-	// IVAN: arg0 - первый аргумент которфй будет передан в OscillogrammsListener
+	// IVAN: arg0 - первый аргумент который будет передан в OscillogrammsListener
 	taskParamsOsci.arg0 = TCPPORT_OSCI;
 
 	Task_Handle taskHandleOsci = Task_create(
@@ -329,8 +330,8 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 				osci_response->cmd = PACKET_CMD_OSCI;
 				osci_response->len = msg_len;
 
-				volatile Osci_Packet *packet_ptr =
-						(Osci_Packet *)((Uint16 *)S6_START + ctom_data->SRAM_offset);
+				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + ctom_data->SRAM_offset);
+
 				for (Uint16 i = 0; i < arg; i++) {
 					if ((Uint16 *)packet_ptr < (Uint16 *)S6_START) {
 						packet_ptr = ((Osci_Packet *)S7_END) - 1;
