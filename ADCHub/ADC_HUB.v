@@ -18,8 +18,8 @@ module ADC_HUB (
 
    // Управление IGBT (6 штуки, пользуем 1 верхний и 1 нижний)
    input  [6:1] IGBT_ERR,
-   output [3:1] CTRL_TOP,
-   output [3:1] CTRL_BOT,
+   output [3:1] CTRL_TOP,  // Используется 1-й
+   output [3:1] CTRL_BOT,  // Используется 2-й
 
    // Оптоволокно c главной ПЛИС
    input  FO_INPUT,
@@ -43,6 +43,12 @@ end
 
 
 // Управление транзисторами
+assign CTRL_TOP[2] = 0;
+assign CTRL_TOP[3] = 0;
+
+assign CTRL_BOT[1] = 0;
+assign CTRL_BOT[3] = 0;
+
 reg converter_on = 0;
 reg mode_up;
 reg [12:0] pwm_counter;
@@ -58,6 +64,12 @@ PWM_GENERATOR GenPWM (
 
 
 // АЦП ADS7886
+assign ADC_CLK[2] = 0;
+assign ADC_CLK[3] = 0;
+
+assign ADC_NCS[2] = 0;
+assign ADC_NCS[3] = 0;
+
 wire [11:0] current;
 
 ADS7886_READER ADSReader(

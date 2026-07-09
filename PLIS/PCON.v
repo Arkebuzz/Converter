@@ -6,8 +6,8 @@ module PCON(
    input CLOCK_12,
    
    // Связь с ADCHub
-   input  [20:1] D_INP,   // 3, 4, 5  - используются
-   output [20:1] D_OUTP,  // 4, 5, 6  - используются
+   input  [20:1] D_INP,   // 3, 4 - используются
+   output [20:1] D_OUTP,  // 4, 5 - используются
    
    // Связь с контроллером:
    inout [15:0] ADRESS_DATA, 
@@ -28,6 +28,8 @@ module PCON(
    input reset_button
 );
 
+assign D_OUTP[3:1]  = 0;
+assign D_OUTP[20:6] = 0;
 
 // Описание ошибок:
 // 0: Потерян сигнал с f28m35
@@ -48,7 +50,7 @@ reg [15:0] errors_latch = 0;
 reg reset_errors_inp = 0;
 reg reset_errors = 0;
 reg [11:0] reset_errors_delay = 0;
-localparam RESET_ERRORS_DELAY = 4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
+localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
 
 
 // Обмен с ADCHub
@@ -199,7 +201,7 @@ always @(posedge CLOCK_50) begin
       reset_errors <= 0;
    end
    if (reset_errors_delay > 0) begin
-      reset_errors_delay <= reset_errors_delay - 1;
+      reset_errors_delay <= reset_errors_delay - 12'b1;
    end
    
    converter_on <= converter_on && (errors_latch == 0);
@@ -225,7 +227,7 @@ always @(posedge CLOCK_50) begin
    end 
    
    // f28m35
-   emif_state_counter <= emif_state_counter + 1;
+   emif_state_counter <= emif_state_counter + 7'b1;
    
    // Передача параметров с ADChubS
    if          (emif_state_counter == 18) begin
@@ -275,7 +277,7 @@ always @(posedge CLOCK_50) begin
          watch_dog_prev <= watch_dog_curr;
          watch_dog_timer <= 0;
       end else begin
-         watch_dog_timer <= watch_dog_timer + 1;
+         watch_dog_timer <= watch_dog_timer + 8'b1;
       end
       
       if (watch_dog_timer > 200) begin
