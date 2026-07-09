@@ -14,23 +14,6 @@ module tb_system_top;
 
     wire FO;
 
-    // DATA_TRANSMITTER u_tx (
-    //     .CLOCK_10(CLOCK_10),
-    //     .DATA_READY(1'b1),
-    //     .DATA(15'b101010001110011),
-    //     .READY_TO_SEND(),
-    //     .FO_OUT(FO)
-    // );
-    
-    // ADC_HUB_RECEIVER u_rx (
-    //     .CLOCK_10(CLOCK_10),
-    //     .FO_IN(FO),
-    //     .DATA(DATA_RX),
-    //     .DATA_READY(DATA_READY_RX),
-    //     .ERROR(ERROR_RX)
-    // );
-
-
     ADC_HUB u_adc_hub (
         .CLOCK_20(CLOCK_20),
         .CLOCK_50(CLOCK),

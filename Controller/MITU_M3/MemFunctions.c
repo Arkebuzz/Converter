@@ -32,6 +32,7 @@ short WriteTo_FPGA(short offset, short value)
 		*XMEM_pw  =  value;
 		return 0;
 	}
+
 }
 
 short WriteTo_SRAM(long offset, short value)
