@@ -18,7 +18,7 @@ assign CTRL_BOT = ctrl_bot;
 
 always @(posedge CLOCK_20) begin
    if (CONVERTER_ON) begin
-      pwm_counter <= pwm_counter + 1;
+      pwm_counter <= pwm_counter + 13'b1;
       
       if (pwm_counter == 0) begin
          pwm_local_value <= PWM;

@@ -42,6 +42,16 @@ always @(posedge CLOCK_20) begin
 end
 
 
+// Ошибки, описание:
+// 0: Ошибки транизисторов 1
+// 1: Ошибки транизисторов 2
+// 2: Превышение порога тока
+// 3: Потеря соединения с PCON
+reg reset_errors;
+reg [3:0] errors;
+reg [3:0] errors_latch;
+
+
 // Управление транзисторами
 assign CTRL_TOP[2] = 0;
 assign CTRL_TOP[3] = 0;
@@ -49,8 +59,9 @@ assign CTRL_TOP[3] = 0;
 assign CTRL_BOT[1] = 0;
 assign CTRL_BOT[3] = 0;
 
-reg converter_on = 0;
-reg mode_up;
+reg converter_on = 0;      // Текущий режим, учитывающий состояние ошибок
+reg converter_on_inp = 0;  // Сигнал с PCON
+reg mode_up;               // Режим работы преобразователя (повышающий/понижающий)
 reg [12:0] pwm_counter;
 
 PWM_GENERATOR GenPWM (
@@ -134,9 +145,6 @@ defparam Receiver.PULSE_1_LEN     = 400;
 defparam Receiver.RESET_LEN       = 1000; 
 defparam Receiver.MAX_ERROR       = 100; 
 
-reg reset_errors;
-reg [3:0] errors;
-reg [3:0] errors_latch;
 
 always @(posedge CLOCK_20) begin
    errors[0] <= (~IGBT_ERR[1]) || (~IGBT_ERR[2]);
@@ -151,14 +159,14 @@ always @(posedge CLOCK_20) begin
       reset_errors <= 0;
    end
    
-   converter_on <= converter_on && (errors_latch == 0);
+   converter_on <= converter_on_inp && (errors_latch == 0);
    
    if (ready_to_send) begin
       data_to_send <= {voltage, current, errors_latch, errors};
    end   
    
    if (rc_data_ready && rc_invalid_data == 0) begin
-      {pwm_counter, mode_up, converter_on, reset_errors} <= receiv_data;
+      {pwm_counter, mode_up, converter_on_inp, reset_errors} <= receiv_data;
    end
 end
 

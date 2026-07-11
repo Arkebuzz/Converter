@@ -84,7 +84,8 @@ reg [11:0] voltage_inp;
 
 // Отправка на ADCHub1
 reg mode_up;
-reg converter_on;
+reg converter_on;      // Текущий режим, учитывающий состояние ошибок
+reg converter_on_inp;  // Сигнал с C28
 
 reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
 wire ready_to_send_1;
@@ -204,7 +205,7 @@ always @(posedge CLOCK_50) begin
       reset_errors_delay <= reset_errors_delay - 12'b1;
    end
    
-   converter_on <= converter_on && (errors_latch == 0);
+   converter_on <= converter_on_inp && (errors_latch == 0);
 
    // ADCHub1 приём
    if (rc_data_ready_1) begin
@@ -264,7 +265,7 @@ always @(posedge CLOCK_50) begin
    else if (emif_state_counter == 55) begin
       emif_adress <= `ADR_CONV_CTRL;
    end else if (emif_state_counter == 59) begin
-      {mode_up, converter_on, reset_errors_inp} <= emif_data_from_micro;
+      {mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
    end
    else if (emif_state_counter == 60) begin
       emif_adress <= `ADR_PWM_COUNTER;

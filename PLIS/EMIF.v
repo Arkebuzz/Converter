@@ -40,8 +40,6 @@ assign wren_wire = wren;
 
 
 always @* begin
-   // Явные защелки
-
    data_from_micro = data_from_micro_wire;
    
    if (nCS0 != 1 || nCS1 != 0) begin
