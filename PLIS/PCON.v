@@ -181,7 +181,7 @@ EMIF Emif (
 );
 
 reg [6:0]  emif_state_counter = 0;
-reg [11:0] pwm_counter;
+reg [12:0] pwm_counter;
 reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
@@ -208,7 +208,7 @@ always @(posedge CLOCK_50) begin
    converter_on <= converter_on_inp && (errors_latch == 0);
 
    // ADCHub1 приём
-   if (rc_data_ready_1) begin
+   if (rc_data_ready_1 && rc_invalid_data_1 == 0) begin
       {voltage_inp, current_1, errors_latch[6:3], errors[6:3]} <= rc_data_1;
    end
    
@@ -218,7 +218,7 @@ always @(posedge CLOCK_50) begin
    end   
    
    // ADCHub2 приём
-   if (rc_data_ready_2) begin
+   if (rc_data_ready_2 && rc_invalid_data_2 == 0) begin
       {voltage_out, current_2, errors_latch[10:7], errors[10:7]} <= rc_data_2;
    end
    
