@@ -1,6 +1,8 @@
+// TODO: READY_TO_SEND можно вырезать
+
 module DATA_TRANSMITTER #(
    parameter DATA_WIDTH  = 13,   // 128 бит максимум! Правь размер bit_counter здесь и в receiver
-   parameter TICK_LEN    = 100,  // Длительность такта передатчика
+   parameter TICK_LEN    = 100,  // Длительность такта передатчика, нс
    // Все следующие параметры должны быть кратны длине такта, иначе работоспособность не гарантируется!
    // Quartus не умеет в проверки. Единицы измерения такие же, что и у длины такта.
    parameter PULSE_0_LEN = 100,  // Длина импульса "1" для 0, меньше, чем PULSE_1_LEN
@@ -36,7 +38,7 @@ reg [DATA_WIDTH-1:0] data;
 
 always @(posedge CLOCK) begin
    fo_out <= 0;
-   pulse_counter <= pulse_counter + 4'b1;
+   pulse_counter <= pulse_counter + 6'b1;
 
    case (state)
       ST_RESET: begin  // FO_OUT = 0

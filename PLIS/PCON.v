@@ -5,9 +5,9 @@ module PCON(
    input CLOCK_50,
    input CLOCK_12,
    
-   // Связь с ADCHub
-   input  [20:1] D_INP,   // 3, 4 - используются
-   output [20:1] D_OUTP,  // 4, 5 - используются
+   // Связь с ADCHub  
+   input  [20:1] D_INP,   // 3 (ADCHub1), 4 (ADCHub2) - используются
+   output [20:1] D_OUTP,  // 4 (ADCHub1), 5 (ADCHub2) - используются
    
    // Связь с контроллером:
    inout [15:0] ADRESS_DATA, 
@@ -251,7 +251,7 @@ always @(posedge CLOCK_50) begin
       emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
-   end else if (emif_state_counter == 26) begin
+   end else if (emif_state_counter == 28) begin
       emif_adress <= `ADR_CURRENT_2;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;

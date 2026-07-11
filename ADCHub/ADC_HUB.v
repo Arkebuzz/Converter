@@ -4,7 +4,7 @@ module ADC_HUB (
 
    // Не используется, ошибки питания
    input VDR_ERR,
-   input VSENS_ERR, 
+   input VSENS_ERR,
    input nPGOOD,
 
    // АЦП AMC1304M25 сигма-дельта 1-3 на температуру и 4 на напряжение
@@ -17,7 +17,7 @@ module ADC_HUB (
    output [3:1] ADC_NCS,   // Сигнал выбор чипа, 1->0 для запуска передачи данных
 
    // Управление IGBT (6 штуки, пользуем 1 верхний и 1 нижний)
-   input  [6:1] IGBT_ERR,
+   input  [6:1] IGBT_ERR,  // Инвертировано
    output [3:1] CTRL_TOP,  // Используется 1-й
    output [3:1] CTRL_BOT,  // Используется 2-й
 
@@ -48,8 +48,8 @@ end
 // 2: Превышение порога тока
 // 3: Потеря соединения с PCON
 reg reset_errors;
-reg [3:0] errors;
-reg [3:0] errors_latch;
+reg [3:0] errors;        // Текущие ошибки
+reg [3:0] errors_latch;  // Сохраненные ошибки, сброс только по reset_errors
 
 
 // Управление транзисторами
@@ -62,15 +62,15 @@ assign CTRL_BOT[3] = 0;
 reg converter_on = 0;      // Текущий режим, учитывающий состояние ошибок
 reg converter_on_inp = 0;  // Сигнал с PCON
 reg mode_up;               // Режим работы преобразователя (повышающий/понижающий)
-reg [12:0] pwm_counter;
+reg [12:0] pwm_counter;    // Скважность
 
 PWM_GENERATOR GenPWM (
    .CLOCK_20(CLOCK_20), 
    .CONVERTER_ON(converter_on),
    .MODE_UP(mode_up),
    .PWM(pwm_counter),
-   .CTRL_TOP(CTRL_TOP[1]),  // Хз че с индексами
-   .CTRL_BOT(CTRL_BOT[2])   // Хз че с индексами
+   .CTRL_TOP(CTRL_TOP[1]),  // TODO: Хз че с индексами
+   .CTRL_BOT(CTRL_BOT[2])   // TODO: Хз че с индексами
 );
 
 
@@ -149,7 +149,7 @@ defparam Receiver.MAX_ERROR       = 100;
 always @(posedge CLOCK_20) begin
    errors[0] <= (~IGBT_ERR[1]) || (~IGBT_ERR[2]);
    errors[1] <= (~IGBT_ERR[3]) || (~IGBT_ERR[4]);
-   errors[2] <= current > 3208 || current < 204;  // хз что тут за пределы, надо спросить
+   errors[2] <= current > 3208 || current < 204;  // TODO: хз что тут за пределы, надо спросить
    errors[3] <= rc_connect_fail | rc_invalid_data;
    
    errors_latch <= errors_latch | errors;  
