@@ -229,56 +229,53 @@ always @(posedge CLOCK_50) begin
    
    // f28m35
    emif_state_counter <= emif_state_counter + 7'b1;
-   
-   // Передача параметров с ADChubS
-   if          (emif_state_counter == 18) begin
+   emif_wren <= 0;
+
+   // Передача параметров с ADChub1-2
+   if          (emif_state_counter == 0) begin
       emif_adress <= `ADR_ERRORS;
       emif_data_to_micro <= errors;
       emif_wren <= 1;
-   end else if (emif_state_counter == 20) begin
+   end else if (emif_state_counter == 2) begin
       emif_adress <= `ADR_ERRORS_LATCH;
       emif_data_to_micro <= errors_latch;
       emif_wren <= 1;
-   end else if (emif_state_counter == 22) begin
+   end else if (emif_state_counter == 4) begin
       emif_adress <= `ADR_VOLTAGE_INP;
       emif_data_to_micro <= voltage_inp;
       emif_wren <= 1;
-   end else if (emif_state_counter == 24) begin
+   end else if (emif_state_counter == 6) begin
       emif_adress <= `ADR_VOLTAGE_OUT;
       emif_data_to_micro <= voltage_out;
       emif_wren <= 1;
-   end else if (emif_state_counter == 26) begin
+   end else if (emif_state_counter == 8) begin
       emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
-   end else if (emif_state_counter == 28) begin
+   end else if (emif_state_counter == 10) begin
       emif_adress <= `ADR_CURRENT_2;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;
    end
    // Чтение параметров
-   else if (emif_state_counter == 50) begin
+   else if (emif_state_counter == 12) begin
       emif_adress <= `ADR_WATCHDOG;
-   end else if (emif_state_counter == 54) begin
+   end else if (emif_state_counter == 16) begin
       watch_dog_curr <= emif_data_from_micro;
    end
-   else if (emif_state_counter == 55) begin
+   else if (emif_state_counter == 17) begin
       emif_adress <= `ADR_CONV_CTRL;
-   end else if (emif_state_counter == 59) begin
-      {mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
-   end
-   else if (emif_state_counter == 60) begin
-      emif_adress <= `ADR_PWM_COUNTER;
-   end else if (emif_state_counter == 64) begin
-      pwm_counter <= emif_data_from_micro;
+   end else if (emif_state_counter == 21) begin
+      {pwm_counter, mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
    end
    // Сброс 
-   else if (emif_state_counter == 99) begin
-      if (watch_dog_curr != watch_dog_prev) begin
+   else if (emif_state_counter == 100) begin
+      if (watch_dog_curr == watch_dog_prev) begin
+         watch_dog_timer <= watch_dog_timer + 8'b1;
+      end else begin
          watch_dog_prev <= watch_dog_curr;
          watch_dog_timer <= 0;
-      end else begin
-         watch_dog_timer <= watch_dog_timer + 8'b1;
+         errors[0] <= 0;
       end
       
       if (watch_dog_timer > 200) begin
@@ -286,9 +283,6 @@ always @(posedge CLOCK_50) begin
       end
 
       emif_state_counter <= 0;
-   end
-   else begin
-      emif_wren <= 0;
    end
 end
 

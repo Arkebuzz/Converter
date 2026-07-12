@@ -18,7 +18,7 @@ typedef struct {
 } DataToM3;
 
 void ReadFPGAData(const Uint16 *Source, DataToM3 *Data);
-void WriteFPGAData(Uint16 CTRL_Converter, Uint16 PWM_Counter);
+void WriteFPGAData(Uint16 CTRL_Converter);
 void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog);
 
 /*

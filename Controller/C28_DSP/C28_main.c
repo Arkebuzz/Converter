@@ -219,20 +219,20 @@ void main(void) {
 		ReadFPGAData(DMABufFPGA, &Data);
 		CheckFPGAConnect(Data, &WatchDog);
 
-		// TODO: Считывание сигналов с M3:
+		// TODO: Считывание сигналов с M3: (bool16 ?)
 		Uint16 reset_errors = 0;
 		Uint16 converter_on = 0;
 		Uint16 mode_up = 0;
 
 		// TODO: Расчет pwm:
-		Uint16 CTRL_Converter = (mode_up << 2) | (converter_on << 1) | reset_errors;
 		Uint16 PWM_Counter = 0;
-
+		Uint16 CTRL_Converter = (PWM_Counter << 3) | (mode_up << 2) | (converter_on << 1) | reset_errors;
+		
 		Data.C28_Errors = ErrorGetCurrent();
 		Data.C28_Errors_Latch = ErrorGetLatch();
 		WriteToM3Data(Data);  // Отправляем замер на М3
 
-		WriteFPGAData(CTRL_Converter, PWM_Counter);  // Запись в FPGA
+		WriteFPGAData(CTRL_Converter);  // Запись в FPGA
 
 		if (reset_errors) {
 			reset_errors = 0;

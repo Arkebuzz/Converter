@@ -36,7 +36,6 @@ void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {
 }
 
 
-void WriteFPGAData(Uint16 CTRL_Converter, Uint16 PWM_Counter) {
+void WriteFPGAData(Uint16 CTRL_Converter) {
 	WriteWordToFPGA(ADR_CONV_CTRL, CTRL_Converter);
-	WriteWordToFPGA(ADR_PWM_COUNTER, PWM_Counter);
 }
