@@ -26,6 +26,7 @@ interrupt void my_critical_interrupt_handler(void) {}
     Port E: пины GPIO128 до GPIO159.
  
     Direction = Input (0) / Output (1)
+    
 5. Арм стартует первым, запускает ДСП, ДСП встает в режим ожидания,
 Арм посылает прерывание (MTOCIPCINT1 = Master To Control IPC Interrupt 1) на ДСП и запускает его,
 Арм говорит ДСП откуда брать код: с Флеш или ОП.
@@ -81,19 +82,52 @@ interrupt void my_critical_interrupt_handler(void) {}
     CPU_OUT2     = 53 <-> 6
     CPU_OUT3     = 54 <-> 7
     CPU_OUT4     = 55 <-> 8
+   
+9. REGISTERS INFO:
+    CTOMIPCSET (Set):           C28 can write here to raise the flags
+    CTOMIPCFLG (Flag):          Read-only status register that reflects what's in the flag
+    CTOMIPCACK (Acknowledge):   This register belongs to the M3
+    So C28 can clear it's own flag - it can only set it
+    The flag can be cleared only when M3 sends ACK
+  
+    Для рускоговорящих:
+    Имеем регистры (передача M3 -> C28):
+    Ядро:   M3                 C28
+            MTOCIPCFLG    =    MTOCIPCSTS
+            MTOCIPCCLR         MTOCIPCACK       сброс бита в 0
+            MTOCIPCSET                          установка бита в 1
 
-9. Тайминги:
-    ПЛИС 
-    Полный цикл чтения-записи emif 100 тактов *  20 нс = 2 мкс
+    Для передачи С28 -> М28 аналогично:                   
+    Ядро:   C28                M3
+            CTOMIPCFLG    =    CTOMIPCSTS
+            CTOMIPCCLR         CTOMIPCACK       сброс бита в 0
+            CTOMIPCSET                          установка бита в 1
 
-    С28     
-    Главный цикл раз в 300 мкс (по таймеру в конце), в числе которого:
-    БЫЛО:
-        Копирование 4 значений с памяти М3 (из 100) - M3_Write_Data  ~7 500 мкс  
-        Перенос ещё от 0 до 4 значений по требованию M3_Get_Setups               
-        Копирование 1 значения в память М3 (из 100) - M3_Read_Data   ~30 000 мкс    
-    СЕЙЧАС:
-        Копируем ~10 значений раз в 50 итераций => 15 000 мкс  (ПРИЕМ НА М3 ОТСУТСВУЕТ)
+    Первые четыре бита генерируют прерывание на получившем ядре.
+    
+    
+10. Кароче я немного запутался
+	По идее далер использует MTOC и CTOM для обмена маленькими мелкими
+	штучками, хотя в линкере С28 на этих местах уже определены
+	секции которые занимают системные штуки:
+	   GROUP : > CTOMRAM, PAGE = 1
+   {
+       PUTBUFFER
+       PUTWRITEIDX
+       GETREADIDX
+   }
 
-    М3      
-    M3 <-> С28 раз в 25 nticks по 1000 мкс = 25 000 мкс
+   GROUP : > MTOCRAM, PAGE = 1
+   {
+       GETBUFFER   :  TYPE = DSECT
+       GETWRITEIDX :  TYPE = DSECT
+       PUTREADIDX  :  TYPE = DSECT
+   }
+   
+   По хорошему MTOC и CTOM я бы побоялся использовать, чтобы не затереть
+   их случайно. К тому же у нас есть SRAM еще миллиард, так что можно
+   ее использовать
+   
+   Пока думаю буду реализовывать опцию отказа от MTOC и CTOM вообще.
+
+   ! СИСТЕМНЫЕ ШТУКИ ДЛЯ РАБОТЫ С MTOC И CTOM НЕ ТРЕБУЮТСЯ !

@@ -5,9 +5,9 @@ module PCON(
    input CLOCK_50,
    input CLOCK_12,
    
-   // Связь с ADCHub
-   input  [20:1] D_INP,   // 3, 4, 5  - используются
-   output [20:1] D_OUTP,  // 4, 5, 6  - используются
+   // Связь с ADCHub  
+   input  [20:1] D_INP,   // 3 (ADCHub1), 4 (ADCHub2) - используются
+   output [20:1] D_OUTP,  // 4 (ADCHub1), 5 (ADCHub2) - используются
    
    // Связь с контроллером:
    inout [15:0] ADRESS_DATA, 
@@ -28,6 +28,8 @@ module PCON(
    input reset_button
 );
 
+assign D_OUTP[3:1]  = 0;
+assign D_OUTP[20:6] = 0;
 
 // Описание ошибок:
 // 0: Потерян сигнал с f28m35
@@ -48,7 +50,7 @@ reg [15:0] errors_latch = 0;
 reg reset_errors_inp = 0;
 reg reset_errors = 0;
 reg [11:0] reset_errors_delay = 0;
-localparam RESET_ERRORS_DELAY = 4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
+localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
 
 
 // Обмен с ADCHub
@@ -82,7 +84,8 @@ reg [11:0] voltage_inp;
 
 // Отправка на ADCHub1
 reg mode_up;
-reg converter_on;
+reg converter_on;      // Текущий режим, учитывающий состояние ошибок
+reg converter_on_inp;  // Сигнал с C28
 
 reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
 wire ready_to_send_1;
@@ -178,7 +181,7 @@ EMIF Emif (
 );
 
 reg [6:0]  emif_state_counter = 0;
-reg [11:0] pwm_counter;
+reg [12:0] pwm_counter;
 reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
@@ -199,13 +202,13 @@ always @(posedge CLOCK_50) begin
       reset_errors <= 0;
    end
    if (reset_errors_delay > 0) begin
-      reset_errors_delay <= reset_errors_delay - 1;
+      reset_errors_delay <= reset_errors_delay - 12'b1;
    end
    
-   converter_on <= converter_on && (errors_latch == 0);
+   converter_on <= converter_on_inp && (errors_latch == 0);
 
    // ADCHub1 приём
-   if (rc_data_ready_1) begin
+   if (rc_data_ready_1 && rc_invalid_data_1 == 0) begin
       {voltage_inp, current_1, errors_latch[6:3], errors[6:3]} <= rc_data_1;
    end
    
@@ -215,7 +218,7 @@ always @(posedge CLOCK_50) begin
    end   
    
    // ADCHub2 приём
-   if (rc_data_ready_2) begin
+   if (rc_data_ready_2 && rc_invalid_data_2 == 0) begin
       {voltage_out, current_2, errors_latch[10:7], errors[10:7]} <= rc_data_2;
    end
    
@@ -225,7 +228,7 @@ always @(posedge CLOCK_50) begin
    end 
    
    // f28m35
-   emif_state_counter <= emif_state_counter + 1;
+   emif_state_counter <= emif_state_counter + 7'b1;
    
    // Передача параметров с ADChubS
    if          (emif_state_counter == 18) begin
@@ -248,7 +251,7 @@ always @(posedge CLOCK_50) begin
       emif_adress <= `ADR_CURRENT_1;
       emif_data_to_micro <= current_1;
       emif_wren <= 1;
-   end else if (emif_state_counter == 26) begin
+   end else if (emif_state_counter == 28) begin
       emif_adress <= `ADR_CURRENT_2;
       emif_data_to_micro <= current_2;
       emif_wren <= 1;
@@ -262,7 +265,7 @@ always @(posedge CLOCK_50) begin
    else if (emif_state_counter == 55) begin
       emif_adress <= `ADR_CONV_CTRL;
    end else if (emif_state_counter == 59) begin
-      {mode_up, converter_on, reset_errors_inp} <= emif_data_from_micro;
+      {mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
    end
    else if (emif_state_counter == 60) begin
       emif_adress <= `ADR_PWM_COUNTER;
@@ -275,7 +278,7 @@ always @(posedge CLOCK_50) begin
          watch_dog_prev <= watch_dog_curr;
          watch_dog_timer <= 0;
       end else begin
-         watch_dog_timer <= watch_dog_timer + 1;
+         watch_dog_timer <= watch_dog_timer + 8'b1;
       end
       
       if (watch_dog_timer > 200) begin

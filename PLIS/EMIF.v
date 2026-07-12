@@ -7,7 +7,7 @@ module EMIF(
    input nCS1,       // Чипселект 2
    input WE,         // Флаг записи (0 - контроллер пишет)
    input OE,         // Флаг чтения (0 - контроллер читает)
-   input ALE,        // Флаг адреса (1 - адресс на шине)
+   input ALE,        // Флаг адреса (1 - адрес на шине)
    
    // Работа внутри ПЛИС:   
    input [15:0] DATA_FROM_FPGA,   
@@ -40,13 +40,11 @@ assign wren_wire = wren;
 
 
 always @* begin
-   // Явные защелки
-
    data_from_micro = data_from_micro_wire;
    
    if (nCS0 != 1 || nCS1 != 0) begin
       wren = 0;
-      buffer = 'bz;
+      buffer = 16'bz;
    end
    else begin
       wren = ~WE;
@@ -62,7 +60,7 @@ always @* begin
       if (OE == 0) begin
          buffer = q_ram;
       end else begin
-         buffer = 'bz;
+         buffer = 16'bz;
       end
    end
 end

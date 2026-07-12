@@ -6,12 +6,13 @@
 
 module ADS7886_READER (
    input CLOCK_5,         // Часы 5 мГц
-   input ADC_DATA,        // Данные 3-х АЦП, по биту на каждый
+   input ADC_DATA,        // Данные АЦП, по биту на каждый
    output ADC_CLK,        // Часы АЦП, 5 мГц
    output ADC_NCS,        // Сигнал выбор чипа, 1->0 для запуска передачи данных
    output [11:0] CURRENT  // Измеренный ток
 );
 
+// TODO: localparam создает 32-битное число со знаком
 localparam ST_OFF  = 0;
 localparam ST_ON   = 1;
 localparam ST_SKIP = 2;

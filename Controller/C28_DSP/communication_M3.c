@@ -1,9 +1,19 @@
 #include "communication_M3.h"
 #include "error_handling.h"
 
-// IVAN: uses only 0x100 of 0x400 available
+// IVAN: 0x400 available
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
-volatile Uint16 CTOM_MSGRAM[0x100];
+volatile Uint16 CTOM_MSGRAM[1024];
+
+// Communication with M3 uses SRAM6-SRAM7
+#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
+volatile Uint16 SHARERAMS6[4096];
+
+#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
+volatile Uint16 SHARERAMS7[4096];
+
+#define S6_START SHARERAMS6
+#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
 // 4 u16
 typedef struct {
@@ -22,24 +32,16 @@ typedef struct {
 // 16 u16
 typedef struct {
 	Uint16 CycleCounter[4];
+	Osci_Errors errors;
 	Uint16 Current_1;
 	Uint16 Current_2;
 	Uint16 Voltage_Inp;
 	Uint16 Voltage_Out;
 	Uint16 FreeTimeCounter;
 	Uint16 WatchDog;
-	Uint16 __pad[6];
+	Uint16 __pad[2];
 } Osci_Packet;
 
-// Communication with M3 uses SRAM6-SRAM7
-#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
-volatile Uint16 SHARERAMS6[0x1000];
-
-#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
-volatile Uint16 SHARERAMS7[0x1000];
-
-#define S6_START SHARERAMS6
-#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
 void WriteToM3Data(const DataToM3 Data) {
 	static volatile Osci_Packet *osci_packet_ptr = (volatile Osci_Packet *)S6_START;
@@ -50,6 +52,10 @@ void WriteToM3Data(const DataToM3 Data) {
 	osci_packet_ptr->CycleCounter[1] = cycle_counter[1];
 	osci_packet_ptr->CycleCounter[2] = cycle_counter[2];
 	osci_packet_ptr->CycleCounter[3] = cycle_counter[3];
+	osci_packet_ptr->errors.C28_Errors 		  = Data.C28_Errors;
+	osci_packet_ptr->errors.C28_Errors_Latch  = Data.C28_Errors_Latch;
+	osci_packet_ptr->errors.FPGA_Errors 	  = Data.FPGA_Errors;
+	osci_packet_ptr->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
 	osci_packet_ptr->Current_1 		 = Data.Current_1;
 	osci_packet_ptr->Current_2 		 = Data.Current_2;
 	osci_packet_ptr->Voltage_Inp 	 = Data.Voltage_Inp;
@@ -63,8 +69,7 @@ void WriteToM3Data(const DataToM3 Data) {
 	ctom_data->errors.C28_Errors_Latch	= Data.C28_Errors_Latch;
 	ctom_data->errors.FPGA_Errors 		= Data.FPGA_Errors;
 	ctom_data->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
-	ctom_data->SRAM_offset =
-			(Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
+	ctom_data->SRAM_offset = (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
 
 	osci_packet_ptr++;
 	if ((Uint16 *)osci_packet_ptr >= (Uint16*)S7_END) {
