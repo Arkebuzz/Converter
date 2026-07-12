@@ -76,7 +76,7 @@ Void DataExchangeWorker(UArg arg0, UArg arg1)
 }
 
 
-Void OscillogrammsWorker(UArg arg0, UArg arg1)
+Void OsciConnectionHandler(UArg arg0, UArg arg1)
 {
     int clientfd = (int)arg0;
     int nbytes;
@@ -628,7 +628,7 @@ Void OscillogrammsListener(UArg arg0, UArg arg1)
         Task_Params_init(&taskParams);
         taskParams.arg0 = (UArg)clientfd;
         taskParams.stackSize = 1024;
-        taskHandle = Task_create((Task_FuncPtr)OscillogrammsWorker, &taskParams, &eb);
+        taskHandle = Task_create((Task_FuncPtr)OsciConnectionHandler, &taskParams, &eb);
         if (taskHandle == NULL) {
             System_printf("tcpHandler: Failed to create new Task\n");
             close(clientfd);

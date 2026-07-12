@@ -88,7 +88,7 @@ int main(void) {
 
 	// IVAN: create background task DataProcessor
 	Task_Handle taskHandleData;
-	taskHandleData = Task_create((Task_FuncPtr)DataProcessor, &taskParamsData, &eb_Data);
+	taskHandleData = Task_create((Task_FuncPtr)KeepAliveTask, &taskParamsData, &eb_Data);
 	if (taskHandleData == NULL) {
 		System_printf("Failed to create Data Processor thread \n");
 	} else {

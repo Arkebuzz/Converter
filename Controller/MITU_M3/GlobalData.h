@@ -120,7 +120,7 @@ extern Void ModbusThread2(UArg arg0, UArg arg1);
 extern Void ModbusServerTask(UArg arg0, UArg arg1);
 
 extern void Buffers_Init(void);
-extern Void DataProcessor(UArg arg0, UArg arg1);
+extern Void KeepAliveTask(UArg arg0, UArg arg1);
 
 static enum ThreadState
 {
