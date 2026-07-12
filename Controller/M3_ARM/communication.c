@@ -27,8 +27,9 @@ char *DomainName_cfg = "PMCB"; // сюда по идее чо угодно мо�
 
 #define NUM_TCP_WORKERS 1
 
-#define PACKET_CMD_OSCI 0
-#define PACKET_CMD_ECHO 1
+#define PACKET_CMD_ECHO 0
+#define PACKET_CMD_OSCI 1
+#define PACKET_CMD_FULL 2
 
 // IVAN: max amount of measurement packets that can be requested
 // in PACKET_CMD_OSCI
@@ -65,6 +66,7 @@ typedef struct {
 } CTOM_Data;
 
 // 16 u16
+// TODO: Щас ошибки дублируются в пакете и в респонсе
 typedef struct {
 	Uint16 CycleCounter[4];
 	Osci_Errors errors;
@@ -284,6 +286,44 @@ Void OscillogrammsTask(UArg arg0, UArg arg1) {
 	}
 }
 
+// IVAN: returns -1 if error
+int tcp_send_all(SOCKET fd, const void *buf, size_t len) {
+	size_t bytes_sent = 0;
+	while (bytes_sent < len) {
+	    int sent = send(
+	    	fd,
+			((Uint8 *)buf) + bytes_sent,
+			len - bytes_sent,
+			0
+		);
+	    if (sent <= 0) {
+	        System_printf("tcp_send_all: send() failed\n");
+	    	return -1;
+	    }
+	    bytes_sent += sent;
+	}
+	return 0;
+}
+
+// IVAN: returns -1 on error
+int tcp_recv_all(SOCKET fd, const void *buf, size_t len) {
+	size_t bytes_read = 0;
+	while (bytes_read < len) {
+		int read = recv(
+			fd,
+			((Uint8 *)buf) + bytes_read,
+			len - bytes_read,
+			0
+		);
+		if (read <= 0) {
+			System_printf("tcp_recv_all: read() failed\n");
+			return -1;
+		}
+		bytes_read += read;
+	}
+	return 0;
+}
+
 Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 	SOCKET client_fd = (SOCKET)arg0;
 	Uint16 recv_buffer[sizeof(Osci_Request) / sizeof(Uint16)];
@@ -295,21 +335,7 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 
 	while (1) {
 		// IVAN: read the request from the PC
-		size_t bytes_read = 0;
-		while (bytes_read < sizeof(Osci_Request)) {
-			int read = recv(
-				client_fd,
-				((Uint8 *)recv_buffer) + bytes_read,
-				sizeof(Osci_Request) - bytes_read,
-				0
-			);
-			if (read <= 0) {
-				System_printf("OscillogrammsWorker: read() failed\n");
-				break;
-			}
-			bytes_read += read;
-		}
-		if (bytes_read != sizeof(Osci_Request)) {
+		if (tcp_recv_all(client_fd, recv_buffer, sizeof(Osci_Request)) <= 0) {
 			break;
 		}
 		Osci_Request *request = (Osci_Request *)recv_buffer;
@@ -356,20 +382,7 @@ Void OscillogrammsWorker(UArg arg0, UArg arg1) {
 		}
 
 		// IVAN: sending the response
-		size_t bytes_sent = 0;
-		while (bytes_sent < msg_len) {
-		    int sent = send(
-		    	client_fd,
-				((Uint8 *)osci_response) + bytes_sent,
-				msg_len - bytes_sent,
-				0
-			);
-		    if (sent <= 0) {
-		        System_printf("OscillogrammsWorker: send() failed\n");
-		        break;
-		    }
-		    bytes_sent += sent;
-		}
+		tcp_send_all(client_fd, osci_response, msg_len);
 	}
 
 	fdClose(client_fd);
