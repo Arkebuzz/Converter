@@ -352,7 +352,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 		switch (cmd) {
 			case PACKET_CMD_ECHO: {
 				osci_response.cmd = PACKET_CMD_ECHO;
-				osci_response.len = sizeof(Osci_Response);
+				osci_response.len = 0;
 
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 			} break;
