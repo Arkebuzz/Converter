@@ -54,9 +54,13 @@ localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно усп
 
 
 // Обмен с ADCHub
+`ifdef DBG
+localparam DATA_TO_ADC_WIDTH = 16;
+localparam DATA_FROM_ADC_WIDTH = 16;
+`else
 localparam DATA_TO_ADC_WIDTH = 16;
 localparam DATA_FROM_ADC_WIDTH = 32;
-
+`endif
 
 // Получение с ADCHub1 - входное напряжение
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_1;
@@ -90,7 +94,12 @@ reg converter_on_inp;  // Сигнал с C28
 reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
 wire ready_to_send_1;
 wire fo_out_1;
+
+`ifdef DBG
+assign D_OUTP[4] = fo_out_1;
+`else
 assign D_OUTP[4] = ~fo_out_1;
+`endif
 
 DATA_TRANSMITTER Transmitter1 (
    .CLOCK(CLOCK_50),
@@ -134,7 +143,12 @@ reg [11:0] voltage_out;
 reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_2;
 wire ready_to_send_2;
 wire fo_out_2;
+
+`ifdef DBG
+assign D_OUTP[5] = fo_out_2;
+`else
 assign D_OUTP[5] = ~fo_out_2;
+`endif
 
 DATA_TRANSMITTER Transmitter2 (
    .CLOCK(CLOCK_50),
@@ -146,7 +160,8 @@ defparam Transmitter2.DATA_WIDTH = DATA_TO_ADC_WIDTH;
 defparam Transmitter2.TICK_LEN    = 20;  // 50 мГц
 defparam Transmitter2.PULSE_0_LEN = 100;
 defparam Transmitter2.PULSE_1_LEN = 400;
-defparam Transmitter2.BIT_LEN     = 600;    
+//defparam Transmitter2.PULSE_1_LEN = 0;
+defparam Transmitter2.BIT_LEN     = 600;
 defparam Transmitter2.RESET_LEN   = 1000;
 
 
@@ -214,7 +229,11 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub1 отправка
    if (ready_to_send_1) begin
+		`ifdef DBG
+      data_to_send_1 <= 67;
+		`else
       data_to_send_1 <= {pwm_counter, mode_up, converter_on, reset_errors};
+		`endif
    end   
    
    // ADCHub2 приём
@@ -224,7 +243,11 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub2 отправка
    if (ready_to_send_2) begin
+		`ifdef DBG
+      data_to_send_1 <= 69;
+		`else
       data_to_send_2 <= {13'b0, 1'b0, 1'b0, reset_errors};
+		`endif
    end 
    
    // f28m35
