@@ -1,5 +1,6 @@
 `include "DATA_ADRESSES.vh"
 
+`define DBG 67
 
 module PCON(
    input CLOCK_50,
@@ -39,19 +40,18 @@ assign D_OUTP[20:6] = 0;
 // 3: Ошибки транизисторов 1
 // 4: Ошибки транизисторов 2
 // 5: Превышение порога тока
-// 6: Потеря соединения с PCON
+// 6: Потеря соединения с ADCHub1
 //    ADCHub2:
 // 7: Ошибки транизисторов 1
 // 8: Ошибки транизисторов 2
 // 9: Превышение порога тока
-// 10: Потеря соединения с PCON
-reg [15:0] errors = 0;
-reg [15:0] errors_latch = 0;
+// 10: Потеря соединения с ADCHub2
+reg [10:0] errors = 0;
+reg [10:0] errors_latch = 0;
 reg reset_errors_inp = 0;
 reg reset_errors = 0;
 reg [11:0] reset_errors_delay = 0;
 localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
-
 
 // Обмен с ADCHub
 `ifdef DBG
@@ -68,9 +68,16 @@ wire rc_data_ready_1;
 wire rc_connect_fail_1;
 wire rc_invalid_data_1;
 
+wire fo_in_1;
+`ifdef DBG
+assign fo_in_1 = ~D_INP[3];
+`else
+assign fo_in_1 = D_INP[3];
+`endif
+
 DATA_RECEIVER Receiver1 (
-   .CLOCK(CLOCK_50), 
-   .FO_IN(D_INP[3]), 
+   .CLOCK(CLOCK_50),
+   .FO_IN(fo_in_1), 
    .DATA(rc_data_1),
    .DATA_READY(rc_data_ready_1),
    .ERR_CONNECT_FAIL(rc_connect_fail_1),
@@ -96,7 +103,7 @@ wire ready_to_send_1;
 wire fo_out_1;
 
 `ifdef DBG
-assign D_OUTP[4] = fo_out_1;
+assign D_OUTP[4] = ~fo_out_1;
 `else
 assign D_OUTP[4] = ~fo_out_1;
 `endif
@@ -121,9 +128,16 @@ wire rc_data_ready_2;
 wire rc_connect_fail_2;
 wire rc_invalid_data_2;
 
+wire fo_in_2;
+`ifdef DBG
+assign fo_in_2 = ~D_INP[4];
+`else
+assign fo_in_2 = D_INP[4];
+`endif
+
 DATA_RECEIVER Receiver2 (
    .CLOCK(CLOCK_50), 
-   .FO_IN(D_INP[4]), 
+   .FO_IN(fo_in_2), 
    .DATA(rc_data_2),
    .DATA_READY(rc_data_ready_2),
    .ERR_CONNECT_FAIL(rc_connect_fail_2),
@@ -145,7 +159,7 @@ wire ready_to_send_2;
 wire fo_out_2;
 
 `ifdef DBG
-assign D_OUTP[5] = fo_out_2;
+assign D_OUTP[5] = ~fo_out_2;
 `else
 assign D_OUTP[5] = ~fo_out_2;
 `endif
@@ -160,7 +174,6 @@ defparam Transmitter2.DATA_WIDTH = DATA_TO_ADC_WIDTH;
 defparam Transmitter2.TICK_LEN    = 20;  // 50 мГц
 defparam Transmitter2.PULSE_0_LEN = 100;
 defparam Transmitter2.PULSE_1_LEN = 400;
-//defparam Transmitter2.PULSE_1_LEN = 0;
 defparam Transmitter2.BIT_LEN     = 600;
 defparam Transmitter2.RESET_LEN   = 1000;
 
@@ -201,10 +214,9 @@ reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
 
-
 always @(posedge CLOCK_50) begin
-   errors[1] <= errors[1] | rc_connect_fail_1;
-   errors[2] <= errors[2] | rc_connect_fail_2;
+   errors[1] <= rc_connect_fail_1;
+   errors[2] <= rc_connect_fail_2;
    errors_latch <= errors_latch | errors;
    
    if (reset_errors_inp) begin
@@ -244,7 +256,7 @@ always @(posedge CLOCK_50) begin
    // ADCHub2 отправка
    if (ready_to_send_2) begin
 		`ifdef DBG
-      data_to_send_1 <= 69;
+      data_to_send_2 <= 69;
 		`else
       data_to_send_2 <= {13'b0, 1'b0, 1'b0, reset_errors};
 		`endif
