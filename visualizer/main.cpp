@@ -175,7 +175,7 @@ DWORD WINAPI NetworkThread(LPVOID lpParam) {
                             g_packet_count = count;
                             memcpy(g_packets, data, g_packet_count * sizeof(Osci_Packet));
                             
-                            // Sort by CycleCounter (fixes circular buffer wrap arounds)
+                            // sort by CycleCounter
                             qsort(g_packets, g_packet_count, sizeof(Osci_Packet), cmp_packets);
                             
                             // Prepare float buffers for ImGui PlotLines
@@ -229,31 +229,34 @@ int main(int, char**) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("MCU Control Panel", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Control Panel", NULL, ImGuiWindowFlags_NoCollapse);
 
-        ImGui::Text("0. Connection");
+        ImGui::Text("Connection");
         ImGui::InputText("IP Address", g_ip, sizeof(g_ip));
         ImGui::InputInt("Port", &g_port);
         ImGui::Separator();
 
-        ImGui::Text("1. Echo");
+        ImGui::Text("Echo");
         if (ImGui::Button("Send Echo Packet")) trigger_cmd(0, 0);
         ImGui::Separator();
 
-        ImGui::Text("2. Request Osci Packets");
+        ImGui::Text("Request Osci Packets");
         ImGui::InputInt("Packet Count (1-16)", &osci_req_cnt);
         if (osci_req_cnt < 1) osci_req_cnt = 1;
         if (osci_req_cnt > 16) osci_req_cnt = 16;
         if (ImGui::Button("Req Osci")) trigger_cmd(1, osci_req_cnt);
         ImGui::Separator();
 
-        ImGui::Text("3. Full Request & Graphs");
+        ImGui::Text("Full Request & Graphs");
         if (ImGui::Button("Req Full")) trigger_cmd(2, 0);
         ImGui::SameLine();
         ImGui::Checkbox("Request Continuously", &g_continuous);
 
         EnterCriticalSection(&g_cs);
         float w = ImGui::GetContentRegionAvail().x;
+
+// void ImGui::PlotLines(const char* label, const float* values, int values_count, int values_offset, const char* overlay_text, float scale_min, float scale_max, ImVec2 graph_size, int stride)
+
         ImGui::PlotLines("Current 1", g_plot_c1, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
         ImGui::PlotLines("Current 2", g_plot_c2, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
         ImGui::PlotLines("Voltage 1", g_plot_v1, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
@@ -263,14 +266,16 @@ int main(int, char**) {
 
         ImGui::End();
 
-        ImGui::Begin("4. Errors Status", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Begin("Status", NULL, ImGuiWindowFlags_AlwaysAutoResize);
         EnterCriticalSection(&g_cs);
+        ImGui::Text("Status: %s\n", g_sock != INVALID_SOCKET ? "CONNECTED" : "DISCONNECTED");
+        ImGui::Separator();
         ImGui::Text("C28_Errors:        0x%04X", g_latest_errors.C28_Errors);
         ImGui::Text("C28_Errors_Latch:  0x%04X", g_latest_errors.C28_Errors_Latch);
         ImGui::Text("FPGA_Errors:       0x%04X", g_latest_errors.FPGA_Errors);
         ImGui::Text("FPGA_Errors_Latch: 0x%04X", g_latest_errors.FPGA_Errors_Latch);
-        LeaveCriticalSection(&g_cs);
         ImGui::End();
+        LeaveCriticalSection(&g_cs);
 
         ImGui::Render();
         int display_w, display_h;

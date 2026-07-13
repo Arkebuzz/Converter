@@ -42,5 +42,11 @@ main.obj: main.cpp
 $(TARGET): $(MAIN_OBJ) $(IMGUI_OBJ)
 	$(CXX) $(CXXFLAGS) $(MAIN_OBJ) $(IMGUI_OBJ) /Fe$(TARGET) /link $(LIBS)
 
+run: $(TARGET)
+	./$(TARGET)
+
 clean:
 	del *.obj $(TARGET)
+
+.PHONY: run clean
+
