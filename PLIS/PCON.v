@@ -1,6 +1,6 @@
 `include "DATA_ADRESSES.vh"
 
-`define DBG 67
+//`define DBG 67
 
 module PCON(
    input CLOCK_50,
