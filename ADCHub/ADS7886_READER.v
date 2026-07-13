@@ -56,7 +56,7 @@ always @(posedge CLOCK_5) begin
       // Нужно скипнуть 2 такта: чтобы АЦП отдохнула и чтобы АЦП засетапилась
       ST_OFF: begin
          nCS <= 1;   // выключаем АЦП
-         counter <= 0;
+         counter <= 15;
          state <= ST_ON;
       end
       

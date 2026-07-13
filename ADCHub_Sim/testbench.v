@@ -43,12 +43,11 @@ INV3PH uut (
 
 always #25 CLOCK_20 = ~CLOCK_20;   // 20 MHz
 
-
 initial begin
     CLOCK_20 = 0;
     CLOCK_50 = 0;
     AMC_DATA = 0;
-    ADC_DATA = 1;
+    ADC_DATA = 0;
     VDR_ERR = 0;
     VSENS_ERR = 0;
     nPGOOD = 1;
@@ -56,4 +55,15 @@ initial begin
     IGBT_ERR = 6'b000000;
 end
 
+reg [32:0] counter = 25;
+
+always@(posedge CLOCK_20) begin
+    counter = counter - 1;
+    if (counter == 0) begin
+        ADC_DATA = 1;
+    end
+    if (counter > 1000) begin
+        ADC_DATA = counter[2];
+    end
+end
 endmodule
