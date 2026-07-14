@@ -34,6 +34,8 @@ always @(posedge CLOCK_20) begin
          end
       end
       else begin  // MODE_DOWN
+			ctrl_bot <= 0;
+			
          if (pwm_counter < pwm_local_value) begin
             ctrl_top <= 1;
          end else begin

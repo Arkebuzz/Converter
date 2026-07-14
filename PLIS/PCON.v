@@ -209,7 +209,7 @@ EMIF Emif (
 );
 
 reg [6:0]  emif_state_counter = 0;
-reg [12:0] pwm_counter;
+reg [12:0] pwm_target;
 reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
@@ -244,7 +244,7 @@ always @(posedge CLOCK_50) begin
 		`ifdef DBG
       data_to_send_1 <= 67;
 		`else
-      data_to_send_1 <= {pwm_counter, mode_up, converter_on, reset_errors};
+      data_to_send_1 <= {pwm_target, mode_up, converter_on, reset_errors};
 		`endif
    end   
    
@@ -301,7 +301,7 @@ always @(posedge CLOCK_50) begin
    else if (emif_state_counter == 17) begin
       emif_adress <= `ADR_CONV_CTRL;
    end else if (emif_state_counter == 21) begin
-      {pwm_counter, mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
+      {pwm_target, mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
    end
    // Сброс 
    else if (emif_state_counter == 100) begin

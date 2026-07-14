@@ -56,21 +56,21 @@ reg [3:0] errors_latch;  // Сохраненные ошибки, сброс то
 assign CTRL_TOP[2] = 0;
 assign CTRL_TOP[3] = 0;
 
-assign CTRL_BOT[1] = 0;
+assign CTRL_BOT[2] = 0;
 assign CTRL_BOT[3] = 0;
 
 reg converter_on = 0;      // Текущий режим, учитывающий состояние ошибок
 reg converter_on_inp = 0;  // Сигнал с PCON
 reg mode_up;               // Режим работы преобразователя (повышающий/понижающий)
-reg [12:0] pwm_counter;    // Скважность
+reg [12:0] pwm_target;    // Скважность
 
 PWM_GENERATOR GenPWM (
    .CLOCK_20(CLOCK_20), 
    .CONVERTER_ON(converter_on),
    .MODE_UP(mode_up),
-   .PWM(pwm_counter),
-   .CTRL_TOP(CTRL_TOP[1]),  // TODO: Хз че с индексами
-   .CTRL_BOT(CTRL_BOT[2])   // TODO: Хз че с индексами
+   .PWM(pwm_target),
+   .CTRL_TOP(CTRL_TOP[1]),  // TODO: тоже хз на так чуть лучше выглядит 
+   .CTRL_BOT(CTRL_BOT[1])   // TODO: тоже хз на так чуть лучше выглядит
 );
 
 
@@ -166,7 +166,7 @@ always @(posedge CLOCK_20) begin
    end   
    
    if (rc_data_ready && rc_invalid_data == 0) begin
-      {pwm_counter, mode_up, converter_on_inp, reset_errors} <= receiv_data;
+      {pwm_target, mode_up, converter_on_inp, reset_errors} <= receiv_data;
    end
 end
 
