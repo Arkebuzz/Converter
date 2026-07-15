@@ -90,7 +90,7 @@ int main(void)
 	Error_init(&eb_Data);
 	taskParamsData.stackSize = 512;
 	taskParamsData.priority = 1;
-	taskHandleData = Task_create((Task_FuncPtr)DataProcessor, &taskParamsData, &eb_Data);
+	taskHandleData = Task_create((Task_FuncPtr)KeepAliveTask, &taskParamsData, &eb_Data);
 	if (taskHandleData == NULL) {System_printf("Failed to create Data Processor thread \n");}
 	else{System_printf("Started Data Processor thread. Initializing Data Exchange thread... \n");}
 	System_flush();

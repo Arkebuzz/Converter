@@ -1,6 +1,6 @@
 
-Void DataProcessor(UArg arg0, UArg arg1);
+Void KeepAliveTask(UArg arg0, UArg arg1);
 
 void netOpenHook();
-Void OscillogrammsWorker(UArg arg0, UArg arg1);
-Void OscillogrammsTask(UArg arg0, UArg arg1);
+Void OsciConnectionHandler(UArg arg0, UArg arg1);
+Void OsciServer(UArg arg0, UArg arg1);

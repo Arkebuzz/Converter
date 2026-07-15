@@ -62,13 +62,13 @@ assign CTRL_BOT[3] = 0;
 reg converter_on = 0;      // Текущий режим, учитывающий состояние ошибок
 reg converter_on_inp = 0;  // Сигнал с PCON
 reg mode_up;               // Режим работы преобразователя (повышающий/понижающий)
-reg [12:0] pwm_counter;    // Скважность
+reg [12:0] pwm_target;    // Скважность
 
 PWM_GENERATOR GenPWM (
    .CLOCK_20(CLOCK_20), 
    .CONVERTER_ON(converter_on),
    .MODE_UP(mode_up),
-   .PWM(pwm_counter),
+   .PWM(pwm_target),
    .CTRL_TOP(CTRL_TOP[1]),  // TODO: Хз че с индексами
    .CTRL_BOT(CTRL_BOT[2])   // TODO: Хз че с индексами
 );
@@ -111,7 +111,7 @@ wire ready_to_send;
 
 DATA_TRANSMITTER Transmitter (
    .CLOCK(CLOCK_20),
-   .DATA(data_to_send), 
+   .DATA(data_to_send),
    .READY_TO_SEND(ready_to_send), 
    .FO_OUT(FO_OUTPUT)
 );
@@ -131,9 +131,12 @@ wire rc_data_ready;
 wire rc_connect_fail;
 wire rc_invalid_data;
 
+wire signal_inp;
+assign signal_inp = FO_INPUT;
+
 DATA_RECEIVER Receiver (
    .CLOCK(CLOCK_20), 
-   .FO_IN(FO_INPUT), 
+   .FO_IN(signal_inp), 
    .DATA(receiv_data),
    .DATA_READY(rc_data_ready),
    .ERR_CONNECT_FAIL(rc_connect_fail),
@@ -144,7 +147,6 @@ defparam Receiver.TICK_LEN_RECEIV = 50;  // 20 мГц
 defparam Receiver.PULSE_1_LEN     = 400;  
 defparam Receiver.RESET_LEN       = 1000; 
 defparam Receiver.MAX_ERROR       = 100; 
-
 
 always @(posedge CLOCK_20) begin
    errors[0] <= (~IGBT_ERR[1]) || (~IGBT_ERR[2]);
@@ -166,7 +168,7 @@ always @(posedge CLOCK_20) begin
    end   
    
    if (rc_data_ready && rc_invalid_data == 0) begin
-      {pwm_counter, mode_up, converter_on_inp, reset_errors} <= receiv_data;
+      {pwm_target, mode_up, converter_on_inp, reset_errors} <= receiv_data;
    end
 end
 

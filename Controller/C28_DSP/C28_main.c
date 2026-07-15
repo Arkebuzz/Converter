@@ -205,10 +205,10 @@ void main(void) {
 
 		// Моргаем светодиодиком
 		LedCounter++;
-		if (LedCounter == 500) {
+		if (LedCounter == 1000) {
 			GpioG1DataRegs.GPADAT.bit.GPIO8 = 0;
 		}
-		else if (LedCounter > 1000) {
+		else if (LedCounter > 2000) {
 			GpioG1DataRegs.GPADAT.bit.GPIO8 = 1;
 			LedCounter = 0;
 		}
