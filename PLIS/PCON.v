@@ -54,13 +54,8 @@ reg [11:0] reset_errors_delay = 0;
 localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
 
 // Обмен с ADCHub
-`ifdef DBG
-localparam DATA_TO_ADC_WIDTH = 16;
-localparam DATA_FROM_ADC_WIDTH = 16;
-`else
 localparam DATA_TO_ADC_WIDTH = 16;
 localparam DATA_FROM_ADC_WIDTH = 32;
-`endif
 
 // Получение с ADCHub1 - входное напряжение
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_1;
@@ -69,11 +64,7 @@ wire rc_connect_fail_1;
 wire rc_invalid_data_1;
 
 wire fo_in_1;
-`ifdef DBG
-assign fo_in_1 = ~D_INP[3];
-`else
-assign fo_in_1 = D_INP[3];
-`endif
+assign fo_in_1 = D_INP[3]; // adchub inverts in hardware before sending on optics
 
 DATA_RECEIVER Receiver1 (
    .CLOCK(CLOCK_50),
@@ -102,11 +93,7 @@ reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_1;
 wire ready_to_send_1;
 wire fo_out_1;
 
-`ifdef DBG
-assign D_OUTP[4] = ~fo_out_1;
-`else
-assign D_OUTP[4] = ~fo_out_1;
-`endif
+assign D_OUTP[4] = fo_out_1;
 
 DATA_TRANSMITTER Transmitter1 (
    .CLOCK(CLOCK_50),
@@ -129,11 +116,7 @@ wire rc_connect_fail_2;
 wire rc_invalid_data_2;
 
 wire fo_in_2;
-`ifdef DBG
-assign fo_in_2 = ~D_INP[4];
-`else
-assign fo_in_2 = D_INP[4];
-`endif
+assign fo_in_2 = D_INP[4]; // adchub inverts in hardware before sending on optics
 
 DATA_RECEIVER Receiver2 (
    .CLOCK(CLOCK_50), 
@@ -158,11 +141,7 @@ reg [DATA_TO_ADC_WIDTH-1:0] data_to_send_2;
 wire ready_to_send_2;
 wire fo_out_2;
 
-`ifdef DBG
-assign D_OUTP[5] = ~fo_out_2;
-`else
-assign D_OUTP[5] = ~fo_out_2;
-`endif
+assign D_OUTP[5] = fo_out_2;
 
 DATA_TRANSMITTER Transmitter2 (
    .CLOCK(CLOCK_50),
@@ -241,11 +220,7 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub1 отправка
    if (ready_to_send_1) begin
-		`ifdef DBG
-      data_to_send_1 <= 67;
-		`else
       data_to_send_1 <= {pwm_counter, mode_up, converter_on, reset_errors};
-		`endif
    end   
    
    // ADCHub2 приём
@@ -255,11 +230,7 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub2 отправка
    if (ready_to_send_2) begin
-		`ifdef DBG
-      data_to_send_2 <= 69;
-		`else
       data_to_send_2 <= {13'b0, 1'b0, 1'b0, reset_errors};
-		`endif
    end 
    
    // f28m35

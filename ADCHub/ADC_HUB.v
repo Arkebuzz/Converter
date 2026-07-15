@@ -1,3 +1,6 @@
+
+//`define DBG 67
+
 module ADC_HUB (
    input CLOCK_20,   // Часы 20 мГц
    input CLOCK_50,   // Часы 20 мГц №2, не используется
@@ -111,7 +114,7 @@ wire ready_to_send;
 
 DATA_TRANSMITTER Transmitter (
    .CLOCK(CLOCK_20),
-   .DATA(data_to_send), 
+   .DATA(data_to_send),
    .READY_TO_SEND(ready_to_send), 
    .FO_OUT(FO_OUTPUT)
 );
@@ -131,9 +134,12 @@ wire rc_data_ready;
 wire rc_connect_fail;
 wire rc_invalid_data;
 
+wire signal_inp;
+assign signal_inp = ~FO_INPUT;
+
 DATA_RECEIVER Receiver (
    .CLOCK(CLOCK_20), 
-   .FO_IN(FO_INPUT), 
+   .FO_IN(signal_inp), 
    .DATA(receiv_data),
    .DATA_READY(rc_data_ready),
    .ERR_CONNECT_FAIL(rc_connect_fail),
@@ -144,7 +150,6 @@ defparam Receiver.TICK_LEN_RECEIV = 50;  // 20 мГц
 defparam Receiver.PULSE_1_LEN     = 400;  
 defparam Receiver.RESET_LEN       = 1000; 
 defparam Receiver.MAX_ERROR       = 100; 
-
 
 always @(posedge CLOCK_20) begin
    errors[0] <= (~IGBT_ERR[1]) || (~IGBT_ERR[2]);
