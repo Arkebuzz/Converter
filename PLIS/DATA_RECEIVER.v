@@ -34,11 +34,13 @@ assign ERR_CONNECT_FAIL = connect_fail;
 reg invalid_data = 0;
 assign ERR_INVALID_DATA = invalid_data;
 
+reg curr_inp;
 reg prev_inp;
 reg [7:0] signal_counter = 0;
 
 always @(posedge CLOCK) begin
-   prev_inp <= FO_IN;
+	curr_inp <= FO_IN;
+   prev_inp <= curr_inp;
    data_ready <= 0;
 
    if (signal_counter < CONFAIL_TICKS) begin
@@ -48,7 +50,7 @@ always @(posedge CLOCK) begin
    end
  
    // 0 -> 1
-   if (prev_inp == 0 && FO_IN == 1) begin
+   if (prev_inp == 0 && curr_inp == 1) begin
       if (signal_counter >= RESET_TICKS) begin
          data_out <= data_temp;
          data_temp <= 0;
@@ -61,7 +63,7 @@ always @(posedge CLOCK) begin
       connect_fail <= 0;
    end
    // 1 -> 0
-   else if (prev_inp == 1 && FO_IN == 0) begin
+   else if (prev_inp == 1 && curr_inp == 0) begin
       if (signal_counter >= PULSE_1_TICKS) begin
          data_temp[bit_counter] <= 1;
       end
