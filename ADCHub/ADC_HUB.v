@@ -1,6 +1,3 @@
-
-//`define DBG 67
-
 module ADC_HUB (
    input CLOCK_20,   // Часы 20 мГц
    input CLOCK_50,   // Часы 20 мГц №2, не используется
@@ -135,7 +132,7 @@ wire rc_connect_fail;
 wire rc_invalid_data;
 
 wire signal_inp;
-assign signal_inp = ~FO_INPUT;
+assign signal_inp = FO_INPUT;
 
 DATA_RECEIVER Receiver (
    .CLOCK(CLOCK_20), 
