@@ -56,7 +56,7 @@ reg [3:0] errors_latch;  // Сохраненные ошибки, сброс то
 assign CTRL_TOP[2] = 0;
 assign CTRL_TOP[3] = 0;
 
-assign CTRL_BOT[1] = 0;
+assign CTRL_BOT[2] = 0;
 assign CTRL_BOT[3] = 0;
 
 reg converter_on = 0;      // Текущий режим, учитывающий состояние ошибок
