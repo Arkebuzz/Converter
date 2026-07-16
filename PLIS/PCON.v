@@ -30,6 +30,7 @@ module PCON(
 assign D_OUTP[3:1]  = 0;
 assign D_OUTP[20:6] = 0;
 
+
 // Описание ошибок:
 // 0: Потерян сигнал с f28m35
 // 1: Потерян сигнал с ADCHub1
@@ -51,11 +52,25 @@ reg reset_errors = 0;
 reg [11:0] reset_errors_delay = 0;
 localparam RESET_ERRORS_DELAY = 12'd4095;  // На 50 мГц должно успеть прилететь на ADCHub и обратно дважды
 
-// Обмен с ADCHub
+
+// Обмен с ADCHub:
 localparam DATA_TO_ADC_WIDTH = 16;
 localparam DATA_FROM_ADC_WIDTH = 32;
 
-// Получение с ADCHub1 - входное напряжение
+reg converter_mode_up;  // Режим повышающий/понижающий
+reg converter_on;       // Вкл/выкл, учитывающее состояние ошибок
+reg converter_on_inp;   // Сигнал вкл/выкл с микроконтроллера
+reg [12:0] pwm_target;  // Скважность
+
+// ADCHub1 - получаем входное напряжение,  управление транзисторами
+reg [11:0] current_1;
+reg [11:0] voltage_inp;
+
+// ADCHub2 - получаем выходное напряжение, управление транзисторами не осуществляется
+reg [11:0] current_2;
+reg [11:0] voltage_out;
+
+// Получение с ADCHub1
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_1;
 wire rc_ready_1;
 wire rc_connect_fail_1;
@@ -75,15 +90,7 @@ defparam Receiver1.PULSE_1_LEN     = 400;
 defparam Receiver1.RESET_LEN       = 1000; 
 defparam Receiver1.MAX_ERROR       = 100; 
 
-reg [11:0] current_1;
-reg [11:0] voltage_inp;
-
-
 // Отправка на ADCHub1
-reg mode_up;
-reg converter_on;      // Текущий режим, учитывающий состояние ошибок
-reg converter_on_inp;  // Сигнал с C28
-
 reg [DATA_TO_ADC_WIDTH-1:0] tr_data_1;
 wire tr_ready_1;
 
@@ -100,8 +107,7 @@ defparam Transmitter1.PULSE_1_LEN = 400;
 defparam Transmitter1.BIT_LEN     = 600;    
 defparam Transmitter1.RESET_LEN   = 1000;
 
-
-// ADCHub2 - выходное напряжение
+// Получение с ADCHub2
 wire [DATA_FROM_ADC_WIDTH-1:0] rc_data_2;
 wire rc_ready_2;
 wire rc_connect_fail_2;
@@ -120,10 +126,6 @@ defparam Receiver2.TICK_LEN_RECEIV = 20;   // 50 мГц
 defparam Receiver2.PULSE_1_LEN     = 400;  
 defparam Receiver2.RESET_LEN       = 1000; 
 defparam Receiver2.MAX_ERROR       = 100; 
-
-reg [11:0] current_2;
-reg [11:0] voltage_out;
-
 
 // Отправка на ADCHub2
 reg [DATA_TO_ADC_WIDTH-1:0] tr_data_2;
@@ -152,7 +154,7 @@ reg  [6:0]  emif_adress;
 wire [6:0]  emif_adress_wire; 
 assign emif_adress_wire = emif_adress; 
 
-// 0->1  =>  запись по ADRS_FROM_FPGA значения DATA_FROM_FPGA
+// wren 0->1  =>  запись по ADRS_FROM_FPGA значения DATA_FROM_FPGA
 reg emif_wren;  
 wire emif_wren_wire;  
 assign emif_wren_wire = emif_wren; 
@@ -174,14 +176,15 @@ EMIF Emif (
 );
 
 reg [6:0]  emif_state_counter = 0;
-reg [12:0] pwm_target;
 reg [7:0]  watch_dog_curr;
 reg [7:0]  watch_dog_prev;
 reg [7:0]  watch_dog_timer;
 
+
 always @(posedge CLOCK_50) begin
    errors[1] <= rc_connect_fail_1 | rc_invalid_data_1;
    errors[2] <= rc_connect_fail_2 | rc_invalid_data_2;
+
    errors_latch <= errors_latch | errors;
    
    if (reset_errors_inp) begin
@@ -206,7 +209,7 @@ always @(posedge CLOCK_50) begin
    
    // ADCHub1 отправка
    if (tr_ready_1) begin
-      tr_data_1 <= {pwm_target, mode_up, converter_on, reset_errors};
+      tr_data_1 <= {pwm_target, converter_mode_up, converter_on, reset_errors};
    end   
    
    // ADCHub2 приём
@@ -258,7 +261,7 @@ always @(posedge CLOCK_50) begin
    else if (emif_state_counter == 17) begin
       emif_adress <= `ADR_CONV_CTRL;
    end else if (emif_state_counter == 21) begin
-      {pwm_target, mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
+      {pwm_target, converter_mode_up, converter_on_inp, reset_errors_inp} <= emif_data_from_micro;
    end
    // Сброс 
    else if (emif_state_counter == 100) begin
