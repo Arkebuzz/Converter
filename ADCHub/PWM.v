@@ -7,6 +7,8 @@ module PWM_GENERATOR (
    output CTRL_BOT
 );
 
+reg mode_up;
+
 reg [12:0] pwm_counter = 0;
 reg [12:0] pwm_target;
 
@@ -22,9 +24,10 @@ always @(posedge CLOCK_20) begin
       
       if (pwm_counter == 0) begin
          pwm_target <= PWM;
+         mode_up <= MODE_UP;
       end
       
-      if (MODE_UP) begin
+      if (mode_up) begin
          ctrl_top <= 1;
          
          if (pwm_counter < pwm_target) begin
@@ -36,7 +39,7 @@ always @(posedge CLOCK_20) begin
       else begin  // MODE_DOWN
 			ctrl_bot <= 0;
 			
-         if (pwm_counter < pwm_local_value) begin
+         if (pwm_counter < pwm_target) begin
             ctrl_top <= 1;
          end else begin
             ctrl_top <= 0;
