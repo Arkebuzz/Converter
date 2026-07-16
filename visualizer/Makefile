@@ -3,8 +3,7 @@ TARGET = visualizer.exe
 CXX = cl
 CXXFLAGS = /nologo /O2 /MD /W3 /I. /I imgui /I imgui/backends /I glfw/include /D "NDEBUG"
 
-LIBS = user32.lib gdi32.lib shell32.lib ws2_32.lib opengl32.lib glfw/glfw3.lib
-
+LIBS = user32.lib gdi32.lib shell32.lib ws2_32.lib opengl32.lib glfw/lib-vc2022/glfw3.lib
 IMGUI_DIR = imgui
 IMGUI_OBJ = \
 	imgui.obj \
@@ -36,7 +35,7 @@ imgui_impl_glfw.obj: $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp
 imgui_impl_opengl3.obj: $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 	$(CXX) $(CXXFLAGS) /c $< /Fo$@
 
-main.obj: main.cpp
+main.obj: main_ai_edition.cpp
 	$(CXX) $(CXXFLAGS) /c $< /Fo$@
 
 $(TARGET): $(MAIN_OBJ) $(IMGUI_OBJ)
