@@ -15,13 +15,14 @@ short WriteWordToFPGA(short offset, short value) {
 
 
 void ReadFPGAData(const Uint16 *Source, DataToM3 *Data) {
-	Data->WatchDog     = Source[ADR_WATCHDOG];
-	Data->Current_1    = Source[ADR_CURRENT_1];
-	Data->Current_2    = Source[ADR_CURRENT_2];
-	Data->Voltage_Inp  = Source[ADR_VOLTAGE_INP];
-	Data->Voltage_Out  = Source[ADR_VOLTAGE_OUT];
-	Data->FPGA_Errors  = Source[ADR_ERRORS];
-	Data->FPGA_Errors_Latch = Source[ADR_ERRORS_LATCH];
+	volatile Uint8 *sixseven = 0x340000;
+	Data->WatchDog     = sixseven[ADR_WATCHDOG];
+	Data->Current_1    = sixseven[ADR_CURRENT_1];
+	Data->Current_2    = sixseven[ADR_CURRENT_2];
+	Data->Voltage_Inp  = sixseven[ADR_VOLTAGE_INP];
+	Data->Voltage_Out  = sixseven[ADR_VOLTAGE_OUT];
+	Data->FPGA_Errors  = sixseven[ADR_ERRORS];
+	Data->FPGA_Errors_Latch = sixseven[ADR_ERRORS_LATCH];
 }
 
 
@@ -31,7 +32,7 @@ void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {
 	} else {
 		ErrorReset(ERROR_FPGA_CONNECT_FAIL);
 	}
-	*WatchDog++;
+	(*WatchDog)++;
 	WriteWordToFPGA(ADR_WATCHDOG, *WatchDog);
 }
 

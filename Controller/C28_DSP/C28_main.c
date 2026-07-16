@@ -189,7 +189,7 @@ void main(void) {
 
 	// Настройка DMA
 	// DMASourceFPGA - память на FPGA, DMADestFPGA - локальная копия
-	Uint16 DMABufFPGA[128] = {0};
+	volatile Uint16 DMABufFPGA[128] = {0};
 	setup_DMA(&DMABufFPGA[0], 51);
 
 	DataToM3 Data;
