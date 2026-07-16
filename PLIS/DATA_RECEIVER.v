@@ -17,8 +17,8 @@ module DATA_RECEIVER #(
 
 localparam PULSE_1_TICKS = (PULSE_1_LEN - MAX_ERROR) / TICK_LEN_RECEIV;
 localparam RESET_TICKS   = (RESET_LEN   - MAX_ERROR) / TICK_LEN_RECEIV;
-localparam CONNECT_FAIL  = 4 * RESET_LEN / TICK_LEN_RECEIV;
-localparam CONFAIL_TICKS = (CONNECT_FAIL < 255) ? CONNECT_FAIL : 255;
+localparam CONFAIL_LEN   = 4 * RESET_LEN / TICK_LEN_RECEIV;
+localparam CONFAIL_TICKS = (CONFAIL_LEN < 255) ? CONFAIL_LEN : 255;
 
 reg [6:0] bit_counter = 0;  // 128 бит
 reg [DATA_WIDTH-1:0] data_temp;
@@ -36,22 +36,22 @@ assign ERR_INVALID_DATA = invalid_data;
 
 reg curr_inp;
 reg prev_inp;
-reg [7:0] signal_counter = 0;
+reg [7:0] timer = 0;  // 256 значений, в 4 раза больше, чем на передатчике (см. CONFAIL_LEN)
 
 always @(posedge CLOCK) begin
 	curr_inp <= FO_IN;
    prev_inp <= curr_inp;
    data_ready <= 0;
 
-   if (signal_counter < CONFAIL_TICKS) begin
-      signal_counter <= signal_counter + 8'b1;
+   if (timer < CONFAIL_TICKS) begin
+      timer <= timer + 8'b1;
    end else begin
       connect_fail <= 1;
    end
  
    // 0 -> 1
    if (prev_inp == 0 && curr_inp == 1) begin
-      if (signal_counter >= RESET_TICKS) begin
+      if (timer >= RESET_TICKS) begin
          data_out <= data_temp;
          data_temp <= 0;
          bit_counter <= 0;
@@ -59,12 +59,12 @@ always @(posedge CLOCK) begin
          data_ready <= 1;
       end
 
-      signal_counter <= 0;
+      timer <= 0;
       connect_fail <= 0;
    end
    // 1 -> 0
    else if (prev_inp == 1 && curr_inp == 0) begin
-      if (signal_counter >= PULSE_1_TICKS) begin
+      if (timer >= PULSE_1_TICKS) begin
          data_temp[bit_counter] <= 1;
       end
       else begin
@@ -80,7 +80,7 @@ always @(posedge CLOCK) begin
          bit_counter <= bit_counter + 7'b1;
       end
 
-      signal_counter <= 0;
+      timer <= 0;
       connect_fail <= 0;
    end
 end

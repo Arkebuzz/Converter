@@ -23,8 +23,8 @@ localparam ST_RESET = 1'b0;
 localparam ST_SEND  = 1'b1;
 reg state = ST_RESET;
 
-reg [6:0] bit_counter = 0;    // 128 бит
-reg [5:0] pulse_counter = 0;  // 64 бит, 50 мГц потянет
+reg [6:0] bit_counter = 0;  // 128 значений
+reg [5:0] timer = 0;        // 64 значений, 50 мГц потянет
 
 reg ready2send = 0;
 assign READY_TO_SEND = ready2send;
@@ -36,35 +36,35 @@ reg [DATA_WIDTH-1:0] data;
 
 always @(posedge CLOCK) begin
    fo_out <= 0;
-   pulse_counter <= pulse_counter + 4'b1;
+   timer <= timer + 4'b1;
 
    case (state)
       ST_RESET: begin  // FO_OUT = 0
-         if      (pulse_counter == RESET_TICKS - 2) begin
+         if      (timer == RESET_TICKS - 2) begin
             ready2send <= 1;
          end
-         else if (pulse_counter == RESET_TICKS - 1) begin
+         else if (timer == RESET_TICKS - 1) begin
             ready2send <= 0;
          end
-         else if (pulse_counter == RESET_TICKS) begin
+         else if (timer == RESET_TICKS) begin
             data <= DATA;
             bit_counter <= 0;
-            pulse_counter <= 1;
+            timer <= 1;
             state <= ST_SEND;
          end
       end
 
       ST_SEND: begin
-         if      (data[bit_counter] == 1 && pulse_counter <= PULSE_1_TICKS) begin
+         if      (data[bit_counter] == 1 && timer <= PULSE_1_TICKS) begin
             fo_out <= 1;
          end
-         else if (data[bit_counter] == 0 && pulse_counter <= PULSE_0_TICKS) begin
+         else if (data[bit_counter] == 0 && timer <= PULSE_0_TICKS) begin
             fo_out <= 1;
          end
 
-         if (pulse_counter == BIT_TICKS) begin
+         if (timer == BIT_TICKS) begin
             bit_counter <= bit_counter + 7'b1;
-            pulse_counter <= 1;
+            timer <= 1;
 
             if (bit_counter == DATA_WIDTH - 1) begin
                state <= ST_RESET;
