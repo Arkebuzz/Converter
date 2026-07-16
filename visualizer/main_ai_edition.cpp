@@ -54,7 +54,7 @@ char g_ip[32] = "10.1.3.12";
 int g_port = 1124;
 SOCKET g_sock = INVALID_SOCKET;
 bool g_connected = false;
-bool g_should_reconnect = false;  // Флаг для запроса переподключения
+bool g_should_connect = false;
 
 Osci_Errors g_latest_errors = {0};
 
@@ -70,16 +70,7 @@ CRITICAL_SECTION g_cs;
 int g_cmd_request = -1;
 int g_arg_request = 0;
 bool g_continuous = false;
-bool g_running = true;  // Флаг для завершения потока
-
-// Функция для безопасного закрытия сокета
-void close_connection() {
-    if (g_sock != INVALID_SOCKET) {
-        closesocket(g_sock);
-        g_sock = INVALID_SOCKET;
-    }
-    g_connected = false;
-}
+bool g_running = true; 
 
 uint64_t get_cycle_counter(const Osci_Packet* p) {
     uint64_t res = 0;
@@ -96,6 +87,14 @@ int cmp_packets(const void* a, const void* b) {
     if (ca < cb) return -1;
     if (ca > cb) return 1;
     return 0;
+}
+
+void close_connection() {
+    if (g_sock != INVALID_SOCKET) {
+        closesocket(g_sock);
+        g_sock = INVALID_SOCKET;
+    }
+    g_connected = false;
 }
 
 bool connect_mcu() {
@@ -175,8 +174,8 @@ DWORD WINAPI NetworkThread(LPVOID lpParam) {
         bool should_connect = false;
         
         EnterCriticalSection(&g_cs);
-        if (g_should_reconnect) {
-            g_should_reconnect = false;
+        if (g_should_connect) {
+            g_should_connect = false;
             should_connect = true;
             cmd = -1;  // Не выполняем команду, только переподключаемся
         } else if (g_cmd_request != -1) {
@@ -193,7 +192,7 @@ DWORD WINAPI NetworkThread(LPVOID lpParam) {
         if (should_connect) {
             // Пытаемся подключиться если нет активного соединения
             if (g_sock == INVALID_SOCKET || !g_connected) {
-                connect_mcu();  // Не блокируем UI, просто пытаемся подключиться
+                connect_mcu();
             }
         }
 
@@ -209,11 +208,17 @@ DWORD WINAPI NetworkThread(LPVOID lpParam) {
 
                     if (resp.cmd == 1 || resp.cmd == 2) {
                         int len = resp.len;
-                        if (len > 0 && len <= MAX_PLOT_POINTS * (int)sizeof(Osci_Packet)) {
-                            void* data = malloc(len);
+                        int max_bytes = MAX_PLOT_POINTS * sizeof(Osci_Packet);
+                        
+                        if (len > 0 && len <= max_bytes) {
+                            int count = len / sizeof(Osci_Packet);
+                            if (count > MAX_PLOT_POINTS) count = MAX_PLOT_POINTS;
+                            int bytes_to_read = count * sizeof(Osci_Packet);
+                        
+                            Osci_Packet packets[MAX_PLOT_POINTS];
                             
-                            if (data && tcp_recv_all(data, len)) {
-                                // Если FULL, читаем tailing INFO packet и offsets
+                            if (tcp_recv_all(packets, bytes_to_read)) {
+                                // Если FULL, читаем tailing INFO
                                 if (resp.cmd == 2) {
                                     Osci_Response info_resp;
                                     uint16_t offsets[2];
@@ -228,32 +233,25 @@ DWORD WINAPI NetworkThread(LPVOID lpParam) {
                                     }
                                 }
 
-                                int count = len / sizeof(Osci_Packet);
-                                if (count > MAX_PLOT_POINTS) count = MAX_PLOT_POINTS;
-
+                                // Сортируем packets по времени
+                                qsort(packets, count, sizeof(Osci_Packet), cmp_packets);
+                                
                                 EnterCriticalSection(&g_cs);
                                 g_packet_count = count;
-                                memcpy(g_packets, data, g_packet_count * sizeof(Osci_Packet));
                                 
-                                // sort by CycleCounter
-                                qsort(g_packets, g_packet_count, sizeof(Osci_Packet), cmp_packets);
-                                
-                                // Prepare float buffers for ImGui PlotLines
-                                for (int i = 0; i < g_packet_count; i++) {
-                                    g_plot_c1[i] = fabsf((float)g_packets[i].Current_1   - 1706.66f) * 0.366210938f;
-                                    g_plot_c2[i] = fabsf((float)g_packets[i].Current_2   - 1706.66f) * 0.366210938f;
-                                    g_plot_v1[i] = fabsf((float)g_packets[i].Voltage_Inp - 2070.0f) * 1.271565755f;
-                                    g_plot_v2[i] = fabsf((float)g_packets[i].Voltage_Out - 2070.0f) * 1.271565755f;
+                                for (int i = 0; i < count; i++) {
+                                    g_plot_c1[i] = fabsf((float)packets[i].Current_1   - 1706.66f) * 0.366210938f;
+                                    g_plot_c2[i] = fabsf((float)packets[i].Current_2   - 1706.66f) * 0.366210938f;
+                                    g_plot_v1[i] = fabsf((float)packets[i].Voltage_Inp - 2070.00f) * 1.271565755f;
+                                    g_plot_v2[i] = fabsf((float)packets[i].Voltage_Out - 2070.00f) * 1.271565755f;
                                 }
                                 LeaveCriticalSection(&g_cs);
                             }
-                            free(data);
                         }
                     }
                 }
             }
         }
-        
         Sleep(50);  // Чтобы не спамить постоянно
     }
     return 0;
@@ -266,9 +264,9 @@ void trigger_cmd(int cmd, int arg) {
     LeaveCriticalSection(&g_cs);
 }
 
-void trigger_reconnect() {
+void trigger_connect() {
     EnterCriticalSection(&g_cs);
-    g_should_reconnect = true;
+    g_should_connect = true;
     LeaveCriticalSection(&g_cs);
 }
 
@@ -332,51 +330,36 @@ int main(int, char**) {
         ImGui::InputText("IP Address", g_ip, sizeof(g_ip));
         ImGui::InputInt("Port", &g_port);
         
-        // Статус подключения
-        EnterCriticalSection(&g_cs);
-        bool current_connected = g_connected;
-        LeaveCriticalSection(&g_cs);
-        
-        if (current_connected) {
+        if (g_connected) {
             ImGui::TextColored(ImVec4(0, 1, 0, 1), "Status: CONNECTED");
         } else {
             ImGui::TextColored(ImVec4(1, 0, 0, 1), "Status: DISCONNECTED");
         }
         
-        if (ImGui::Button("Connect")) {
-            trigger_reconnect();
-        }
-        
+        if (ImGui::Button("Connect")) trigger_connect();
         ImGui::Separator();
 
         ImGui::Text("Echo Test");
-        if (ImGui::Button("Send Echo Packet")) {
-            trigger_cmd(0, 0);
-        }
+        if (ImGui::Button("Send Echo Packet")) trigger_cmd(0, 0);
         ImGui::Separator();
 
         ImGui::Text("Request Osci Packets");
         ImGui::InputInt("Packet Count (1-16)", &osci_req_cnt);
         if (osci_req_cnt < 1) osci_req_cnt = 1;
         if (osci_req_cnt > 16) osci_req_cnt = 16;
-        if (ImGui::Button("Request Osci")) {
-            trigger_cmd(1, osci_req_cnt);
-        }
+        if (ImGui::Button("Request Osci")) trigger_cmd(1, osci_req_cnt);
         ImGui::Separator();
 
         ImGui::Text("Full Request & Graphs");
-        if (ImGui::Button("Request Full")) {
-            trigger_cmd(2, 0);
-        }
+        if (ImGui::Button("Request Full")) trigger_cmd(2, 0);
         ImGui::SameLine();
         ImGui::Checkbox("Request Continuously", &g_continuous);
-
         ImGui::Separator();
         
         // Графики
-        EnterCriticalSection(&g_cs);
         float w = ImGui::GetContentRegionAvail().x;
-
+        
+        EnterCriticalSection(&g_cs);
         if (g_packet_count > 0) {
             ImGui::PlotLines("##Current 1",   g_plot_c1, g_packet_count, 0, "Current 1",   0.0f, 2000.0f, ImVec2(w, 80));
             ImGui::PlotLines("##Current 2",   g_plot_c2, g_packet_count, 0, "Current 2",   0.0f, 2000.0f, ImVec2(w, 80));
@@ -392,7 +375,7 @@ int main(int, char**) {
         // Окно статуса
         ImGui::Begin("Status", NULL, ImGuiWindowFlags_AlwaysAutoResize);
         EnterCriticalSection(&g_cs);
-        ImGui::Text("Connection: %s", current_connected ? "ACTIVE" : "INACTIVE");
+        ImGui::Text("Connection: %s", g_connected ? "ACTIVE" : "INACTIVE");
         ImGui::Separator();
         ImGui::Text("C28_Errors:        0x%04X", g_latest_errors.C28_Errors);
         ImGui::Text("C28_Errors_Latch:  0x%04X", g_latest_errors.C28_Errors_Latch);
