@@ -57,6 +57,9 @@ PAGE 0:    /* Program Memory */
    ECSL_PWL_P0 : origin = 0x13FFF4, length = 0x000004     /* Part of FLASHA.  ECSL password locations in FLASHA */
    CSM_PWL_P0  : origin = 0x13FFF8, length = 0x000008     /* Part of FLASHA.  CSM password locations in FLASHA */
 
+   //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+   FPGAMSGRAM  : origin = 0x340000, length = 0x80
+
    FPUTABLES   : origin = 0x3FD258, length = 0x0006A0      /* FPU Tables in Boot ROM */
    IQTABLES    : origin = 0x3FD8F8, length = 0x000B50     /* IQ Math Tables in Boot ROM */
    IQTABLES2   : origin = 0x3FE448, length = 0x00008C     /* IQ Math Tables in Boot ROM */
@@ -142,6 +145,7 @@ SECTIONS
    }
 
    // !!!!!!!!!!!!
+   FPGA_MSGRAM : > FPGAMSGRAM, PAGE = 0
    CTOM_MSGRAM : > CTOMRAM, PAGE = 1
    MTOC_MSGRAM : > MTOCRAM, PAGE = 1
 

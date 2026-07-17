@@ -104,6 +104,24 @@ void setup_SPI(void) {
 	SpiaRegs.SPICCR.bit.SPISWRESET = 1;
 }
 
+void setup_DMA_FPGA() {
+	Uint16 size = sizeof(FPGA_MSGRAM_LOCAL)/sizeof(FPGA_MSGRAM_LOCAL[0]);
+	DMACH1AddrConfig(FPGA_MSGRAM_LOCAL, FPGA_MSGRAM);
+
+	DMACH1BurstConfig(0, 0, 0);
+	DMACH1TransferConfig(size - 1, 1, 1);
+	DMACH1WrapConfig(size - 1, 0, size - 1, 0);
+
+	// This is a static copy use one shot mode, so only one trigger is needed
+	// Use 16-bit mode
+	// Enable the PIE interrupt for the DMA channel
+	DMACH1ModeConfig(0,PERINT_ENABLE,ONESHOT_ENABLE,CONT_ENABLE,
+					 SYNC_DISABLE,SYNC_SRC,OVRFLOW_DISABLE,SIXTEEN_BIT,
+					 CHINT_END, CHINT_ENABLE);
+
+	StartDMACH1();
+}
+
 void setup_timers(unsigned short MainCycleTimer_uS, unsigned short CPUfreq_value_MHZ) {
 	// COPY PASTE
 
@@ -124,26 +142,6 @@ void start_timers(void) {
 	CpuTimer1Regs.TCR.bit.TIF = 1; //Reset interrupt flag
 	CpuTimer1Regs.TCR.bit.TIE = 1; //Enable timer interrupt
 	CpuTimer1Regs.TCR.bit.TSS = 0; //Ensure timer start
-}
-
-void setup_DMA(volatile Uint16 *DMADestFPGA, Uint16 size) {
-	// COPY PASTE
-
-	Uint16 *DMASourceFPGA = (Uint16 *)(0x340000);
-	DMACH1AddrConfig(DMADestFPGA, DMASourceFPGA);
-
-	DMACH1BurstConfig(0, 0, 0);
-	DMACH1TransferConfig(size - 1, 1, 1);
-	DMACH1WrapConfig(size - 1, 0, size - 1, 0);
-
-	// This is a static copy use one shot mode, so only one trigger is needed
-	// Use 16-bit mode
-	// Enable the PIE interrupt for the DMA channel
-	DMACH1ModeConfig(0,PERINT_ENABLE,ONESHOT_ENABLE,CONT_ENABLE,
-					 SYNC_DISABLE,SYNC_SRC,OVRFLOW_DISABLE,SIXTEEN_BIT,
-					 CHINT_END, CHINT_ENABLE);
-
-	StartDMACH1();
 }
 
 void main(void) {
@@ -188,9 +186,8 @@ void main(void) {
 	while (CtoMIpcRegs.CTOMIPCFLG.bit.IPC1 != 0);  // Wait for M3 to read init data
 
 	// Настройка DMA
-	// DMASourceFPGA - память на FPGA, DMADestFPGA - локальная копия
-	volatile Uint16 DMABufFPGA[128] = {0};
-	setup_DMA(&DMABufFPGA[0], 51);
+	// FPGA_MSGRAM - память на FPGA, FPGA_MSGRAM_LOCAL - локальная копия
+	setup_DMA_FPGA();
 
 	DataToM3 Data;
 	Uint16 FreeTimeCounter = 0;
@@ -216,23 +213,19 @@ void main(void) {
 		Data.CycleCounter = CycleCounter;
 		Data.FreeTimeCounter = FreeTimeCounter;
 
-		ReadFPGAData(DMABufFPGA, &Data);
+		ReadFPGAData(&Data);
 		CheckFPGAConnect(Data, &WatchDog);
 
 		// TODO: Считывание сигналов с M3: (bool16 ?)
-		Uint16 reset_errors = 0;
-		Uint16 converter_on = 0;
-		Uint16 mode_up = 0;
+		Bool reset_errors = false;
+		Bool converter_on = false;
+		Bool mode_up = false;
+		Uint16 PWM_Counter = 0; // TODO: Расчет pwm:
+		WriteFPGAData(PWM_Counter, mode_up, converter_on, reset_errors);
 
-		// TODO: Расчет pwm:
-		Uint16 PWM_Counter = 0;
-		Uint16 CTRL_Converter = (PWM_Counter << 3) | (mode_up << 2) | (converter_on << 1) | reset_errors;
-		
 		Data.C28_Errors = ErrorGetCurrent();
 		Data.C28_Errors_Latch = ErrorGetLatch();
 		WriteToM3Data(Data);  // Отправляем замер на М3
-
-		WriteFPGAData(CTRL_Converter);  // Запись в FPGA
 
 		if (reset_errors) {
 			reset_errors = 0;
