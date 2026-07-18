@@ -104,6 +104,7 @@ void setup_SPI(void) {
 	SpiaRegs.SPICCR.bit.SPISWRESET = 1;
 }
 
+/*
 void setup_DMA_FPGA() {
 	Uint16 size = sizeof(FPGA_MSGRAM_LOCAL)/sizeof(FPGA_MSGRAM_LOCAL[0]);
 	DMACH1AddrConfig(FPGA_MSGRAM_LOCAL, FPGA_MSGRAM);
@@ -121,6 +122,7 @@ void setup_DMA_FPGA() {
 
 	StartDMACH1();
 }
+*/
 
 void setup_timers(unsigned short MainCycleTimer_uS, unsigned short CPUfreq_value_MHZ) {
 	// COPY PASTE
@@ -145,12 +147,7 @@ void start_timers(void) {
 }
 
 void main(void) {
-	{
-		// COPY PASTE
-
-		//GpioG2DataRegs.GPEDAT.bit.GPIO134 = 0; //Remove system OK flag to FPGA
-		GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; 	 //Remove system OK flag to FPGA
-	}
+	GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; 	 //Remove system OK flag to FPGA
 
     // Disable all interrupts while configuring
     DINT;
@@ -187,7 +184,7 @@ void main(void) {
 
 	// Настройка DMA
 	// FPGA_MSGRAM - память на FPGA, FPGA_MSGRAM_LOCAL - локальная копия
-	setup_DMA_FPGA();
+	// setup_DMA_FPGA();
 
 	DataToM3 Data;
 	Uint16 FreeTimeCounter = 0;

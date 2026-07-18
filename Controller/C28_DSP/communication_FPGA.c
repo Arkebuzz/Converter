@@ -1,16 +1,19 @@
 #include "communication_FPGA.h"
 #include "error_handling.h"
 
+#pragma DATA_SECTION(FPGA_MSGRAM, "FPGA_MSGRAM")
+volatile Uint16 FPGA_MSGRAM[128];
+
 void ReadFPGAData(DataToM3 *Data) {
     // пока DMA не работает и поэтому читаем с адреса
-    Uint16 Source = 0x340000; //FPGA_MSGRAM_LOCAL
-	Data->WatchDog     = Source[ADR_WATCHDOG];
-	Data->Current_1    = Source[ADR_CURRENT_1];
-	Data->Current_2    = Source[ADR_CURRENT_2];
-	Data->Voltage_Inp  = Source[ADR_VOLTAGE_INP];
-	Data->Voltage_Out  = Source[ADR_VOLTAGE_OUT];
-	Data->FPGA_Errors  = Source[ADR_ERRORS];
-	Data->FPGA_Errors_Latch = Source[ADR_ERRORS_LATCH];
+    // Uint16 *Source = (Uint16 *)0x340000; //FPGA_MSGRAM_LOCAL
+	Data->WatchDog     = FPGA_MSGRAM[ADR_WATCHDOG];
+	Data->Current_1    = FPGA_MSGRAM[ADR_CURRENT_1];
+	Data->Current_2    = FPGA_MSGRAM[ADR_CURRENT_2];
+	Data->Voltage_Inp  = FPGA_MSGRAM[ADR_VOLTAGE_INP];
+	Data->Voltage_Out  = FPGA_MSGRAM[ADR_VOLTAGE_OUT];
+	Data->FPGA_Errors  = FPGA_MSGRAM[ADR_ERRORS];
+	Data->FPGA_Errors_Latch = FPGA_MSGRAM[ADR_ERRORS_LATCH];
 }
 
 void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog) {

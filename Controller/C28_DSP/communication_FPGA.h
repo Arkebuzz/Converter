@@ -25,9 +25,7 @@ void WriteFPGAData(Uint16 PWM_Counter, Bool mode_up, Bool converter_on, Bool res
  * Список адресов всех данных с FPGA, должен быть синхронизирован с аналогичным файлом для FPGA.
  */
 
-#pragma DATA_SECTION(FPGA_MSGRAM, "FPGA_MSGRAM")
-volatile Uint16 FPGA_MSGRAM[128];
-volatile Uint16 FPGA_MSGRAM_LOCAL[51];
+// volatile Uint16 FPGA_MSGRAM_LOCAL[51];
 
 // FPGA -> C28		(0-49)
 
