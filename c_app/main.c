@@ -97,19 +97,43 @@ void print_errors(Osci_Errors errors) {
 }
 
 void print_responce(Osci_Response resp) {
-    printf("Received:\n"
-    "Uint16 cmd = %i\n"
-    "Uint16 len = %i\n"
-    "Osci_Errors errors = {\n",
-    resp.cmd, resp.len
+    printf(
+        "Received:\n"
+        "Uint16 cmd = %i\n"
+        "Uint16 len = %i\n"
+        "Osci_Errors errors = {\n",
+        resp.cmd, resp.len
     );
     print_errors(resp.errors);
     printf("}\n");
 }
 
+void print_packet(Osci_Packet packet) {
+    printf(
+        "Uint16 CycleCounter[4] = %zu\n"
+        "Uint16 Current_1 = %i\n"
+        "Uint16 Current_2 = %i\n"
+        "Uint16 Voltage_Inp = %i\n"
+        "Uint16 Voltage_Out = %i\n"
+        "Uint16 FreeTimeCounter = %i\n"
+        "Uint16 WatchDog = %i\n"
+//        "Uint16 __pad[2] = %i\n"
+        "Osci_Errors errors = {\n",
+        *((uint64_t*)(&packet.CycleCounter)),
+        packet.Current_1,
+        packet.Current_2,
+        packet.Voltage_Inp,
+        packet.Voltage_Out,
+        packet.FreeTimeCounter,
+        packet.WatchDog
+    );
+    print_errors(packet.errors);
+    printf("}\n");
+}
+
 void send_echo(int sock) {
     int status = 0;
-    Osci_Request data = { .cmd = PACKET_CMD_ECHO, .arg = 123};
+    Osci_Request data = { .cmd = PACKET_CMD_ECHO, .arg = 123 };
     status = tcp_send_all(sock, &data, sizeof(data));
     if (status < 0) { perror("recv"); exit(-1); }
     printf("Sent ECHO\n");
@@ -119,6 +143,34 @@ void send_echo(int sock) {
     if (status < 0) { perror("recv"); exit(-1); }
 
     print_responce(resp);
+}
+
+void send_osci(int sock) {
+    int status = 0;
+    const Uint16 num_packets = 2;
+    Osci_Request data = { .cmd = PACKET_CMD_OSCI, .arg = num_packets };
+    status = tcp_send_all(sock, &data, sizeof(data));
+    if (status < 0) { perror("recv"); exit(-1); }
+    printf("Sent OSCI\n");
+
+    Osci_Response resp = {0};
+    status = tcp_recv_all(sock, &resp, sizeof(resp));
+    if (status < 0) { perror("recv"); exit(-1); }
+    print_responce(resp);
+    printf("Received OSCI response header\n");
+
+    Osci_Packet *packets = calloc(resp.len, 1);
+    status = tcp_recv_all(sock, packets, resp.len);
+    int got_packets = resp.len / sizeof(Osci_Packet);
+    printf(
+        "Received OSCI packets: %i (bytes); requested %i packets, got %i\n",
+        resp.len, num_packets, got_packets
+    );
+    for (int i = 0; i < got_packets; i++) {
+        printf("\tPacket %i\n", i);
+        print_packet(packets[i]);
+        printf("\n");
+    }
 }
 
 int main(void) {
@@ -135,7 +187,8 @@ int main(void) {
     if (status < 0) { perror("Connect"); return -1; }
 
     printf("Connected\n");
-    send_echo(sock);
+    // send_echo(sock);
+    send_osci(sock);
 
     // Close the socket
     close(sock);
