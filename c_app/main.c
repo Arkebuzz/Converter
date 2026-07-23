@@ -118,8 +118,10 @@ void print_responce(Osci_Response resp) {
 }
 
 void print_packet(Osci_Packet packet) {
+    uint64_t cycle_counter;
+    memcpy(&cycle_counter, packet.CycleCounter, sizeof(cycle_counter));
     printf(
-        "Uint16 CycleCounter[4] = %zu\n"
+        "Uint16 CycleCounter[4] = %lu\n"
         "Uint16 Current_1 = %u\n"
         "Uint16 Current_2 = %u\n"
         "Uint16 Voltage_Inp = %u\n"
@@ -128,7 +130,7 @@ void print_packet(Osci_Packet packet) {
         "Uint16 WatchDog = %u\n"
 //        "Uint16 __pad[2] = %u\n"
         "Osci_Errors errors = {\n",
-        *((uint64_t*)(&packet.CycleCounter)),
+        cycle_counter,
         packet.Current_1,
         packet.Current_2,
         packet.Voltage_Inp,
@@ -172,7 +174,7 @@ void send_osci(int sock, Uint16 num_packets) {
     Osci_Packet *packets = calloc(resp.len, 1);
     status = tcp_recv_all(sock, packets, resp.len);
     if (status < 0) { perror("recv body"); exit(-1); }
-    double got_packets = resp.len / sizeof(Osci_Packet);
+    double got_packets = (double)resp.len / sizeof(Osci_Packet);
     printf(
         "Received OSCI packets: %u (bytes); requested %u packets, got %f\n",
         resp.len, num_packets, got_packets
@@ -182,6 +184,7 @@ void send_osci(int sock, Uint16 num_packets) {
         print_packet(packets[i]);
         printf("\n");
     }
+    free(packets);
 }
 
 void send_full(int sock) {
@@ -200,7 +203,7 @@ void send_full(int sock) {
 
     Osci_Packet *packets = calloc(resp.len, 1);
     status = tcp_recv_all(sock, packets, resp.len);
-    double got_packets = resp.len / sizeof(Osci_Packet);
+    double got_packets = (double)resp.len / sizeof(Osci_Packet);
     printf(
         "Received FULL packets: %u (bytes); %f (packets)\n",
         resp.len, got_packets

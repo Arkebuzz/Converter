@@ -287,7 +287,7 @@ int tcp_send_all(SOCKET fd, volatile const void *buf, size_t len) {
 }
 
 // IVAN: returns -1 on error
-int tcp_recv_all(SOCKET fd, volatile const void *buf, size_t len) {
+int tcp_recv_all(SOCKET fd, volatile void *buf, size_t len) {
 	size_t bytes_read = 0;
 	while (bytes_read < len) {
 		int read = recv(
@@ -336,7 +336,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 
 	while (1) {
 		// IVAN: read the request from the PC
-		if (tcp_recv_all(client_fd, recv_buffer, sizeof(Osci_Request)) <= 0) {
+		if (tcp_recv_all(client_fd, recv_buffer, sizeof(Osci_Request)) < 0) {
 			break;
 		}
 		Osci_Request *request = (Osci_Request *)recv_buffer;
