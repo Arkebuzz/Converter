@@ -131,21 +131,17 @@ typedef struct {
     CRITICAL_SECTION cs;
 } RingBuf;
 
-inline RingBuf ring_new() {
-    RingBuf res = {0};
-    InitializeCriticalSection(&res.cs);
-    return res;
-}
+RingBuf g_rb;
 
-inline void ring_push(RingBuf *rb, const Osci_Packet* packets, uint32_t num_packets) {
+inline void ring_push(const Osci_Packet* packets, uint32_t num_packets) {
     if (num_packets > RING_BUF_LEN) {
         app_log("ERROR: ring_push() num_packets too big (wraps twice)");
     }
-    EnterCriticalSection(rg->cs);
-    uint32_t num_wrap = num_packets < RING_BUF_LEN - idx ? 0 : RING_BUF_LEN - idx;
-    memcpy(rb->buf + rb->idx, packets, num_wrap * sizeof(Osci_Packet));
-    memcpy(rb->buf, packets + num_wrap, (num_packets - num_wrap) * sizeof(Osci_Packet));
-    LeaveCriticalSection(rg->cs);
+    EnterCriticalSection(&g_rb.cs);
+    uint32_t num_wrap = num_packets < RING_BUF_LEN - g_rb.idx ? 0 : RING_BUF_LEN - g_rb.idx;
+    memcpy(g_rb.buf + g_rb.idx, packets, num_wrap * sizeof(Osci_Packet));
+    memcpy(g_rb.buf, packets + num_wrap, (num_packets - num_wrap) * sizeof(Osci_Packet));
+    LeaveCriticalSection(&g_rb.cs);
 }
 
 int connect_to_mcu(struct in_addr ip, int port, SOCKET *sock) {
@@ -173,11 +169,18 @@ int connect_to_mcu(struct in_addr ip, int port, SOCKET *sock) {
     return 0;
 }
 
-int send_echo(struct in_addr ip, int port) {
+typedef struct {
+    struct in_addr ip;
+    uint16_t port;
+    uint16_t num_packets;
+} SendParams;
+
+DWORD WINAPI send_echo(LPVOID arg) {
+    SendParams *params = (SendParams *)arg;
     int status = 0;
 
     SOCKET sock;
-    status = connect_to_mcu(ip, port, &sock);
+    status = connect_to_mcu(params->ip, params->port, &sock);
     if (status < 0) { return -1; }
 
     Osci_Request data = { .cmd = PACKET_CMD_ECHO, .arg = 123 };
@@ -191,14 +194,117 @@ int send_echo(struct in_addr ip, int port) {
     
     if (resp.cmd != PACKET_CMD_ECHO) {
         app_log("ERROR: Expected ECHO response, got %u", resp.cmd);
+        return -1;
     }
 
     // print_responce(resp);
+    free(params);
+    return 0;
+}
+
+DWORD WINAPI send_osci(LPVOID arg) {
+    SendParams *params = (SendParams *)arg;
+    int status = 0;
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { return -1; }
+
+    Osci_Request data = { .cmd = PACKET_CMD_OSCI, .arg = params->num_packets };
+    status = tcp_send_all(sock, &data, sizeof(data));
+    if (status < 0) { return -1; }
+    app_log("Sent OSCI");
+
+    Osci_Response resp = {0};
+    status = tcp_recv_all(sock, &resp, sizeof(resp));
+    if (status < 0) { return -1; }
+    if (resp.cmd != PACKET_CMD_OSCI ) {
+        app_log("ERROR: Expected OSCI response, got %u", resp.cmd);
+        return -1;
+    }
+    // print_responce(resp);
+    app_log("Received OSCI response header");
+
+    Osci_Packet *packets = (Osci_Packet *)calloc(resp.len, 1);
+    status = tcp_recv_all(sock, packets, resp.len);
+    if (status < 0) { return -1; }
+    double got_packets = (double)resp.len / sizeof(Osci_Packet);
+    app_log(
+        "Received OSCI packets: %u (bytes); requested %u packets, got %f",
+        resp.len, params->num_packets, got_packets
+    );
+    ring_push(packets, (uint32_t)got_packets);
+    free(packets);
+    free(params);
+    return 0;
+}
+
+DWORD WINAPI send_full(LPVOID arg) {
+    SendParams *params = (SendParams *)arg;
+    int status = 0;
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { return -1; }
+
+    Osci_Request data = { .cmd = PACKET_CMD_FULL, .arg = 123 };
+    status = tcp_send_all(sock, &data, sizeof(data));
+    if (status < 0) { return -1; }
+    app_log("Sent OSCI");
+
+    Osci_Response resp = {0};
+    status = tcp_recv_all(sock, &resp, sizeof(resp));
+    if (status < 0) { return -1; }
+    if (resp.cmd != PACKET_CMD_FULL ) {
+        app_log("ERROR: Expected FULL response, got %u", resp.cmd);
+        return -1;
+    }
+    // print_responce(resp);
+    app_log("Received FULL response header");
+
+    Osci_Packet *packets = (Osci_Packet *)calloc(resp.len, 1);
+    status = tcp_recv_all(sock, packets, resp.len);
+    double got_packets = (double)resp.len / sizeof(Osci_Packet);
+    app_log(
+        "Received FULL packets: %u (bytes); %f (packets)\n",
+        resp.len, got_packets
+    );
+
+    status = tcp_recv_all(sock, &resp, sizeof(resp));
+    if (status < 0) { return -1; }
+    app_log("Received FULL INFO response header\n");
+    if (resp.cmd != PACKET_CMD_INFO ) {
+        app_log("ERROR: Expected INFO response, got %u", resp.cmd);
+        return -1;
+    }
+
+#pragma pack(1)
+    struct {
+        Uint16 before_offset;
+        Uint16 after_offset;
+    } info_data = {0};
+#pragma pack()
+    if (resp.len != sizeof(info_data)) {
+        app_log("ERROR: Mismatched INFO header response length", resp.cmd);
+        return -1;
+    }
+    tcp_recv_all(sock, &info_data, sizeof(info_data));
+
+    app_log(
+        "Received FULL INFO response body: "
+        "before_offset = %u; after_offset = %u\n",
+        info_data.before_offset, info_data.after_offset
+    );
+
+    ring_push(packets, (uint32_t)got_packets);
+    free(packets);
+    free(params);
     return 0;
 }
 
 int main(void) {
     InitializeCriticalSection(&g_log_cs);
+    InitializeCriticalSection(&g_rb.cs);
 
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
@@ -215,7 +321,7 @@ int main(void) {
 
     struct in_addr ip;
     char ip_str[32] = "10.1.3.12";
-    int port = 1124;
+    uint16_t port = 1124;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
@@ -229,10 +335,13 @@ int main(void) {
 
             ImGui::InputText("IP", ip_str, sizeof(ip_str));
             inet_pton(AF_INET, ip_str, &ip);
-            ImGui::InputInt("Port", &port);
+            ImGui::InputScalar("Port", ImGuiDataType_U16, &port);
             ImGui::Separator();
 
             if (ImGui::Button("Send ECHO")) {
+                SendParams *params = (SendParams *)malloc(sizeof(SendParams));
+                *params = { .ip = ip, .port = port };
+                CreateThread(NULL, 0, send_echo, params, NULL, 0);
             }
             ImGui::SameLine();
             ImGui::Text("Sent");
