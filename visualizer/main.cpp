@@ -15,7 +15,7 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-#pragma pack(push, 1)
+#pragma pack(1)
 typedef struct {
     uint16_t C28_Errors;
     uint16_t C28_Errors_Latch;
@@ -45,7 +45,7 @@ typedef struct {
     uint16_t len;
     Osci_Errors errors;
 } Osci_Response;
-#pragma pack(pop)
+#pragma pack()
 
 #define MAX_PLOT_POINTS 1024
 

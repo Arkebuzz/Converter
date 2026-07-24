@@ -1,7 +1,7 @@
 TARGET = visualizer.exe
 
 CXX = cl
-CXXFLAGS = /nologo /O2 /MD /W3 /I. /I imgui /I imgui/backends /I glfw/include /D "NDEBUG"
+CXXFLAGS = /nologo /O2 /MD /W3 /I. /I imgui /I imgui/backends /I glfw/include /D "NDEBUG" /std:c++20
 
 LIBS = user32.lib gdi32.lib shell32.lib ws2_32.lib opengl32.lib glfw/glfw3.lib
 
@@ -36,7 +36,10 @@ imgui_impl_glfw.obj: $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp
 imgui_impl_opengl3.obj: $(IMGUI_DIR)/backends/imgui_impl_opengl3.cpp
 	$(CXX) $(CXXFLAGS) /c $< /Fo$@
 
-main.obj: main.cpp
+# main.obj: main.cpp
+# 	$(CXX) $(CXXFLAGS) /c $< /Fo$@
+
+main.obj: main2.cpp
 	$(CXX) $(CXXFLAGS) /c $< /Fo$@
 
 $(TARGET): $(MAIN_OBJ) $(IMGUI_OBJ)
