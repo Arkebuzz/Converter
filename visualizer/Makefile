@@ -1,7 +1,8 @@
 TARGET = visualizer.exe
 
 CXX = cl
-CXXFLAGS = /nologo /O2 /MD /W3 /I. /I imgui /I imgui/backends /I glfw/include /D "NDEBUG" /std:c++20
+CXXFLAGS = /nologo /O2 /MD /W3 /I. /I imgui /I imgui/backends /I glfw/include \
+		   /D "NDEBUG" /std:c++20 /fsanitize=address /Zi
 
 LIBS = user32.lib gdi32.lib shell32.lib ws2_32.lib opengl32.lib glfw/glfw3.lib
 
