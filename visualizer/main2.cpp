@@ -149,6 +149,7 @@ RingBuf g_rb;
 inline void ring_push(const Osci_Packet* packets, uint32_t num_packets) {
     if (num_packets > RING_BUF_LEN) {
         app_log("ERROR: ring_push() num_packets too big (wraps twice)");
+        return;
     }
     EnterCriticalSection(&g_rb.cs);
     uint32_t num_wrap = num_packets < RING_BUF_LEN - g_rb.idx ? 0 : RING_BUF_LEN - g_rb.idx;
@@ -449,6 +450,25 @@ int main(void) {
             ImGui::SameLine();
             ImGui::Checkbox("Repeat", &g_repeat);
 
+            ImGui::End();
+        }
+
+        // errors window
+        {
+            ImGui::Begin("Errors");
+            int idx = g_eb.active_idx;
+            int cmd = g_eb.buf[idx].cmd;
+            Osci_Errors errors = g_eb.buf[idx].errors;
+            ImGui::Text(
+                "Cmd: %s\n"
+                "Osci_Errors.C28_Errors        = %u\n"
+                "Osci_Errors.C28_Errors_Latch  = %u\n"
+                "Osci_Errors.FPGA_Errors       = %u\n"
+                "Osci_Errors.FPGA_Errors_Latch = %u\n",
+                cmd_to_str(cmd),
+                errors.C28_Errors, errors.C28_Errors_Latch,
+                errors.FPGA_Errors, errors.FPGA_Errors_Latch
+            );
             ImGui::End();
         }
 
