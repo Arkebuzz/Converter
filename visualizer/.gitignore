@@ -1,5 +1,10 @@
 imgui/
+implot/
 glfw/
+
+target/
 *.obj
+*.pdb
 *.ini
+*.vim
 

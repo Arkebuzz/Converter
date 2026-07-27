@@ -17,13 +17,17 @@ typedef struct {
 	Uint8  WatchDog;
 } DataToM3;
 
-void ReadFPGAData(const Uint16 *Source, DataToM3 *Data);
-void WriteFPGAData(Uint16 CTRL_Converter);
 void CheckFPGAConnect(const DataToM3 Data, Uint8 *WatchDog);
+void ReadFPGAData(DataToM3 *Data);
+void WriteFPGAData(Uint16 PWM_Counter, Bool mode_up, Bool converter_on, Bool reset_errors);
 
 /*
  * Список адресов всех данных с FPGA, должен быть синхронизирован с аналогичным файлом для FPGA.
  */
+
+#pragma DATA_SECTION(FPGA_MSGRAM, "FPGA_MSGRAM")
+volatile Uint16 FPGA_MSGRAM[128];
+volatile Uint16 FPGA_MSGRAM_LOCAL[51];
 
 // FPGA -> C28		(0-49)
 

@@ -1,299 +1,503 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
 
+#include <stdio.h>
+#include <stdint.h>
+
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 
-#pragma comment(lib, "ws2_32.lib")
+// log
+#define LOG_MAX_LINES 67
+#define LOG_LINE_LEN 420
+CRITICAL_SECTION g_log_cs;
+char g_log[LOG_MAX_LINES][LOG_LINE_LEN] = {0};
+int g_log_idx = 0;
 
-#pragma pack(push, 1)
+void app_log(const char* fmt, ...) {
+    EnterCriticalSection(&g_log_cs);
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(g_log[g_log_idx], LOG_LINE_LEN, fmt, args);
+    va_end(args);
+
+    g_log_idx = (g_log_idx + 1) % LOG_MAX_LINES;
+    LeaveCriticalSection(&g_log_cs);
+}
+
+void app_log_err(const char* msg) {
+    static char err_buf[256];
+    int err = WSAGetLastError();
+    DWORD res = FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL,
+        err,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        err_buf,
+        sizeof(err_buf),
+        NULL
+    );
+    if (res == 0) {
+        app_log("ERROR %s: (unknown WSA error %u)", msg, err);
+        return;
+    }
+    app_log("ERROR %s: %s", msg, err_buf);
+}
+
+void glfw_error_callback(int error, const char* desc) {
+    app_log("GLFW ERROR %i: %s", error, desc);
+}
+
+int tcp_send_all(SOCKET fd, volatile const void *buf, int len) {
+    if (len == 0) {
+        return 0;
+    }
+    int bytes_sent = 0;
+    while (bytes_sent < len) {
+        int sent = send(
+            fd,
+            ((const char *)buf) + bytes_sent,
+            len - bytes_sent,
+            0
+        );
+        if (sent <= 0) {
+            app_log_err("tcp_send_all");
+            return -1;
+        }
+        bytes_sent += sent;
+    }
+    return 0;
+}
+
+int tcp_recv_all(SOCKET fd, volatile void *buf, int len) {
+    int bytes_read = 0;
+    while (bytes_read < len) {
+        int read = recv(
+            fd,
+            ((char *)buf) + bytes_read,
+            len - bytes_read,
+            0
+        );
+        if (read <= 0) {
+            app_log_err("tcp_recv_all");
+            return -1;
+        }
+        bytes_read += read;
+    }
+    return 0;
+}
+
+typedef uint16_t Uint16;
+
+#pragma pack(1)
+
 typedef struct {
-    uint16_t C28_Errors;
-    uint16_t C28_Errors_Latch;
-    uint16_t FPGA_Errors;
-    uint16_t FPGA_Errors_Latch;
+    Uint16 C28_Errors;
+    Uint16 C28_Errors_Latch;
+    Uint16 FPGA_Errors;
+    Uint16 FPGA_Errors_Latch;
 } Osci_Errors;
 
 typedef struct {
-    uint16_t CycleCounter[4];
+    Uint16 CycleCounter[4];
     Osci_Errors errors;
-    uint16_t Current_1;
-    uint16_t Current_2;
-    uint16_t Voltage_Inp;
-    uint16_t Voltage_Out;
-    uint16_t FreeTimeCounter;
-    uint16_t WatchDog;
-    uint16_t __pad[2];
+    Uint16 Current_1;
+    Uint16 Current_2;
+    Uint16 Voltage_Inp;
+    Uint16 Voltage_Out;
+    Uint16 FreeTimeCounter;
+    Uint16 WatchDog;
+    Uint16 __pad[2];
 } Osci_Packet;
 
 typedef struct {
-    uint16_t cmd;
-    uint16_t arg;
+    Uint16 cmd;
+    Uint16 arg;
 } Osci_Request;
 
 typedef struct {
-    uint16_t cmd;
-    uint16_t len;
+    Uint16 cmd;
+    Uint16 len;
     Osci_Errors errors;
 } Osci_Response;
-#pragma pack(pop)
 
-#define MAX_PLOT_POINTS 1024
+#pragma pack()
 
-char g_ip[32] = "10.1.3.12";
-int g_port = 1124;
-SOCKET g_sock = INVALID_SOCKET;
+typedef enum {
+    PACKET_CMD_ECHO = 0,
+    PACKET_CMD_OSCI,
+    PACKET_CMD_FULL,
+    PACKET_CMD_INFO,
+} Packet_Cmd;
 
-Osci_Errors g_latest_errors = {0};
 
-Osci_Packet g_packets[MAX_PLOT_POINTS];
-int g_packet_count = 0;
+#define RING_BUF_LEN (2 << 16)
 
-float g_plot_c1[MAX_PLOT_POINTS];
-float g_plot_c2[MAX_PLOT_POINTS];
-float g_plot_v1[MAX_PLOT_POINTS];
-float g_plot_v2[MAX_PLOT_POINTS];
-float g_plot_err[MAX_PLOT_POINTS];
+// ring buffer for packets
+typedef struct {
+    Osci_Packet buf[RING_BUF_LEN];
+    uint32_t idx;
+    CRITICAL_SECTION cs;
+} RingBuf;
 
-CRITICAL_SECTION g_cs;
-int g_cmd_request = -1;
-int g_arg_request = 0;
-bool g_continuous = false;
+RingBuf g_rb;
 
-uint64_t get_cycle_counter(const Osci_Packet* p) {
-    uint64_t res = 0;
-    res |= (uint64_t)p->CycleCounter[0];
-    res |= ((uint64_t)p->CycleCounter[1]) << 16;
-    res |= ((uint64_t)p->CycleCounter[2]) << 32;
-    res |= ((uint64_t)p->CycleCounter[3]) << 48;
-    return res;
-}
-
-int cmp_packets(const void* a, const void* b) {
-    uint64_t ca = get_cycle_counter((const Osci_Packet*)a);
-    uint64_t cb = get_cycle_counter((const Osci_Packet*)b);
-    if (ca < cb) return -1;
-    if (ca > cb) return 1;
-    return 0;
-}
-
-bool connect_mcu() {
-    if (g_sock != INVALID_SOCKET) { closesocket(g_sock); g_sock = INVALID_SOCKET; }
-    g_sock = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(g_port);
-    inet_pton(AF_INET, g_ip, &addr.sin_addr);
-    
-    int opt = 1;
-    setsockopt(g_sock, IPPROTO_TCP, TCP_NODELAY, (const char*)&opt, sizeof(opt));
-
-    return connect(g_sock, (struct sockaddr*)&addr, sizeof(addr)) != SOCKET_ERROR;
-}
-
-bool tcp_send_all(const void* buf, int len) {
-    if (g_sock == INVALID_SOCKET) return false;
-    int sent = 0;
-    while (sent < len) {
-        int res = send(g_sock, (const char*)buf + sent, len - sent, 0);
-        if (res <= 0) { closesocket(g_sock); g_sock = INVALID_SOCKET; return false; }
-        sent += res;
+inline void ring_push(const Osci_Packet* packets, uint32_t num_packets) {
+    if (num_packets > RING_BUF_LEN) {
+        app_log("ERROR: ring_push() num_packets too big (wraps twice)");
+        return;
     }
-    return true;
+    EnterCriticalSection(&g_rb.cs);
+    uint32_t num_wrap = num_packets < RING_BUF_LEN - g_rb.idx ? 0 : RING_BUF_LEN - g_rb.idx;
+    memcpy(g_rb.buf + g_rb.idx, packets, (num_packets - num_wrap) * sizeof(Osci_Packet));
+    memcpy(g_rb.buf, packets + num_wrap, num_wrap * sizeof(Osci_Packet));
+    g_rb.idx = (g_rb.idx + num_packets) % RING_BUF_LEN;
+    LeaveCriticalSection(&g_rb.cs);
 }
 
-bool tcp_recv_all(void* buf, int len) {
-    if (g_sock == INVALID_SOCKET) return false;
-    int rcvd = 0;
-    while (rcvd < len) {
-        int res = recv(g_sock, (char*)buf + rcvd, len - rcvd, 0);
-        if (res <= 0) { closesocket(g_sock); g_sock = INVALID_SOCKET; return false; }
-        rcvd += res;
+// double buffering for last error
+typedef struct {
+    struct {
+        Osci_Errors errors;
+        uint16_t cmd;
+    } buf[2];
+    uint8_t active_idx;
+    CRITICAL_SECTION cs;
+} ErrorsBuf;
+
+ErrorsBuf g_eb;
+
+// NOTE: UI doesn't use critical section - it just reads the active index
+// so as long as only one thread sets the errors critical section is almost zero cost
+inline void errors_set(Osci_Errors errors, uint16_t cmd) {
+    EnterCriticalSection(&g_eb.cs);
+    uint8_t inactive_idx = g_eb.active_idx ^ 1;
+    g_eb.buf[inactive_idx] = { errors, cmd };
+    g_eb.active_idx = inactive_idx;
+    LeaveCriticalSection(&g_eb.cs);
+}
+
+int connect_to_mcu(const char *ip, int port, SOCKET *sock) {
+    int status = 0;
+    SOCKET mcu_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (mcu_sock == INVALID_SOCKET) {
+        app_log_err("connect_to_mcu socket()");
+        return -1;
     }
-    return true;
-}
 
-DWORD WINAPI NetworkThread(LPVOID lpParam) {
-    while (1) {
-        int cmd = -1, arg = 0;
-        
-        EnterCriticalSection(&g_cs);
-        if (g_cmd_request != -1) {
-            cmd = g_cmd_request;
-            arg = g_arg_request;
-            g_cmd_request = -1;
-        } else if (g_continuous) {
-            cmd = 2; // PACKET_CMD_FULL
-        }
-        LeaveCriticalSection(&g_cs);
-
-        if (cmd != -1) {
-            if (g_sock == INVALID_SOCKET && !connect_mcu()) {
-                Sleep(500); // Wait on failure
-                continue;
-            }
-
-            Osci_Request req = { (uint16_t)cmd, (uint16_t)arg };
-            if (tcp_send_all(&req, sizeof(req))) {
-                Osci_Response resp;
-                if (tcp_recv_all(&resp, sizeof(resp))) {
-                    
-                    EnterCriticalSection(&g_cs);
-                    g_latest_errors = resp.errors;
-                    LeaveCriticalSection(&g_cs);
-
-                    if (resp.cmd == 1 || resp.cmd == 2) { // OSCI or FULL
-                        int len = resp.len;
-                        void* data = malloc(len);
-                        
-                        if (tcp_recv_all(data, len)) {
-                            // If FULL, read the tailing INFO packet and offsets
-                            if (resp.cmd == 2) {
-                                Osci_Response info_resp;
-                                uint16_t offsets[2];
-                                tcp_recv_all(&info_resp, sizeof(info_resp));
-                                tcp_recv_all(offsets, info_resp.len);
-                                
-                                EnterCriticalSection(&g_cs);
-                                g_latest_errors = info_resp.errors;
-                                LeaveCriticalSection(&g_cs);
-                            }
-
-                            int count = len / sizeof(Osci_Packet);
-                            if (count > MAX_PLOT_POINTS) count = MAX_PLOT_POINTS;
-
-                            EnterCriticalSection(&g_cs);
-                            g_packet_count = count;
-                            memcpy(g_packets, data, g_packet_count * sizeof(Osci_Packet));
-                            
-                            // sort by CycleCounter
-                            qsort(g_packets, g_packet_count, sizeof(Osci_Packet), cmp_packets);
-                            
-                            // Prepare float buffers for ImGui PlotLines
-                            for (int i = 0; i < g_packet_count; i++) {
-                                g_plot_c1[i] = (float)g_packets[i].Current_1;
-                                g_plot_c2[i] = (float)g_packets[i].Current_2;
-                                g_plot_v1[i] = (float)g_packets[i].Voltage_Inp;
-                                g_plot_v2[i] = (float)g_packets[i].Voltage_Out;
-                                g_plot_err[i] = (float)g_packets[i].errors.C28_Errors;
-                            }
-                            LeaveCriticalSection(&g_cs);
-                        }
-                        free(data);
-                    }
-                }
-            }
+    struct sockaddr_in mcu_address = {
+        .sin_family = AF_INET,
+        .sin_port = htons(port),
+    };
+    status = inet_pton(AF_INET, ip, &mcu_address.sin_addr);
+    if (status <= 0) {
+        if (status == 0) {
+            app_log("ERROR: Incorrent IP format: %s", ip);
         } else {
-            Sleep(10);
+            app_log_err("connect_to_mcu inet_pton()");
         }
+        return -1;
     }
+
+    int ndelay = 1;
+    setsockopt(mcu_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&ndelay, sizeof(ndelay));
+
+    status = connect(mcu_sock, (struct sockaddr *)&mcu_address, sizeof(mcu_address));
+    if (status < 0) {
+        app_log_err("connect_to_mcu connect()");
+        return -1;
+    }
+
+    app_log("CONNECTED to %s:%u", ip, port);
+    *sock = mcu_sock;
     return 0;
 }
 
-void trigger_cmd(int cmd, int arg) {
-    EnterCriticalSection(&g_cs);
-    g_cmd_request = cmd;
-    g_arg_request = arg;
-    LeaveCriticalSection(&g_cs);
+typedef struct {
+    char ip[32];
+    uint16_t port;
+    uint16_t num_packets;
+} SendParams;
+
+SendParams *send_params_new(uint16_t port, char *ip) {
+    SendParams *params = (SendParams *)malloc(sizeof(SendParams));
+    params->port = port;
+    memcpy(&params->ip, ip, sizeof(params->ip));
+    return params;
 }
 
-int main(int, char**) {
+bool g_repeat = false;
+
+const char *cmd_to_str(uint16_t cmd) {
+#define CMD_CASE_RET(cmd) case cmd: return #cmd
+    switch (cmd) {
+        CMD_CASE_RET(PACKET_CMD_ECHO);
+        CMD_CASE_RET(PACKET_CMD_OSCI);
+        CMD_CASE_RET(PACKET_CMD_FULL);
+        CMD_CASE_RET(PACKET_CMD_INFO);
+        default: return "(UNKNOWN CMD)";
+    }
+}
+
+int recv_packet_header(SOCKET sock, Osci_Request req, Osci_Response *resp) {
+    int status = 0;
+    status = tcp_send_all(sock, &req, sizeof(req));
+    if (status < 0) { return -1; }
+    app_log("Sent %s", cmd_to_str(req.cmd));
+
+    status = tcp_recv_all(sock, resp, sizeof(*resp));
+    if (status < 0) { return -1; }
+    
+    if (resp->cmd != req.cmd) {
+        app_log("ERROR: Expected %s response, got %u", cmd_to_str(req.cmd), resp->cmd);
+        return -1;
+    }
+    errors_set(resp->errors, req.cmd);
+    return 0;
+}
+
+DWORD WINAPI send_echo(LPVOID arg) {
+    int ret = 0;
+    int status = 0;
+    SendParams *params = (SendParams *)arg;
+    Osci_Response resp;
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { goto err; }
+
+    status = recv_packet_header(
+        sock,
+        Osci_Request { .cmd = PACKET_CMD_ECHO, .arg = 123 },
+        &resp
+    );
+    if (status < 0) { goto err; }
+
+    if (0) err: {
+        ret = -1;
+    }
+    free(params);
+    closesocket(sock);
+    return ret;
+}
+
+DWORD WINAPI send_osci(LPVOID arg) {
+    int ret = 0;
+    int status = 0;
+    SendParams *params = (SendParams *)arg;
+    Osci_Response resp;
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { goto err; }
+
+    status = recv_packet_header(
+        sock,
+        Osci_Request { .cmd = PACKET_CMD_OSCI, .arg = params->num_packets },
+        &resp
+    );
+    if (status < 0) { goto err; }
+
+    {
+        Osci_Packet *packets = (Osci_Packet *)calloc(resp.len, 1);
+        status = tcp_recv_all(sock, packets, resp.len);
+        if (status < 0) { goto err; }
+        double got_packets = (double)resp.len / sizeof(Osci_Packet);
+        app_log(
+            "Received OSCI packets: %u (bytes); requested %u packets, got %f",
+            resp.len, params->num_packets, got_packets
+        );
+        ring_push(packets, (uint32_t)got_packets);
+        free(packets);
+    }
+
+    if (0) err: {
+        ret = -1;
+    }
+    free(params);
+    closesocket(sock);
+    return ret;
+}
+
+DWORD WINAPI send_full(LPVOID arg) {
+    int ret = 0;
+    int status = 0;
+    SendParams *params = (SendParams *)arg;
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { goto err; }
+
+    do {
+        Osci_Response resp; // forward declare because bjarne is a moron
+        Osci_Packet *packets;
+        double got_packets;
+
+        status = recv_packet_header(
+            sock,
+            Osci_Request { .cmd = PACKET_CMD_FULL, .arg = 123 },
+            &resp
+        );
+        if (status < 0) { goto err; }
+
+        packets = (Osci_Packet *)calloc(resp.len, 1);
+        status = tcp_recv_all(sock, packets, resp.len);
+        if (status < 0) { goto err; }
+        got_packets = (double)resp.len / sizeof(Osci_Packet);
+        app_log(
+            "Received FULL packets: %u (bytes); %f (packets)\n",
+            resp.len, got_packets
+        );
+
+        status = recv_packet_header(
+            sock,
+            Osci_Request { .cmd = PACKET_CMD_INFO, .arg = 123 },
+            &resp
+        );
+        if (status < 0) { goto err; }
+
+#pragma pack(1)
+        struct {
+            Uint16 before_offset;
+            Uint16 after_offset;
+        } info_data = {0};
+#pragma pack()
+        if (resp.len != sizeof(info_data)) {
+            app_log("ERROR: Mismatched INFO header response length");
+            goto err;
+        }
+        tcp_recv_all(sock, &info_data, sizeof(info_data));
+
+        app_log(
+            "Received FULL INFO response body: "
+            "before_offset = %u; after_offset = %u\n",
+            info_data.before_offset, info_data.after_offset
+        );
+        ring_push(packets, (uint32_t)got_packets);
+
+        free(packets);
+    } while (g_repeat);
+
+    if (0) err: {
+        ret = -1;
+    }
+    free(params);
+    closesocket(sock);
+    return ret;
+}
+
+int main(void) {
+    InitializeCriticalSection(&g_log_cs);
+    InitializeCriticalSection(&g_rb.cs);
+    InitializeCriticalSection(&g_eb.cs);
+
     WSADATA wsa;
     WSAStartup(MAKEWORD(2, 2), &wsa);
-    InitializeCriticalSection(&g_cs);
-    CreateThread(NULL, 0, NetworkThread, NULL, 0, NULL);
 
+    glfwSetErrorCallback(glfw_error_callback);
     glfwInit();
-    GLFWwindow* window = glfwCreateWindow(800, 800, "MCU TCP Monitor", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "TCP Visualizer", NULL, NULL);
     glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); 
+    glfwSwapInterval(1);
 
     ImGui::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    static int osci_req_cnt = 16;
-
+    char ip[32] = "10.1.3.12";
+    uint16_t port = 1124;
+    uint16_t num_packets = 16;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Control Panel", NULL, ImGuiWindowFlags_NoCollapse);
+        // monitor window
+        {
+            ImGui::Begin("Monitor");
 
-        ImGui::Text("Connection");
-        ImGui::InputText("IP Address", g_ip, sizeof(g_ip));
-        ImGui::InputInt("Port", &g_port);
-        ImGui::Separator();
+            ImGui::InputText("IP", ip, sizeof(ip));
+            ImGui::InputScalar("Port", ImGuiDataType_U16, &port);
+            ImGui::Separator();
 
-        ImGui::Text("Echo");
-        if (ImGui::Button("Send Echo Packet")) trigger_cmd(0, 0);
-        ImGui::Separator();
+            if (ImGui::Button("Send ECHO")) {
+                SendParams *params = send_params_new(port, ip);
+                HANDLE thr = CreateThread(NULL, 0, send_echo, params, NULL, 0);
+                if (thr) { CloseHandle(thr); }
+            }
 
-        ImGui::Text("Request Osci Packets");
-        ImGui::InputInt("Packet Count (1-16)", &osci_req_cnt);
-        if (osci_req_cnt < 1) osci_req_cnt = 1;
-        if (osci_req_cnt > 16) osci_req_cnt = 16;
-        if (ImGui::Button("Req Osci")) trigger_cmd(1, osci_req_cnt);
-        ImGui::Separator();
+            if (ImGui::Button("Send OSCI")) {
+                SendParams *params = send_params_new(port, ip);
+                params->num_packets = num_packets;
+                HANDLE thr = CreateThread(NULL, 0, send_osci, params, NULL, 0);
+                if (thr) { CloseHandle(thr); }
+            }
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(20.0f);
+            ImGui::InputScalar("Num Packets", ImGuiDataType_U16, &num_packets);
 
-        ImGui::Text("Full Request & Graphs");
-        if (ImGui::Button("Req Full")) trigger_cmd(2, 0);
-        ImGui::SameLine();
-        ImGui::Checkbox("Request Continuously", &g_continuous);
+            if (ImGui::Button("Send FULL")) {
+                SendParams *params = send_params_new(port, ip);
+                HANDLE thr = CreateThread(NULL, 0, send_full, params, NULL, 0);
+                if (thr) { CloseHandle(thr); }
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Repeat", &g_repeat);
 
-        EnterCriticalSection(&g_cs);
-        float w = ImGui::GetContentRegionAvail().x;
+            ImGui::End();
+        }
 
-// void ImGui::PlotLines(const char* label, const float* values, int values_count, int values_offset, const char* overlay_text, float scale_min, float scale_max, ImVec2 graph_size, int stride)
+        // errors window
+        {
+            ImGui::Begin("Errors");
+            int idx = g_eb.active_idx;
+            int cmd = g_eb.buf[idx].cmd;
+            Osci_Errors errors = g_eb.buf[idx].errors;
+            ImGui::Text(
+                "Cmd: %s\n"
+                "Osci_Errors.C28_Errors        = %u\n"
+                "Osci_Errors.C28_Errors_Latch  = %u\n"
+                "Osci_Errors.FPGA_Errors       = %u\n"
+                "Osci_Errors.FPGA_Errors_Latch = %u\n",
+                cmd_to_str(cmd),
+                errors.C28_Errors, errors.C28_Errors_Latch,
+                errors.FPGA_Errors, errors.FPGA_Errors_Latch
+            );
+            ImGui::End();
+        }
 
-        ImGui::PlotLines("Current 1", g_plot_c1, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
-        ImGui::PlotLines("Current 2", g_plot_c2, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
-        ImGui::PlotLines("Voltage 1", g_plot_v1, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
-        ImGui::PlotLines("Voltage 2", g_plot_v2, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
-        ImGui::PlotLines("Errors", g_plot_err, g_packet_count, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(w, 80));
-        LeaveCriticalSection(&g_cs);
+        // log window
+        {
+            ImGui::Begin("Log");
+            EnterCriticalSection(&g_log_cs);
+            for (int i = 0; i < g_log_idx; i++) {
+                ImGui::TextWrapped(g_log[i]);
+            }
+            for (int i = g_log_idx; i < LOG_MAX_LINES; i++) {
+                ImGui::TextWrapped(g_log[i]);
+            }
+            LeaveCriticalSection(&g_log_cs);
+            ImGui::End();
+        }
 
-        ImGui::End();
-
-        ImGui::Begin("Status", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-        EnterCriticalSection(&g_cs);
-        ImGui::Text("Status: %s\n", g_sock != INVALID_SOCKET ? "CONNECTED" : "DISCONNECTED");
-        ImGui::Separator();
-        ImGui::Text("C28_Errors:        0x%04X", g_latest_errors.C28_Errors);
-        ImGui::Text("C28_Errors_Latch:  0x%04X", g_latest_errors.C28_Errors_Latch);
-        ImGui::Text("FPGA_Errors:       0x%04X", g_latest_errors.FPGA_Errors);
-        ImGui::Text("FPGA_Errors_Latch: 0x%04X", g_latest_errors.FPGA_Errors_Latch);
-        ImGui::End();
-        LeaveCriticalSection(&g_cs);
-
+        // rendering
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    
-    closesocket(g_sock);
-    WSACleanup();
     return 0;
 }
+
