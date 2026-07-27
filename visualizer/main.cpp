@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "implot.h"
 #include "GLFW/glfw3.h"
 
 // log
@@ -405,6 +406,7 @@ int main(void) {
     glfwSwapInterval(1);
 
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
@@ -483,6 +485,51 @@ int main(void) {
                 ImGui::TextWrapped(g_log[i]);
             }
             LeaveCriticalSection(&g_log_cs);
+            ImGui::End();
+        }
+
+        // plots
+        {
+            ImGui::Begin("Plots");
+            if (ImPlot::BeginPlot("Oscilloscope Data", ImVec2(-1, -1))) {
+                ImPlot::SetupAxes("Time (CycleCounter)", "Value");
+                
+                static Osci_Packet local_buf[RING_BUF_LEN];
+                static uint64_t time_vals[RING_BUF_LEN];
+                static uint64_t current_1_vals[RING_BUF_LEN];
+                static uint64_t current_2_vals[RING_BUF_LEN];
+                static uint64_t voltage_inp_vals[RING_BUF_LEN];
+                static uint64_t voltage_out_vals[RING_BUF_LEN];
+                
+                EnterCriticalSection(&g_rb.cs);
+                uint32_t oldest_idx = g_rb.idx;
+                uint32_t first_chunk = RING_BUF_LEN - oldest_idx;
+                
+                memcpy(local_buf, g_rb.buf + oldest_idx, first_chunk * sizeof(Osci_Packet));
+                if (oldest_idx > 0) {
+                    memcpy(local_buf + first_chunk, g_rb.buf, oldest_idx * sizeof(Osci_Packet));
+                }
+                LeaveCriticalSection(&g_rb.cs);
+
+                for (uint32_t i = 0; i < RING_BUF_LEN; i++) {
+                    time_vals[i] = (uint64_t)local_buf[i].CycleCounter[3] << 48
+                                 | (uint64_t)local_buf[i].CycleCounter[2] << 32
+                                 | (uint64_t)local_buf[i].CycleCounter[1] << 16
+                                 | (uint64_t)local_buf[i].CycleCounter[0];
+                                        
+                    current_1_vals[i]   = (uint64_t)local_buf[i].Current_1;
+                    current_2_vals[i]   = (uint64_t)local_buf[i].Current_2;
+                    voltage_inp_vals[i] = (uint64_t)local_buf[i].Voltage_Inp;
+                    voltage_out_vals[i] = (uint64_t)local_buf[i].Voltage_Out;
+                }
+
+                ImPlot::PlotLine("Current_1",   time_vals, current_1_vals,   RING_BUF_LEN);
+                ImPlot::PlotLine("Current_2",   time_vals, current_2_vals,   RING_BUF_LEN);
+                ImPlot::PlotLine("Voltage_Inp", time_vals, voltage_inp_vals, RING_BUF_LEN);
+                ImPlot::PlotLine("Voltage_Out", time_vals, voltage_out_vals, RING_BUF_LEN);
+                
+                ImPlot::EndPlot();
+            }
             ImGui::End();
         }
 
