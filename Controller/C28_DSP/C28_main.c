@@ -7,6 +7,7 @@
 #include "error_handling.h"
 #include "communication_M3.h"
 #include "communication_FPGA.h"
+#include "flash.h"
 
 #define C28_FREQ			100		// C28 работает на 100 мГц
 #define MAIN_CYCLE_US		300		// Главный цикл С28 - 300 мкс
@@ -31,77 +32,6 @@ void setup_GPIO(void) {
     GpioG2CtrlRegs.GPEDIR.bit.GPIO128 = 1;
     GpioG1CtrlRegs.GPADIR.bit.GPIO19 = 1;
     EDIS;
-}
-
-void setup_SPI(void) {
-	// COPY PASTE
-
-#define SPI_BAUDRATE 1000000     // 1000KHz
-#define LSPCLK_FREQ  (CPU_FREQ/4)
-#define SPI_BRR      (LSPCLK_FREQ/SPI_BAUDRATE)-1
-
-	//GpioG1DataRegs.GPADAT.bit.GPIO19 = 1;
-
-	// Initialize SPI FIFO registers
-	// SPI reset
-	// Reset the FIFO pointer and hold in reset
-	//
-	SpiaRegs.SPIFFTX.bit.SPIRST = 0;
-	SpiaRegs.SPIFFTX.bit.TXFIFO = 0;
-
-	// Set TX FIFO to 4 words
-	// Enable TX FIFOs
-	// Enable TX FIFO interrupts
-	// Release FIFO from reset
-	SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // в примере 4 у далера 6
-	SpiaRegs.SPIFFTX.bit.SPIFFENA = 1;
-	SpiaRegs.SPIFFTX.bit.TXFFIENA = 1;
-	SpiaRegs.SPIFFTX.bit.TXFIFO = 1;
-
-	//
-	// Put RX FIFO in reset
-	// Set RX FIFO to 4 words
-	// Enable RX FIFO interrupts
-	// Release RX FIFO from reset
-	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0;
-	SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // в примере 4 у далера 6
-	SpiaRegs.SPIFFRX.bit.RXFFINT = 1;
-	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1;
-
-	// Transmit delay is zero
-	// Release SPI from reset
-	SpiaRegs.SPIFFCT.all=0x0;
-	SpiaRegs.SPIFFTX.bit.SPIRST = 1;
-
-	// Set reset low before configuration changes
-	// Clock polarity (0 == rising, 1 == falling)
-	// 16-bit character
-	// Enable loop-back
-	SpiaRegs.SPICCR.bit.SPISWRESET = 0;
-	SpiaRegs.SPICCR.bit.CLKPOLARITY = 1;
-	SpiaRegs.SPICCR.bit.SPICHAR = (16-1);
-	SpiaRegs.SPICCR.bit.SPILBK = 0;
-
-	// Enable master (0 == slave, 1 == master)
-	// Enable transmission (Talk)
-	// Clock phase (0 == normal, 1 == delayed ВЫБРАЛ 1)
-	// SPI interrupts are disabled
-	SpiaRegs.SPICTL.bit.MASTER_SLAVE = 1;
-	SpiaRegs.SPICTL.bit.TALK = 1;
-	SpiaRegs.SPICTL.bit.CLK_PHASE = 0;
-	SpiaRegs.SPICTL.bit.SPIINTENA = 0;
-
-	// Set the baud rate
-	//
-	SpiaRegs.SPIBRR = SPI_BRR;
-
-	// Set FREE bit
-	// Halting on a breakpoint will not halt the SPI
-	SpiaRegs.SPIPRI.bit.FREE = 1;
-
-	//
-	// Release the SPI from reset
-	SpiaRegs.SPICCR.bit.SPISWRESET = 1;
 }
 
 /*
@@ -159,7 +89,6 @@ void main(void) {
     InitGpio();
 
     setup_GPIO();       // setup GPIO pins
-    setup_SPI();        // setup SPI pins
 
     // Configuring PIE (Peripheral Interrupt Expansion)
     // Инициализация системы прерываний
@@ -167,6 +96,8 @@ void main(void) {
 	IER = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	IFR = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	InitPieVectTable(); // Initialize the PIE vector table with pointers to the shell ISR.
+
+    setup_SPI();        // setup SPI
 
 	EINT;  // Enable Global interrupt INTM
 	ERTM;  // Enable Global realtime interrupt DBGM
