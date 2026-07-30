@@ -97,7 +97,7 @@ void main(void) {
 	IFR = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	InitPieVectTable(); // Initialize the PIE vector table with pointers to the shell ISR.
 
-    setup_SPI();        // setup SPI
+	flash_spi_setup();
 
 	EINT;  // Enable Global interrupt INTM
 	ERTM;  // Enable Global realtime interrupt DBGM
@@ -124,7 +124,60 @@ void main(void) {
 	Uint16 LedCounter = 0;
 	Uint8  WatchDog = 0;
 
+	enum {
+		FLASH_ST_READ = 0,
+		FLASH_ST_WE_1,
+		FLASH_ST_ERASE,
+		FLASH_ST_POLL_STATUS_1,
+		FLASH_ST_CHECK_STATUS_1,
+		FLASH_ST_WE_2,
+		FLASH_ST_WRITE,
+		FLASH_ST_POLL_STATUS_2,
+		FLASH_ST_CHECK_STATUS_2,
+		FLASH_ST_DONE,
+	} flash_st = FLASH_ST_READ;
 	for(;;) {  // Итерации раз в 300 мкс
+		Uint16 data[123] = {0};
+		union FlashStatusRegister flash_status_register = {0};
+		if (flash_st != FLASH_ST_DONE && flash_is_ready()) {
+			switch (flash_st) {
+				case FLASH_ST_READ: {
+					flash_read_array(data, 123, 0x00DEAD);
+					flash_st++;
+				} break;
+
+				case FLASH_ST_WE_1:
+				case FLASH_ST_WE_2: {
+					flash_write_enable();
+					flash_st++;
+				} break;
+
+				case FLASH_ST_ERASE: {
+					flash_block_erase_4K(0x006767);
+					flash_st++;
+				} break;
+
+				case FLASH_ST_POLL_STATUS_1:
+				case FLASH_ST_POLL_STATUS_2: {
+					flash_read_status(&flash_status_register);
+					flash_st++;
+				} break;
+
+				case FLASH_ST_CHECK_STATUS_1:
+				case FLASH_ST_CHECK_STATUS_2: {
+					// wait for ongoing operation to complete
+					if (flash_status_register.RDY_BSY_1 == 0) {
+						flash_st++;
+					}
+				} break;
+
+				case FLASH_ST_WRITE: {
+					flash_write_array(data, 123, 0x006767);
+					flash_st++;
+				} break;
+			}
+		}
+
 		if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS) {
 			continue;  // DMA занят, ждем
 		}
