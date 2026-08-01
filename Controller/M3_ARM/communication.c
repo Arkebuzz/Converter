@@ -295,7 +295,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 
 		// IVAN: forming the response
 		Osci_Response osci_response = {
-			.errors = CTOM_DATA->errors,
+			.errors = CTOM_DATA->OsciErrors,
 		};
 		switch (cmd) {
 			case PACKET_CMD_ECHO: {
@@ -313,7 +313,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = arg * sizeof(Osci_Packet);
 
 				Osci_Packet packets[arg];
-				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + CTOM_DATA->SRAM_offset);
+				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + CTOM_DATA->SRAM_Offset);
 
 				for (Uint16 i = 0; i < arg; i++) {
 					if ((Uint16 *)packet_ptr < (Uint16 *)S6_START) {
@@ -333,12 +333,12 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = sizeof(SHARERAMS6) + sizeof(SHARERAMS7);
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 
-				volatile Uint16 before_offset = CTOM_DATA->SRAM_offset;
+				volatile Uint16 before_offset = CTOM_DATA->SRAM_Offset;
 				tcp_send_all(client_fd, S6_START, osci_response.len);
-				volatile Uint16 after_offset = CTOM_DATA->SRAM_offset;
+				volatile Uint16 after_offset = CTOM_DATA->SRAM_Offset;
 
 				// IVAN: send info about potentially invalid packets
-				osci_response.errors = CTOM_DATA->errors;
+				osci_response.errors = CTOM_DATA->OsciErrors;
 				osci_response.cmd = PACKET_CMD_INFO;
 
 				struct {
@@ -356,28 +356,28 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				Uint16 resp_flash_cmd = 0;
 				osci_response.len = sizeof(resp_flash_cmd);
 
-				if (CTOM_DATA->FlashData.FlashCmd == FLASH_CMD_DONE && arg < FLASH_CMD_SZ) {
+				if (CTOM_DATA->FlashData.Cmd == FLASH_CMD_DONE && arg < FLASH_CMD_SZ) {
 					// read address
 					tcp_recv_all(
 						client_fd,
-						&CTOM_DATA->FlashData.FlashAddress,
-						sizeof(CTOM_DATA->FlashData.FlashAddress)
+						&CTOM_DATA->FlashData.Address,
+						sizeof(CTOM_DATA->FlashData.Address)
 					);
 					// read data size
 					tcp_recv_all(
 						client_fd,
-						&CTOM_DATA->FlashData.FlashDataSize,
-						sizeof(CTOM_DATA->FlashData.FlashDataSize)
+						&CTOM_DATA->FlashData.DataSize,
+						sizeof(CTOM_DATA->FlashData.DataSize)
 					);
-					if (CTOM_DATA->FlashData.FlashDataSize > 128) {
-						CTOM_DATA->FlashData.FlashDataSize = 128;
+					if (CTOM_DATA->FlashData.DataSize > 128) {
+						CTOM_DATA->FlashData.DataSize = 128;
 					}
-					if (CTOM_DATA->FlashData.FlashDataSize > 0) {
+					if (CTOM_DATA->FlashData.DataSize > 0) {
 						// read data
 						tcp_recv_all(
 							client_fd,
-							CTOM_DATA->FlashData.FlashBuf,
-							CTOM_DATA->FlashData.FlashDataSize * sizeof(CTOM_DATA->FlashData.FlashBuf[0])
+							CTOM_DATA->FlashData.Buf,
+							CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
 						);
 					}
 					resp_flash_cmd = arg;
@@ -393,15 +393,15 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 			case PACKET_CMD_FLASH_READ: {
 				osci_response.cmd = PACKET_CMD_FLASH_READ;
 
-				if (CTOM_DATA->FlashData.FlashCmd == FLASH_CMD_DONE) {
+				if (CTOM_DATA->FlashData.Cmd == FLASH_CMD_DONE) {
 					// hack: set flash cmd to some garbage value so C28
 					// doesn't accept new commands nor advance it's state machine
 					// while we are copying the data
-					CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_SZ;
+					CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
 					osci_response.len =
-						sizeof(CTOM_DATA->FlashData.FlashDataSize) * sizeof(CTOM_DATA->FlashData.FlashBuf[0]);
+						sizeof(CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
-					tcp_send_all(client_fd, CTOM_DATA->FlashData.FlashBuf, osci_response.len);
+					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
 				} else {
 					osci_response.len = 0;
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));

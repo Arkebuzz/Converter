@@ -136,7 +136,7 @@ void main(void) {
 	} flash_st = FLASH_ST_READ;
 	for(;;) {  // Итерации раз в 300 мкс
 		union FlashStatusRegister flash_status_register = {0};
-		switch (CTOM_DATA->FlashData.FlashCmd) {
+		switch (CTOM_DATA->FlashData.Cmd) {
 			case FLASH_CMD_DONE: break;
 			case FLASH_CMD_BUSY: {
 				if (!flash_is_ready()) {
@@ -145,9 +145,9 @@ void main(void) {
 				switch (flash_st) {
 					case FLASH_ST_READ: {
 						flash_read_array(
-							CTOM_DATA->FlashData.FlashBuf,
-							CTOM_DATA->FlashData.FlashDataSize,
-							CTOM_DATA->FlashData.FlashAddress
+							CTOM_DATA->FlashData.Buf,
+							CTOM_DATA->FlashData.DataSize,
+							CTOM_DATA->FlashData.Address
 						);
 						flash_st = FLASH_ST_POLL_STATUS;
 					} break;
@@ -157,14 +157,14 @@ void main(void) {
 						flash_st++;
 					} break;
 					case FLASH_ST_ERASE: {
-						flash_block_erase_4K(CTOM_DATA->FlashData.FlashAddress);
+						flash_block_erase_4K(CTOM_DATA->FlashData.Address);
 						flash_st = FLASH_ST_DONE;
 					} break;
 					case FLASH_ST_WRITE: {
 						flash_write_array(
-							CTOM_DATA->FlashData.FlashBuf,
-							CTOM_DATA->FlashData.FlashDataSize,
-							CTOM_DATA->FlashData.FlashAddress
+							CTOM_DATA->FlashData.Buf,
+							CTOM_DATA->FlashData.DataSize,
+							CTOM_DATA->FlashData.Address
 						);
 						flash_st++;
 					} break;
@@ -182,15 +182,15 @@ void main(void) {
 				}
 			} break;
 			case FLASH_CMD_READ: {
-				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
 				flash_st = FLASH_ST_READ;
 			} break;
 			case FLASH_CMD_WRITE: {
-				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
 				flash_st = FLASH_ST_WRITE_WE;
 			} break;
 			case FLASH_CMD_ERASE_4K: {
-				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
 				flash_st = FLASH_ST_ERASE_WE;
 			} break;
 		}

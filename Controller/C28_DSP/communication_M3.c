@@ -26,10 +26,10 @@ void WriteToM3Data(const DataToM3 Data) {
 	osci_packet_ptr->CycleCounter[1] = cycle_counter[1];
 	osci_packet_ptr->CycleCounter[2] = cycle_counter[2];
 	osci_packet_ptr->CycleCounter[3] = cycle_counter[3];
-	osci_packet_ptr->errors.C28_Errors 		  = Data.C28_Errors;
-	osci_packet_ptr->errors.C28_Errors_Latch  = Data.C28_Errors_Latch;
-	osci_packet_ptr->errors.FPGA_Errors 	  = Data.FPGA_Errors;
-	osci_packet_ptr->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
+	osci_packet_ptr->OsciErrors.C28_Errors 		  = Data.C28_Errors;
+	osci_packet_ptr->OsciErrors.C28_Errors_Latch  = Data.C28_Errors_Latch;
+	osci_packet_ptr->OsciErrors.FPGA_Errors 	  = Data.FPGA_Errors;
+	osci_packet_ptr->OsciErrors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
 	osci_packet_ptr->Current_1 		 = Data.Current_1;
 	osci_packet_ptr->Current_2 		 = Data.Current_2;
 	osci_packet_ptr->Voltage_Inp 	 = Data.Voltage_Inp;
@@ -38,11 +38,11 @@ void WriteToM3Data(const DataToM3 Data) {
 	osci_packet_ptr->WatchDog 		 = (Uint16)Data.WatchDog;
 
 	// IVAN: запишем данные (ошибки и оффсет в буфере) в CTOM
-	CTOM_DATA->errors.C28_Errors 		= Data.C28_Errors;
-	CTOM_DATA->errors.C28_Errors_Latch	= Data.C28_Errors_Latch;
-	CTOM_DATA->errors.FPGA_Errors 		= Data.FPGA_Errors;
-	CTOM_DATA->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
-	CTOM_DATA->SRAM_offset = (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
+	CTOM_DATA->OsciErrors.C28_Errors 		= Data.C28_Errors;
+	CTOM_DATA->OsciErrors.C28_Errors_Latch	= Data.C28_Errors_Latch;
+	CTOM_DATA->OsciErrors.FPGA_Errors 		= Data.FPGA_Errors;
+	CTOM_DATA->OsciErrors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
+	CTOM_DATA->SRAM_Offset = (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
 
 	osci_packet_ptr++;
 	if ((Uint16 *)osci_packet_ptr >= (Uint16*)S7_END) {

@@ -13,9 +13,9 @@ typedef struct {
 } Osci_Errors;
 
 typedef struct {
-	uint16_t FlashBuf[128];
-	uint32_t FlashAddress;
-	uint16_t FlashDataSize;
+	uint16_t Buf[128];
+	uint32_t Address;
+	uint16_t DataSize;
 	enum {
 		FLASH_CMD_DONE = 0,
 		FLASH_CMD_BUSY,
@@ -24,12 +24,12 @@ typedef struct {
 		FLASH_CMD_ERASE_4K,
 
 		FLASH_CMD_SZ,
-	} FlashCmd;
+	} Cmd;
 } Flash_Data;
 
 typedef struct {
-	Osci_Errors errors;
-	uint16_t SRAM_offset;
+	Osci_Errors OsciErrors;
+	uint16_t SRAM_Offset;
 	Flash_Data FlashData;
 } CTOM_Data;
 
@@ -37,7 +37,7 @@ typedef struct {
 // TODO: Щас ошибки дублируются в пакете и в респонсе
 typedef struct {
 	uint16_t CycleCounter[4];
-	Osci_Errors errors;
+	Osci_Errors OsciErrors;
 	uint16_t Current_1;
 	uint16_t Current_2;
 	uint16_t Voltage_Inp;
