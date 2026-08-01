@@ -178,6 +178,7 @@ void main(void) {
 							flash_st++;
 						}
 					} break;
+					default: break;
 				}
 			} break;
 			case FLASH_CMD_READ: {

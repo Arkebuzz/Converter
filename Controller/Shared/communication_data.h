@@ -17,11 +17,13 @@ typedef struct {
 	uint32_t FlashAddress;
 	uint16_t FlashDataSize;
 	enum {
-		FLASH_CMD_DONE,
+		FLASH_CMD_DONE = 0,
 		FLASH_CMD_BUSY,
 		FLASH_CMD_READ,
 		FLASH_CMD_WRITE,
 		FLASH_CMD_ERASE_4K,
+
+		FLASH_CMD_SZ,
 	} FlashCmd;
 } Flash_Data;
 
@@ -52,6 +54,8 @@ typedef enum {
 	PACKET_CMD_OSCI,
 	PACKET_CMD_FULL,
 	PACKET_CMD_INFO,
+	PACKET_CMD_FLASH_QUERY,
+	PACKET_CMD_FLASH_READ,
 } Packet_Cmd;
 
 typedef struct {

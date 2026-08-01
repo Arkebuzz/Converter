@@ -11,6 +11,7 @@
 #include "communication.h"
 
 #define CTOM_MSGRAM 0x2007F000;
+volatile CTOM_Data *CTOM_DATA = (CTOM_Data *)CTOM_MSGRAM;
 
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
 volatile Uint16 SHARERAMS6[0x1000];
@@ -293,9 +294,8 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 		Uint16 arg = request->arg;
 
 		// IVAN: forming the response
-		volatile CTOM_Data *ctom_data = (CTOM_Data *)CTOM_MSGRAM;
 		Osci_Response osci_response = {
-			.errors = ctom_data->errors,
+			.errors = CTOM_DATA->errors,
 		};
 		switch (cmd) {
 			case PACKET_CMD_ECHO: {
@@ -313,7 +313,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = arg * sizeof(Osci_Packet);
 
 				Osci_Packet packets[arg];
-				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + ctom_data->SRAM_offset);
+				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + CTOM_DATA->SRAM_offset);
 
 				for (Uint16 i = 0; i < arg; i++) {
 					if ((Uint16 *)packet_ptr < (Uint16 *)S6_START) {
@@ -333,12 +333,12 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = sizeof(SHARERAMS6) + sizeof(SHARERAMS7);
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 
-				volatile Uint16 before_offset = ctom_data->SRAM_offset;
+				volatile Uint16 before_offset = CTOM_DATA->SRAM_offset;
 				tcp_send_all(client_fd, S6_START, osci_response.len);
-				volatile Uint16 after_offset = ctom_data->SRAM_offset;
+				volatile Uint16 after_offset = CTOM_DATA->SRAM_offset;
 
 				// IVAN: send info about potentially invalid packets
-				osci_response.errors = ctom_data->errors;
+				osci_response.errors = CTOM_DATA->errors;
 				osci_response.cmd = PACKET_CMD_INFO;
 
 				struct {
@@ -349,6 +349,63 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 				tcp_send_all(client_fd, &info_data, osci_response.len);
+			} break;
+
+			case PACKET_CMD_FLASH_QUERY: {
+				osci_response.cmd = PACKET_CMD_FLASH_QUERY;
+				Uint16 resp_flash_cmd = 0;
+				osci_response.len = sizeof(resp_flash_cmd);
+
+				if (CTOM_DATA->FlashData.FlashCmd == FLASH_CMD_DONE && arg < FLASH_CMD_SZ) {
+					// read address
+					tcp_recv_all(
+						client_fd,
+						&CTOM_DATA->FlashData.FlashAddress,
+						sizeof(CTOM_DATA->FlashData.FlashAddress)
+					);
+					// read data size
+					tcp_recv_all(
+						client_fd,
+						&CTOM_DATA->FlashData.FlashDataSize,
+						sizeof(CTOM_DATA->FlashData.FlashDataSize)
+					);
+					if (CTOM_DATA->FlashData.FlashDataSize > 128) {
+						CTOM_DATA->FlashData.FlashDataSize = 128;
+					}
+					if (CTOM_DATA->FlashData.FlashDataSize > 0) {
+						// read data
+						tcp_recv_all(
+							client_fd,
+							CTOM_DATA->FlashData.FlashBuf,
+							CTOM_DATA->FlashData.FlashDataSize * sizeof(CTOM_DATA->FlashData.FlashBuf[0])
+						);
+					}
+					resp_flash_cmd = arg;
+				} else {
+					// flash is still busy
+					resp_flash_cmd = FLASH_CMD_BUSY;
+				}
+
+				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+				tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
+			} break;
+
+			case PACKET_CMD_FLASH_READ: {
+				osci_response.cmd = PACKET_CMD_FLASH_READ;
+
+				if (CTOM_DATA->FlashData.FlashCmd == FLASH_CMD_DONE) {
+					// hack: set flash cmd to some garbage value so C28
+					// doesn't accept new commands nor advance it's state machine
+					// while we are copying the data
+					CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_SZ;
+					osci_response.len =
+						sizeof(CTOM_DATA->FlashData.FlashDataSize) * sizeof(CTOM_DATA->FlashData.FlashBuf[0]);
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, CTOM_DATA->FlashData.FlashBuf, osci_response.len);
+				} else {
+					osci_response.len = 0;
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+				}
 			} break;
 
 			default: {
