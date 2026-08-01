@@ -24,6 +24,13 @@
 		<nature>com.ti.ccstudio.core.ccsNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>communication_data.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Shared/communication_data.h</locationURI>
+		</link>
+	</linkedResources>
 	<variableList>
 		<variable>
 			<name>INSTALLROOT_F28M35X_V202</name>
