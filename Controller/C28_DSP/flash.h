@@ -3,7 +3,7 @@
 
 Bool flash_is_ready();
 
-Bool flash_read_array(Uint16 *buf, Uint16 count, Uint32 address);
+Bool flash_read_array(volatile Uint16 *buf, Uint16 count, Uint32 address);
 
 Bool flash_write_enable(void);
 Bool flash_write_disable(void);
@@ -13,7 +13,7 @@ Bool flash_block_erase_32K(Uint32 address);
 Bool flash_block_erase_64K(Uint32 address);
 
 // writes up to one page (256 bytes) starting at address
-Bool flash_write_array(Uint16 *buf, Uint16 count, Uint32 address);
+Bool flash_write_array(volatile const Uint16 *buf, Uint16 count, Uint32 address);
 
 union FlashStatusRegister {
 	// bytes are reversed because we send 16 bit words

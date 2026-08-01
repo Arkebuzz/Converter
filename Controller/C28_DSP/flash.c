@@ -152,7 +152,7 @@ static inline void flash_end_reset(void) {
 // "nonblocking" read
 // starts reading `count` words from `address` on flash into `buf`
 // returns 1 if started reading, 0 if busy
-Bool flash_read_array(Uint16 *buf, Uint16 count, Uint32 address) {
+Bool flash_read_array(volatile Uint16 *buf, Uint16 count, Uint32 address) {
 	if (!flash_is_ready()) {
 		return 0;
 	}
@@ -227,7 +227,7 @@ Bool flash_block_erase_64K(Uint32 address) {
 }
 
 // writes up to one page (256 bytes) starting at address
-Bool flash_write_array(Uint16 *buf, Uint16 count, Uint32 address) {
+Bool flash_write_array(volatile const Uint16 *buf, Uint16 count, Uint32 address) {
 	if (!flash_is_ready() || count > 128) {
 		return 0;
 	}

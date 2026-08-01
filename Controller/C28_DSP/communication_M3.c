@@ -5,6 +5,8 @@
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
 volatile Uint16 CTOM_MSGRAM[1024];
 
+volatile CTOM_Data *CTOM_DATA = (volatile CTOM_Data *)CTOM_MSGRAM;
+
 // Communication with M3 uses SRAM6-SRAM7
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
 volatile Uint16 SHARERAMS6[4096];
@@ -14,34 +16,6 @@ volatile Uint16 SHARERAMS7[4096];
 
 #define S6_START SHARERAMS6
 #define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
-
-// 4 u16
-typedef struct {
-	Uint16 C28_Errors;
-	Uint16 C28_Errors_Latch;
-	Uint16 FPGA_Errors;
-	Uint16 FPGA_Errors_Latch;
-} Osci_Errors;
-
-// 5 u16
-typedef struct {
-	Osci_Errors errors;
-	Uint16 SRAM_offset;
-} CTOM_Data;
-
-// 16 u16
-typedef struct {
-	Uint16 CycleCounter[4];
-	Osci_Errors errors;
-	Uint16 Current_1;
-	Uint16 Current_2;
-	Uint16 Voltage_Inp;
-	Uint16 Voltage_Out;
-	Uint16 FreeTimeCounter;
-	Uint16 WatchDog;
-	Uint16 __pad[2];
-} Osci_Packet;
-
 
 void WriteToM3Data(const DataToM3 Data) {
 	static volatile Osci_Packet *osci_packet_ptr = (volatile Osci_Packet *)S6_START;
@@ -64,12 +38,11 @@ void WriteToM3Data(const DataToM3 Data) {
 	osci_packet_ptr->WatchDog 		 = (Uint16)Data.WatchDog;
 
 	// IVAN: запишем данные (ошибки и оффсет в буфере) в CTOM
-	volatile CTOM_Data *ctom_data = (volatile CTOM_Data *)CTOM_MSGRAM;
-	ctom_data->errors.C28_Errors 		= Data.C28_Errors;
-	ctom_data->errors.C28_Errors_Latch	= Data.C28_Errors_Latch;
-	ctom_data->errors.FPGA_Errors 		= Data.FPGA_Errors;
-	ctom_data->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
-	ctom_data->SRAM_offset = (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
+	CTOM_DATA->errors.C28_Errors 		= Data.C28_Errors;
+	CTOM_DATA->errors.C28_Errors_Latch	= Data.C28_Errors_Latch;
+	CTOM_DATA->errors.FPGA_Errors 		= Data.FPGA_Errors;
+	CTOM_DATA->errors.FPGA_Errors_Latch = Data.FPGA_Errors_Latch;
+	CTOM_DATA->SRAM_offset = (Uint16 *)osci_packet_ptr - (Uint16 *)S6_START;
 
 	osci_packet_ptr++;
 	if ((Uint16 *)osci_packet_ptr >= (Uint16*)S7_END) {

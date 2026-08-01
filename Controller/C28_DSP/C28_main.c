@@ -126,56 +126,72 @@ void main(void) {
 
 	enum {
 		FLASH_ST_READ = 0,
-		FLASH_ST_WE_1,
+		FLASH_ST_ERASE_WE,
 		FLASH_ST_ERASE,
-		FLASH_ST_POLL_STATUS_1,
-		FLASH_ST_CHECK_STATUS_1,
-		FLASH_ST_WE_2,
+		FLASH_ST_WRITE_WE,
 		FLASH_ST_WRITE,
-		FLASH_ST_POLL_STATUS_2,
-		FLASH_ST_CHECK_STATUS_2,
+		FLASH_ST_POLL_STATUS,
+		FLASH_ST_CHECK_STATUS,
 		FLASH_ST_DONE,
 	} flash_st = FLASH_ST_READ;
 	for(;;) {  // Итерации раз в 300 мкс
-		Uint16 data[123] = {0};
 		union FlashStatusRegister flash_status_register = {0};
-		if (flash_st != FLASH_ST_DONE && flash_is_ready()) {
-			switch (flash_st) {
-				case FLASH_ST_READ: {
-					flash_read_array(data, 123, 0x00DEAD);
-					flash_st++;
-				} break;
-
-				case FLASH_ST_WE_1:
-				case FLASH_ST_WE_2: {
-					flash_write_enable();
-					flash_st++;
-				} break;
-
-				case FLASH_ST_ERASE: {
-					flash_block_erase_4K(0x006767);
-					flash_st++;
-				} break;
-
-				case FLASH_ST_POLL_STATUS_1:
-				case FLASH_ST_POLL_STATUS_2: {
-					flash_read_status(&flash_status_register);
-					flash_st++;
-				} break;
-
-				case FLASH_ST_CHECK_STATUS_1:
-				case FLASH_ST_CHECK_STATUS_2: {
-					// wait for ongoing operation to complete
-					if (flash_status_register.RDY_BSY_1 == 0) {
+		switch (CTOM_DATA->FlashData.FlashCmd) {
+			case FLASH_CMD_DONE: break;
+			case FLASH_CMD_BUSY: {
+				if (!flash_is_ready()) {
+					break;
+				}
+				switch (flash_st) {
+					case FLASH_ST_READ: {
+						flash_read_array(
+							CTOM_DATA->FlashData.FlashBuf,
+							CTOM_DATA->FlashData.FlashDataSize,
+							CTOM_DATA->FlashData.FlashAddress
+						);
+						flash_st = FLASH_ST_POLL_STATUS;
+					} break;
+					case FLASH_ST_ERASE_WE:
+					case FLASH_ST_WRITE_WE: {
+						flash_write_enable();
 						flash_st++;
-					}
-				} break;
-
-				case FLASH_ST_WRITE: {
-					flash_write_array(data, 123, 0x006767);
-					flash_st++;
-				} break;
-			}
+					} break;
+					case FLASH_ST_ERASE: {
+						flash_block_erase_4K(CTOM_DATA->FlashData.FlashAddress);
+						flash_st = FLASH_ST_DONE;
+					} break;
+					case FLASH_ST_WRITE: {
+						flash_write_array(
+							CTOM_DATA->FlashData.FlashBuf,
+							CTOM_DATA->FlashData.FlashDataSize,
+							CTOM_DATA->FlashData.FlashAddress
+						);
+						flash_st++;
+					} break;
+					case FLASH_ST_POLL_STATUS: {
+						flash_read_status(&flash_status_register);
+						flash_st = FLASH_ST_CHECK_STATUS;
+					} break;
+					case FLASH_ST_CHECK_STATUS: {
+						// wait for ongoing operation to complete
+						if (flash_status_register.RDY_BSY_1 == 0) {
+							flash_st++;
+						}
+					} break;
+				}
+			} break;
+			case FLASH_CMD_READ: {
+				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_READ;
+			} break;
+			case FLASH_CMD_WRITE: {
+				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_WRITE_WE;
+			} break;
+			case FLASH_CMD_ERASE_4K: {
+				CTOM_DATA->FlashData.FlashCmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_ERASE_WE;
+			} break;
 		}
 
 		if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS) {
