@@ -351,18 +351,32 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				tcp_send_all(client_fd, &info_data, osci_response.len);
 			} break;
 
-			case PACKET_CMD_FLASH_QUERY: {
-				osci_response.cmd = PACKET_CMD_FLASH_QUERY;
+			case PACKET_CMD_FLASH: {
+				osci_response.cmd = PACKET_CMD_FLASH;
 				Uint16 resp_flash_cmd = 0;
 				osci_response.len = sizeof(resp_flash_cmd);
 
-				if (CTOM_DATA->FlashData.Cmd == FLASH_CMD_DONE && arg < FLASH_CMD_SZ) {
-					// read address
-					tcp_recv_all(
-						client_fd,
-						&CTOM_DATA->FlashData.Address,
-						sizeof(CTOM_DATA->FlashData.Address)
-					);
+				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE || arg >= FLASH_CMD_SZ) {
+					// flash is still busy
+					resp_flash_cmd = FLASH_CMD_BUSY;
+
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
+					break;
+				}
+
+				// hack: set flash cmd to some garbage value so C28
+				// doesn't accept new commands nor advance it's state machine
+				// while we are waiting for the data
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+
+				// read address
+				tcp_recv_all(
+					client_fd,
+					&CTOM_DATA->FlashData.Address,
+					sizeof(CTOM_DATA->FlashData.Address)
+				);
+				if (arg == FLASH_CMD_WRITE || arg == FLASH_CMD_READ) {
 					// read data size
 					tcp_recv_all(
 						client_fd,
@@ -372,39 +386,31 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 					if (CTOM_DATA->FlashData.DataSize > 128) {
 						CTOM_DATA->FlashData.DataSize = 128;
 					}
-					if (CTOM_DATA->FlashData.DataSize > 0) {
-						// read data
-						tcp_recv_all(
-							client_fd,
-							CTOM_DATA->FlashData.Buf,
-							CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
-						);
-					}
-					resp_flash_cmd = arg;
-				} else {
-					// flash is still busy
-					resp_flash_cmd = FLASH_CMD_BUSY;
 				}
-
-				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
-				tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
-			} break;
-
-			case PACKET_CMD_FLASH_READ: {
-				osci_response.cmd = PACKET_CMD_FLASH_READ;
-
-				if (CTOM_DATA->FlashData.Cmd == FLASH_CMD_DONE) {
-					// hack: set flash cmd to some garbage value so C28
-					// doesn't accept new commands nor advance it's state machine
-					// while we are copying the data
-					CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+				if (arg == FLASH_CMD_WRITE) {
+					// read data
+					tcp_recv_all(
+						client_fd,
+						CTOM_DATA->FlashData.Buf,
+						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
+					);
+				}
+				if (arg == FLASH_CMD_READ) {
+					CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
+					// FIXME: blocks until read is done
+					while (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
+						Task_sleep(100);
+					}
 					osci_response.len =
-						sizeof(CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
+						CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
 				} else {
-					osci_response.len = 0;
+					CTOM_DATA->FlashData.Cmd = (enum Flash_Cmd) arg;
+					resp_flash_cmd = arg;
+
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
 				}
 			} break;
 

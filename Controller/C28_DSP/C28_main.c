@@ -135,7 +135,7 @@ void main(void) {
 		FLASH_ST_DONE,
 	} flash_st = FLASH_ST_READ;
 	for(;;) {  // Итерации раз в 300 мкс
-		union FlashStatusRegister flash_status_register = {0};
+		static union FlashStatusRegister flash_status_register = {0};
 		switch (CTOM_DATA->FlashData.Cmd) {
 			case FLASH_CMD_DONE: break;
 			case FLASH_CMD_BUSY: {
@@ -158,7 +158,7 @@ void main(void) {
 					} break;
 					case FLASH_ST_ERASE: {
 						flash_block_erase_4K(CTOM_DATA->FlashData.Address);
-						flash_st = FLASH_ST_DONE;
+						flash_st = FLASH_ST_POLL_STATUS;
 					} break;
 					case FLASH_ST_WRITE: {
 						flash_write_array(
@@ -175,7 +175,8 @@ void main(void) {
 					case FLASH_ST_CHECK_STATUS: {
 						// wait for ongoing operation to complete
 						if (flash_status_register.RDY_BSY_1 == 0) {
-							flash_st++;
+							CTOM_DATA->FlashData.Cmd = FLASH_CMD_DONE;
+							flash_st = FLASH_ST_DONE;
 						}
 					} break;
 					default: break;
@@ -193,6 +194,7 @@ void main(void) {
 				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
 				flash_st = FLASH_ST_ERASE_WE;
 			} break;
+			default: break;
 		}
 
 		if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS) {
