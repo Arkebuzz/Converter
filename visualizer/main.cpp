@@ -190,10 +190,20 @@ int connect_to_mcu(const char *ip, int port, SOCKET *sock) {
     return 0;
 }
 
+// wow c++ is garbage
+// thanks for breaking C compatibility
+using enum Flash_Data::Flash_Cmd;
+typedef Flash_Data::Flash_Cmd Flash_Cmd;
+
 typedef struct {
     char ip[32];
     uint16_t port;
     uint16_t num_packets;
+    struct {
+        Flash_Cmd cmd;
+        uint32_t address;
+        uint8_t data_size;
+    } flash_params;
 } SendParams;
 
 SendParams *send_params_new(uint16_t port, char *ip) {
@@ -205,26 +215,49 @@ SendParams *send_params_new(uint16_t port, char *ip) {
 
 bool g_repeat = false;
 
+#define ENUM_CASE_RET(cmd) case cmd: return #cmd
 const char *cmd_to_str(uint16_t cmd) {
-#define CMD_CASE_RET(cmd) case cmd: return #cmd
     switch (cmd) {
-        CMD_CASE_RET(PACKET_CMD_ECHO);
-        CMD_CASE_RET(PACKET_CMD_OSCI);
-        CMD_CASE_RET(PACKET_CMD_FULL);
-        CMD_CASE_RET(PACKET_CMD_INFO);
+        ENUM_CASE_RET(PACKET_CMD_ECHO);
+        ENUM_CASE_RET(PACKET_CMD_OSCI);
+        ENUM_CASE_RET(PACKET_CMD_FULL);
+        ENUM_CASE_RET(PACKET_CMD_INFO);
         default: return "(UNKNOWN CMD)";
     }
 }
 
-int recv_packet_header(SOCKET sock, Osci_Request req, Osci_Response *resp) {
+const char *flash_cmd_to_str(uint16_t cmd) {
+    switch (cmd) {
+        ENUM_CASE_RET(FLASH_CMD_DONE);
+        ENUM_CASE_RET(FLASH_CMD_BUSY);
+        ENUM_CASE_RET(FLASH_CMD_READ);
+        ENUM_CASE_RET(FLASH_CMD_WRITE);
+        ENUM_CASE_RET(FLASH_CMD_ERASE_4K);
+        ENUM_CASE_RET(FLASH_CMD_SZ);
+        default: return "(UNKNOWN CMD)";
+    }
+}
+
+int send_request(SOCKET sock, Osci_Request req) {
     int status = 0;
     status = tcp_send_all(sock, &req, sizeof(req));
     if (status < 0) { return -1; }
     app_log("Sent %s", cmd_to_str(req.cmd));
 
+    return 0;
+}
+
+int recv_header(SOCKET sock, Osci_Response *resp) {
+    int status = 0;
     status = tcp_recv_all(sock, resp, sizeof(*resp));
     if (status < 0) { return -1; }
     
+    return 0;
+}
+
+int send_and_recv_header(SOCKET sock, Osci_Request req, Osci_Response *resp) {
+    if (send_request(sock, req) < 0) { return -1; }
+    if (recv_header(sock, resp) < 0) { return -1; }
     if (resp->cmd != req.cmd) {
         app_log("ERROR: Expected %s response, got %u", cmd_to_str(req.cmd), resp->cmd);
         return -1;
@@ -243,7 +276,7 @@ DWORD WINAPI send_echo(LPVOID arg) {
     status = connect_to_mcu(params->ip, params->port, &sock);
     if (status < 0) { goto err; }
 
-    status = recv_packet_header(
+    status = send_and_recv_header(
         sock,
         Osci_Request { .cmd = PACKET_CMD_ECHO, .arg = 123 },
         &resp
@@ -268,7 +301,7 @@ DWORD WINAPI send_osci(LPVOID arg) {
     status = connect_to_mcu(params->ip, params->port, &sock);
     if (status < 0) { goto err; }
 
-    status = recv_packet_header(
+    status = send_and_recv_header(
         sock,
         Osci_Request { .cmd = PACKET_CMD_OSCI, .arg = params->num_packets },
         &resp
@@ -310,7 +343,7 @@ DWORD WINAPI send_full(LPVOID arg) {
         Osci_Packet *packets;
         double got_packets;
 
-        status = recv_packet_header(
+        status = send_and_recv_header(
             sock,
             Osci_Request { .cmd = PACKET_CMD_FULL, .arg = 123 },
             &resp
@@ -326,7 +359,7 @@ DWORD WINAPI send_full(LPVOID arg) {
             resp.len, got_packets
         );
 
-        status = recv_packet_header(
+        status = send_and_recv_header(
             sock,
             Osci_Request { .cmd = PACKET_CMD_INFO, .arg = 123 },
             &resp
@@ -364,7 +397,74 @@ DWORD WINAPI send_full(LPVOID arg) {
     return ret;
 }
 
+#define FLASH_DATA_LEN (sizeof(Flash_Data::Buf))
+
+uint16_t g_resp_flash_cmd = {0};
+char g_flash_read_data[FLASH_DATA_LEN] = {0};
+char g_flash_write_data[FLASH_DATA_LEN] = {0};
+static_assert(sizeof(char) == 1);
+
+CRITICAL_SECTION g_flash_read_cs;
+CRITICAL_SECTION g_flash_write_cs;
+
+DWORD WINAPI send_flash(LPVOID arg) {
+    int ret = 0;
+    int status = 0;
+    SendParams *params = (SendParams *)arg;
+    Osci_Response resp;
+
+    Flash_Cmd cmd = params->flash_params.cmd;
+    uint32_t address = params->flash_params.address;
+    uint8_t data_size = params->flash_params.data_size;
+
+    uint16_t resp_flash_cmd = {0};
+
+    SOCKET sock;
+    status = connect_to_mcu(params->ip, params->port, &sock);
+    if (status < 0) { goto err; }
+
+    // sending
+    status = tcp_send_all(sock, &address, sizeof(address));
+    if (status < 0) { goto err; }
+
+    if (cmd == FLASH_CMD_WRITE || cmd == FLASH_CMD_READ) {
+        status = tcp_send_all(sock, &data_size, sizeof(data_size));
+        if (status < 0) { goto err; }
+    }
+    if (cmd == FLASH_CMD_WRITE) {
+        EnterCriticalSection(&g_flash_write_cs);
+        status = tcp_send_all(sock, g_flash_write_data, data_size);
+        LeaveCriticalSection(&g_flash_write_cs);
+        if (status < 0) { goto err; }
+    }
+
+    // receiving
+    status = recv_header(sock, &resp);
+    errors_set(resp.errors, PACKET_CMD_FLASH);
+    if (status < 0) { goto err; }
+    
+    if (cmd == FLASH_CMD_READ) {
+        EnterCriticalSection(&g_flash_read_cs);
+        status = tcp_send_all(sock, g_flash_write_data, data_size);
+        LeaveCriticalSection(&g_flash_read_cs);
+        if (status < 0) { goto err; }
+    } else {
+        status = tcp_recv_all(sock, &resp_flash_cmd, sizeof(resp_flash_cmd));
+        if (status < 0) { goto err; }
+        InterlockedExchange16((SHORT *)&g_resp_flash_cmd, resp_flash_cmd);
+    }
+
+    if (0) err: {
+        ret = -1;
+    }
+    free(params);
+    closesocket(sock);
+    return ret;
+}
+
 int main(void) {
+    InitializeCriticalSection(&g_flash_read_cs);
+    InitializeCriticalSection(&g_flash_write_cs);
     InitializeCriticalSection(&g_log_cs);
     InitializeCriticalSection(&g_rb.cs);
     InitializeCriticalSection(&g_eb.cs);
@@ -433,12 +533,9 @@ int main(void) {
         {
             ImGui::Begin("Flash");
 
-            // wow c++ is garbage
-            // thanks for breaking C compatibility
-            using enum Flash_Data::Flash_Cmd;
+            ImGui::Text("Flash Response Status: %s", flash_cmd_to_str(g_resp_flash_cmd));
 
-            // this compiles only if declared with auto lmao
-            static auto flash_cmd = FLASH_CMD_READ;
+            static Flash_Cmd flash_cmd = FLASH_CMD_READ;
             if (ImGui::RadioButton("Read", flash_cmd == FLASH_CMD_READ)) {
                 flash_cmd = FLASH_CMD_READ;
             }
@@ -451,28 +548,36 @@ int main(void) {
 
             static uint32_t address = 0;
             static uint8_t data_size = 0;
-            // c++ doesn't have designated array initializers xD
-            static char read_data[sizeof(Flash_Data::Buf)] = {0};
-            static char write_data[sizeof(Flash_Data::Buf)] = {0};
             ImGui::InputScalar("Address", ImGuiDataType_U32, &address,
                     NULL, NULL, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
             if (flash_cmd == FLASH_CMD_READ) {
+                EnterCriticalSection(&g_flash_read_cs);
+
                 ImGui::InputScalar("Data Size", ImGuiDataType_U8, &data_size);
                 ImGui::Text("Data");
-                char prev_char = read_data[data_size];
-                read_data[data_size] = '\0';
-                ImGui::InputTextMultiline("##ReadData", read_data, data_size,
+                char prev_char = g_flash_read_data[data_size];
+                g_flash_read_data[data_size] = '\0';
+                ImGui::InputTextMultiline("##ReadData", g_flash_read_data, data_size,
                         ImVec2(-1.0f, 150.0f), ImGuiInputTextFlags_ReadOnly);
-                read_data[data_size] = prev_char;
+                g_flash_read_data[data_size] = prev_char;
+
+                LeaveCriticalSection(&g_flash_read_cs);
             } else if (flash_cmd == FLASH_CMD_WRITE) {
+                EnterCriticalSection(&g_flash_write_cs);
+
                 ImGui::Text("Data");
-                ImGui::InputTextMultiline("##WriteData", write_data, sizeof(write_data),
-                        ImVec2(-1.0f, 150.0f));
+                ImGui::InputTextMultiline("##WriteData", g_flash_write_data,
+                        FLASH_DATA_LEN, ImVec2(-1.0f, 150.0f));
+
+                LeaveCriticalSection(&g_flash_write_cs);
             }
 
             if (ImGui::Button("Send FLASH")) {
                 SendParams *params = send_params_new(port, ip);
-                HANDLE thr = CreateThread(NULL, 0, send_full, params, NULL, 0);
+                params->flash_params.cmd = flash_cmd;
+                params->flash_params.address = address;
+                params->flash_params.data_size = data_size;
+                HANDLE thr = CreateThread(NULL, 0, send_flash, params, NULL, 0);
                 if (thr) { CloseHandle(thr); }
             }
 
@@ -518,9 +623,6 @@ int main(void) {
             
             static float history = 1000000.0f;
             ImGui::SliderFloat("History (Cycles)", &history, 1000.0f, 100000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
-
-            ImPlotAxisFlags x_flags = ImPlotAxisFlags_None;
-            ImPlotAxisFlags y_flags = ImPlotAxisFlags_AutoFit;
 
             static bool has_wrapped = false;
             static uint32_t last_idx = 0;
@@ -582,6 +684,9 @@ int main(void) {
             }
 
             double latest_t = (valid_count > 0 && display_count > 0) ? time_vals[display_count - 1] : history;
+
+            const ImPlotAxisFlags x_flags = ImPlotAxisFlags_None;
+            const ImPlotAxisFlags y_flags = ImPlotAxisFlags_AutoFit;
 
             if (ImPlot::BeginSubplots("##OsciSubplots", 4, 1, ImVec2(-1, -1), ImPlotSubplotFlags_LinkAllX)) {
                 
