@@ -356,20 +356,14 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				Uint16 resp_flash_cmd = 0;
 				osci_response.len = sizeof(resp_flash_cmd);
 
-				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE || arg >= FLASH_CMD_SZ) {
-					// flash is still busy
-					resp_flash_cmd = FLASH_CMD_BUSY;
-
-					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
-					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
-					break;
-				}
-
 				// hack: set flash cmd to some garbage value so C28
 				// doesn't accept new commands nor advance it's state machine
 				// while we are waiting for the data
-				CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
+					CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+				}
 
+				// receiving data
 				// read address
 				tcp_recv_all(
 					client_fd,
@@ -395,6 +389,17 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
 					);
 				}
+
+				// responding
+				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE || arg >= FLASH_CMD_SZ) {
+					// flash is still busy
+					resp_flash_cmd = FLASH_CMD_BUSY;
+
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
+					break;
+				}
+
 				if (arg == FLASH_CMD_READ) {
 					CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
 					// FIXME: blocks until read is done
@@ -402,7 +407,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 						Task_sleep(100);
 					}
 					osci_response.len =
-						CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
+						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0]);
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
 				} else {
