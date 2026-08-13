@@ -90,8 +90,8 @@ PAGE 1 :   /* Data Memory */
 
    // !!!!!!!!!!!!!!!!!!!!!!!!!1
    // IVAN: changed 0x380 to 0x400 because spec tells it's 0x400
-   CTOMRAM     : origin = 0x03F800, length = 0x000400     /* C28 to M3 Message RAM */
-   MTOCRAM     : origin = 0x03FC00, length = 0x000400     /* M3 to C28 Message RAM */
+   CTOMRAM (RW) : origin = 0x03F800, length = 0x000400     /* C28 to M3 Message RAM */
+   MTOCRAM (R)  : origin = 0x03FC00, length = 0x000400     /* M3 to C28 Message RAM */
    
    FLASHB      : origin = 0x13C000, length = 0x002000     /* on-chip FLASH */
 }
@@ -145,9 +145,9 @@ SECTIONS
    }
 
    // !!!!!!!!!!!!
-   FPGA_MSGRAM : > FPGAMSGRAM, PAGE = 0
-   CTOM_MSGRAM : > CTOMRAM, PAGE = 1
-   MTOC_MSGRAM : > MTOCRAM, PAGE = 1
+   FPGA_MSGRAM         : > FPGAMSGRAM, PAGE = 0
+   CTOM_MSGRAM         : > CTOMRAM, PAGE = 1
+   MTOC_MSGRAM         : > MTOCRAM, PAGE = 1, TYPE = NOINIT
 
    SHARERAMS0          : > RAMS0,        PAGE = 1
    SHARERAMS1          : > RAMS1,        PAGE = 1
@@ -219,9 +219,3 @@ SECTIONS
    vectors             : > VECTORS     PAGE = 0, TYPE = DSECT
 
 }
-
-/*
-*/
-
-
-

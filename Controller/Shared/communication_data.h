@@ -16,6 +16,7 @@ typedef struct {
 	uint16_t Buf[128];
 	uint32_t Address;
 	uint16_t DataSize;
+	uint16_t CmdIdx;
 	enum Flash_Cmd {
 		FLASH_CMD_DONE = 0,
 		FLASH_CMD_BUSY,
@@ -28,10 +29,14 @@ typedef struct {
 } Flash_Data;
 
 typedef struct {
+	Flash_Data FlashData;
 	Osci_Errors OsciErrors;
 	uint16_t SRAM_Offset;
-	Flash_Data FlashData;
 } CTOM_Data;
+
+typedef struct {
+	Flash_Data FlashData;
+} MTOC_Data;
 
 // 16 u16
 // TODO: Щас ошибки дублируются в пакете и в респонсе

@@ -1,11 +1,13 @@
 #include "communication_M3.h"
 #include "error_handling.h"
 
-// IVAN: 0x400 available
 #pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
-volatile Uint16 CTOM_MSGRAM[1024];
+volatile Uint16 CTOM_MSGRAM[0x400];
+volatile CTOM_Data *CTOM_DATA = (CTOM_Data *)CTOM_MSGRAM;
 
-volatile CTOM_Data *CTOM_DATA = (volatile CTOM_Data *)CTOM_MSGRAM;
+#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
+volatile Uint16 MTOC_MSGRAM[0x400];
+volatile const MTOC_Data *MTOC_DATA = (MTOC_Data *)MTOC_MSGRAM;
 
 // Communication with M3 uses SRAM6-SRAM7
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")

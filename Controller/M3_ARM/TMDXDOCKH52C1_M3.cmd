@@ -48,8 +48,8 @@ MEMORY
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!11
 	// IVAN: added RAMS6 and RAMS7
-	RAMS6 (RWX)     : origin = 0x20014000, length = 0x2000
-    RAMS7 (RWX)     : origin = 0x20016000, length = 0x2000
+	RAMS6 (RW)      : origin = 0x20014000, length = 0x2000
+    RAMS7 (RW)      : origin = 0x20016000, length = 0x2000
 }
 
 SECTIONS
@@ -76,6 +76,9 @@ SECTIONS
 
 	SHARERAMS6  : > RAMS6
 	SHARERAMS7  : > RAMS7
+
+	CTOM_MSGRAM : > CTOMMSGRAM, TYPE = NOINIT
+	MTOC_MSGRAM : > MTOCMSGRAM
 }
 
 __STACK_TOP = __stack + 256;

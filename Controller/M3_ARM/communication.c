@@ -10,8 +10,13 @@
 
 #include "communication.h"
 
-#define CTOM_MSGRAM 0x2007F000;
-volatile CTOM_Data *CTOM_DATA = (CTOM_Data *)CTOM_MSGRAM;
+#pragma DATA_SECTION(CTOM_MSGRAM, "CTOM_MSGRAM")
+volatile Uint16 CTOM_MSGRAM[0x400];
+volatile const CTOM_Data *CTOM_DATA = (CTOM_Data *)CTOM_MSGRAM;
+
+#pragma DATA_SECTION(MTOC_MSGRAM, "MTOC_MSGRAM")
+volatile Uint16 MTOC_MSGRAM[0x400];
+volatile MTOC_Data *MTOC_DATA = (MTOC_Data *)MTOC_MSGRAM;
 
 #pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
 volatile Uint16 SHARERAMS6[0x1000];
@@ -199,7 +204,7 @@ Void OsciServer(UArg arg0, UArg arg1) {
 		Task_Params_init(&taskParams);
 		taskParams.arg0 = (UArg)client_fd;
 		// IVAN: TI recommend to use > 4096 stack for a TCP task
-		taskParams.stackSize = 4096;
+		taskParams.stackSize = 5120;
 //		taskParams.stackSize = 1024;
 
 		Task_Handle taskHandle = Task_create(
@@ -256,10 +261,12 @@ int tcp_recv_all(SOCKET fd, volatile void *buf, size_t len) {
 }
 
 Void OsciConnectionHandler(UArg arg0, UArg arg1) {
+	fdOpenSession(TaskSelf());
+
 	SOCKET client_fd = (SOCKET)arg0;
 	Uint16 recv_buffer[sizeof(Osci_Request) / sizeof(Uint16)];
 
-	System_printf("OscillogrammsWorker: started processing client_fd = %i", client_fd);
+	System_printf("OscillogrammsWorker: started processing client_fd = %i\n", client_fd);
 
     int opt;
     int status;
@@ -283,6 +290,8 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 		fdClose(client_fd);
 		return;
 	}
+
+	System_flush();
 
 	while (1) {
 		// IVAN: read the request from the PC
@@ -352,70 +361,78 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 			} break;
 
 			case PACKET_CMD_FLASH: {
+				// respond with header whether flash is ready
+				// to accept new command
 				osci_response.cmd = PACKET_CMD_FLASH;
-				Uint16 resp_flash_cmd = 0;
-				osci_response.len = sizeof(resp_flash_cmd);
-
-				// hack: set flash cmd to some garbage value so C28
-				// doesn't accept new commands nor advance it's state machine
-				// while we are waiting for the data
-				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
-					CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+				uint16_t is_ready =
+					CTOM_DATA->FlashData.CmdIdx == MTOC_DATA->FlashData.CmdIdx &&
+					CTOM_DATA->FlashData.Cmd == FLASH_CMD_DONE &&
+					arg < FLASH_CMD_SZ;
+				osci_response.len = sizeof(is_ready);
+				Uint8 buf[sizeof(osci_response) + sizeof(is_ready)];
+				memcpy(buf, &osci_response, sizeof(osci_response));
+				memcpy(buf + sizeof(osci_response), &is_ready, sizeof(is_ready));
+//				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+//				tcp_send_all(client_fd, &is_ready, osci_response.len);
+				int status = 0;
+				status = tcp_send_all(client_fd, buf, sizeof(buf));
+				if (status < 0) {
+					System_printf("ERR\n");
+					System_flush();
 				}
+
+				if (!is_ready) {
+					break;
+				}
+
+				Task_sleep(10);
 
 				// receiving data
 				// read address
-				tcp_recv_all(
-					client_fd,
-					&CTOM_DATA->FlashData.Address,
-					sizeof(CTOM_DATA->FlashData.Address)
-				);
+				uint16_t address_local[2];
+				tcp_recv_all(client_fd, &address_local, sizeof(address_local));
+				memcpy((void*)&MTOC_DATA->FlashData.Address, &address_local, sizeof(address_local));
 				if (arg == FLASH_CMD_WRITE || arg == FLASH_CMD_READ) {
 					// read data size
 					tcp_recv_all(
 						client_fd,
-						&CTOM_DATA->FlashData.DataSize,
-						sizeof(CTOM_DATA->FlashData.DataSize)
+						&MTOC_DATA->FlashData.DataSize,
+						sizeof(MTOC_DATA->FlashData.DataSize)
 					);
-					if (CTOM_DATA->FlashData.DataSize > 128) {
-						CTOM_DATA->FlashData.DataSize = 128;
+					if (MTOC_DATA->FlashData.DataSize > 128) {
+						MTOC_DATA->FlashData.DataSize = 128;
 					}
 				}
 				if (arg == FLASH_CMD_WRITE) {
 					// read data
 					tcp_recv_all(
 						client_fd,
-						CTOM_DATA->FlashData.Buf,
-						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
+						MTOC_DATA->FlashData.Buf,
+						MTOC_DATA->FlashData.DataSize * sizeof(MTOC_DATA->FlashData.Buf[0])
 					);
 				}
 
-				// responding
-				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE || arg >= FLASH_CMD_SZ) {
-					// flash is still busy
-					resp_flash_cmd = FLASH_CMD_BUSY;
+				MTOC_DATA->FlashData.Cmd = (enum Flash_Cmd) arg;
+				MTOC_DATA->FlashData.CmdIdx++;
 
-					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
-					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
-					break;
+				// FIXME: blocks until operation is complete
+				while (
+					CTOM_DATA->FlashData.CmdIdx != MTOC_DATA->FlashData.CmdIdx &&
+					CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE
+				) {
+					Task_sleep(100);
 				}
 
+				// responding
 				if (arg == FLASH_CMD_READ) {
-					CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
-					// FIXME: blocks until read is done
-					while (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
-						Task_sleep(100);
-					}
 					osci_response.len =
 						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0]);
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
 				} else {
-					CTOM_DATA->FlashData.Cmd = (enum Flash_Cmd) arg;
-					resp_flash_cmd = arg;
-
+					// signal that communication is over
+					osci_response.len = 0;
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
-					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
 				}
 			} break;
 
@@ -429,6 +446,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 		}
 	}
 
+	fdCloseSession(TaskSelf());
 	fdClose(client_fd);
 	return;
 }

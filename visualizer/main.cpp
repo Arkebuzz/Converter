@@ -1,3 +1,5 @@
+// FIXME: massive memory leak somewhere
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -10,6 +12,26 @@
 #include "imgui_impl_opengl3.h"
 #include "implot.h"
 #include "GLFW/glfw3.h"
+
+// debug
+#if !defined NDEBUG
+uint64_t alloc_cntr = 0; uint64_t free_cntr = 0;
+void *spoof_malloc(size_t a) {
+    alloc_cntr++;
+    return malloc(a);
+}
+void *spoof_calloc(size_t a, size_t b) {
+    alloc_cntr++;
+    return calloc(a,b);
+}
+void spoof_free(void *arg) {
+    free_cntr++;
+    free(arg);
+}
+#define malloc(a) spoof_malloc(a)
+#define calloc(a, b) spoof_calloc(a, b)
+#define free(a) spoof_free(a)
+#endif
 
 // log
 #define LOG_MAX_LINES 67
@@ -202,7 +224,7 @@ typedef struct {
     struct {
         Flash_Cmd cmd;
         uint32_t address;
-        uint8_t data_size;
+        uint16_t data_size;
     } flash_params;
 } SendParams;
 
@@ -222,6 +244,7 @@ const char *cmd_to_str(uint16_t cmd) {
         ENUM_CASE_RET(PACKET_CMD_OSCI);
         ENUM_CASE_RET(PACKET_CMD_FULL);
         ENUM_CASE_RET(PACKET_CMD_INFO);
+        ENUM_CASE_RET(PACKET_CMD_FLASH);
         default: return "(UNKNOWN CMD)";
     }
 }
@@ -234,7 +257,7 @@ const char *flash_cmd_to_str(uint16_t cmd) {
         ENUM_CASE_RET(FLASH_CMD_WRITE);
         ENUM_CASE_RET(FLASH_CMD_ERASE_4K);
         ENUM_CASE_RET(FLASH_CMD_SZ);
-        default: return "(UNKNOWN CMD)";
+        default: return "(UNKNOWN FLASH CMD)";
     }
 }
 
@@ -399,7 +422,7 @@ DWORD WINAPI send_full(LPVOID arg) {
 
 #define FLASH_DATA_LEN (sizeof(Flash_Data::Buf))
 
-uint16_t g_resp_flash_cmd = {0};
+uint16_t g_flash_cmd = {0};
 char g_flash_read_data[FLASH_DATA_LEN] = {0};
 char g_flash_write_data[FLASH_DATA_LEN] = {0};
 static_assert(sizeof(char) == 1);
@@ -413,48 +436,88 @@ DWORD WINAPI send_flash(LPVOID arg) {
     SendParams *params = (SendParams *)arg;
     Osci_Response resp;
 
-    Flash_Cmd cmd = params->flash_params.cmd;
-    uint32_t address = params->flash_params.address;
-    uint8_t data_size = params->flash_params.data_size;
+    // Flash_Cmd cmd = params->flash_params.cmd;
+    // uint32_t address = params->flash_params.address;
+    // uint16_t data_size = params->flash_params.data_size;
 
-    uint16_t resp_flash_cmd = {0};
+    Flash_Cmd cmd = params->flash_params.cmd;
+    uint32_t address = 0xdeadbabe;
+    uint16_t data_size = 0x1234;
+
+    uint16_t is_ready = 0;
+
+    // it doesn't work if I declare it via designated initializers
+    // does anything fucking work in this language
+    Osci_Request req = {0};
+    req.cmd = PACKET_CMD_FLASH;
+    req.arg = cmd;
 
     SOCKET sock;
     status = connect_to_mcu(params->ip, params->port, &sock);
     if (status < 0) { goto err; }
 
-    // sending
+    status = send_and_recv_header(sock, req, &resp);
+    if (status < 0) { goto err; }
+
+    app_log("RESP RECV'D");
+
+    if (resp.len != sizeof(is_ready)) {
+        app_log("FLASH ERROR: resp.len != sizeof(is_ready)");
+        goto err;
+    }
+
+    status = tcp_recv_all(sock, &is_ready, resp.len); 
+    if (status < 0) { goto err; }
+
+    app_log("READY RECV'D");
+
+    if (!is_ready) {
+        app_log("NOT READY");
+
+        InterlockedExchange16((SHORT *)&g_flash_cmd, FLASH_CMD_BUSY);
+        free(params);
+        closesocket(sock);
+        return 0;
+    }
+
+    Sleep(10);
     status = tcp_send_all(sock, &address, sizeof(address));
     if (status < 0) { goto err; }
 
+    app_log("ADDRESS SENT");
+
     if (cmd == FLASH_CMD_WRITE || cmd == FLASH_CMD_READ) {
-        status = tcp_send_all(sock, &data_size, sizeof(data_size));
+        // status = tcp_send_all(sock, &data_size, sizeof(data_size));
+        app_log("DATA SZ SENT");
         if (status < 0) { goto err; }
     }
     if (cmd == FLASH_CMD_WRITE) {
         EnterCriticalSection(&g_flash_write_cs);
-        status = tcp_send_all(sock, g_flash_write_data, data_size);
+        // status = tcp_send_all(sock, &g_flash_write_data, data_size);
         LeaveCriticalSection(&g_flash_write_cs);
+        app_log("DATA SENT");
         if (status < 0) { goto err; }
     }
 
-    // receiving
+    InterlockedExchange16((SHORT *)&g_flash_cmd, cmd);
+
     status = recv_header(sock, &resp);
-    errors_set(resp.errors, PACKET_CMD_FLASH);
     if (status < 0) { goto err; }
-    
+    app_log("HEADER RECV'D");
+
     if (cmd == FLASH_CMD_READ) {
         EnterCriticalSection(&g_flash_read_cs);
-        status = tcp_send_all(sock, g_flash_write_data, data_size);
+        status = tcp_recv_all(sock, g_flash_read_data, resp.len);
         LeaveCriticalSection(&g_flash_read_cs);
+        app_log("DATA RECV'D");
         if (status < 0) { goto err; }
-    } else {
-        status = tcp_recv_all(sock, &resp_flash_cmd, sizeof(resp_flash_cmd));
-        if (status < 0) { goto err; }
-        InterlockedExchange16((SHORT *)&g_resp_flash_cmd, resp_flash_cmd);
+        if (resp.len != data_size) {
+            app_log("FLASH ERROR: resp.len != data_size");
+        }
     }
 
     if (0) err: {
+        app_log("ERR'D");
         ret = -1;
     }
     free(params);
@@ -533,7 +596,7 @@ int main(void) {
         {
             ImGui::Begin("Flash");
 
-            ImGui::Text("Flash Response Status: %s", flash_cmd_to_str(g_resp_flash_cmd));
+            ImGui::Text("Flash Response Status: %s", flash_cmd_to_str(g_flash_cmd));
 
             static Flash_Cmd flash_cmd = FLASH_CMD_READ;
             if (ImGui::RadioButton("Read", flash_cmd == FLASH_CMD_READ)) {
@@ -720,6 +783,16 @@ int main(void) {
 
                 ImPlot::EndSubplots();
             }
+
+#if !defined NDEBUG
+            // debug
+            {
+                ImGui::Begin("Debug");
+                ImGui::Text("alloc_cntr: %zu", alloc_cntr);
+                ImGui::Text("free_cntr: %zu", free_cntr);
+                ImGui::End();
+            }
+#endif
             
             ImGui::End();
         }

@@ -125,7 +125,10 @@ void main(void) {
 	Uint8  WatchDog = 0;
 
 	enum {
-		FLASH_ST_READ = 0,
+		FLASH_ST_RESET = 0,
+		FLASH_ST_G_UNPROT_WE,
+		FLASH_ST_G_UNPROT,
+		FLASH_ST_READ,
 		FLASH_ST_ERASE_WE,
 		FLASH_ST_ERASE,
 		FLASH_ST_WRITE_WE,
@@ -133,16 +136,82 @@ void main(void) {
 		FLASH_ST_POLL_STATUS,
 		FLASH_ST_CHECK_STATUS,
 		FLASH_ST_DONE,
-	} flash_st = FLASH_ST_READ;
+	} flash_st = FLASH_ST_G_UNPROT_WE;
+
+	enum {
+		DBG_ST_RESET,
+		DBG_ST_UNPROT,
+		DBG_ST_STATUS,
+		DBG_ST_READ_1,
+		DBG_ST_ERASE,
+		DBG_ST_WRITE,
+		DBG_ST_READ_2,
+		DBG_ST_DONE,
+	} dbg_st = DBG_ST_RESET;
+
 	for(;;) {  // Итерации раз в 300 мкс
-		static union FlashStatusRegister flash_status_register = {0};
+		static FlashStatusRegister flash_status_register = {0};
 		switch (CTOM_DATA->FlashData.Cmd) {
-			case FLASH_CMD_DONE: break;
+			case FLASH_CMD_DONE: {
+				// start doing next command if there's any
+//				if (CTOM_DATA->FlashData.CmdIdx != MTOC_DATA->FlashData.CmdIdx) {
+//					CTOM_DATA->FlashData.Cmd = MTOC_DATA->FlashData.Cmd;
+//					CTOM_DATA->FlashData.CmdIdx = MTOC_DATA->FlashData.CmdIdx;
+//				}
+
+				// TEST
+				switch (dbg_st) {
+					case DBG_ST_RESET: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+						flash_st = FLASH_ST_RESET;
+						dbg_st++;
+					} break;
+					case DBG_ST_UNPROT: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+						flash_st = FLASH_ST_G_UNPROT_WE;
+						dbg_st++;
+					} break;
+					case DBG_ST_STATUS: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+						flash_st = FLASH_ST_POLL_STATUS;
+						dbg_st++;
+					} break;
+					case DBG_ST_READ_1:
+					case DBG_ST_READ_2: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
+						CTOM_DATA->FlashData.Address = 0;
+						CTOM_DATA->FlashData.DataSize = 100;
+						memset((void *)CTOM_DATA->FlashData.Buf, 0, CTOM_DATA->FlashData.DataSize);
+						dbg_st++;
+					} break;
+					case DBG_ST_ERASE: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_ERASE_4K;
+						CTOM_DATA->FlashData.Address = 0;
+						dbg_st++;
+					} break;
+					case DBG_ST_WRITE: {
+						CTOM_DATA->FlashData.Cmd = FLASH_CMD_WRITE;
+						CTOM_DATA->FlashData.Address = 1;
+						CTOM_DATA->FlashData.DataSize = 67;
+						memset((void *)CTOM_DATA->FlashData.Buf, 123, CTOM_DATA->FlashData.DataSize);
+						dbg_st++;
+					} break;
+					default: break;
+				}
+			} break;
 			case FLASH_CMD_BUSY: {
 				if (!flash_is_ready()) {
 					break;
 				}
 				switch (flash_st) {
+					case FLASH_ST_RESET: {
+						flash_reset();
+						flash_st = FLASH_ST_POLL_STATUS;
+					} break;
+					case FLASH_ST_G_UNPROT: {
+						flash_write_status_fst(0, 0, 1);
+						flash_st++;
+					} break;
 					case FLASH_ST_READ: {
 						flash_read_array(
 							CTOM_DATA->FlashData.Buf,
@@ -151,6 +220,7 @@ void main(void) {
 						);
 						flash_st = FLASH_ST_POLL_STATUS;
 					} break;
+					case FLASH_ST_G_UNPROT_WE:
 					case FLASH_ST_ERASE_WE:
 					case FLASH_ST_WRITE_WE: {
 						flash_write_enable();
@@ -162,6 +232,9 @@ void main(void) {
 					} break;
 					case FLASH_ST_WRITE: {
 						flash_write_array(
+//							MTOC_DATA->FlashData.Buf,
+//							MTOC_DATA->FlashData.DataSize,
+//							MTOC_DATA->FlashData.Address
 							CTOM_DATA->FlashData.Buf,
 							CTOM_DATA->FlashData.DataSize,
 							CTOM_DATA->FlashData.Address
@@ -174,7 +247,7 @@ void main(void) {
 					} break;
 					case FLASH_ST_CHECK_STATUS: {
 						// wait for ongoing operation to complete
-						if (flash_status_register.RDY_BSY_1 == 0) {
+						if (flash_status_register.snd.RDY_BSY == 0) {
 							CTOM_DATA->FlashData.Cmd = FLASH_CMD_DONE;
 							flash_st = FLASH_ST_DONE;
 						}
