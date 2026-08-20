@@ -40,6 +40,7 @@ NOTE:
 volatile Uint16 *spi_rx_buf = 0; // buffer of data to be sent
 Uint16 spi_rx_read_count = 0; // count to read from the flash
 Uint16 spi_rx_skip_count = 0; // count to skip flash's response to things like cmd and address
+Uint16 spi_rx_trail_skip_count = 0; // count to skip flash's response to align reads to be 0 mod 16
 Bool spi_rx_overflowed = 0;
 
 volatile const Uint16 *spi_tx_buf = 0; // buffer of data to receive into
@@ -62,9 +63,17 @@ interrupt void spi_rx_int(void) {
 	}
 	// copy data from FIFO to memory
 	while (read_count > 0 && spi_rx_read_count > 0) {
+		// reverse the bytes because SPI is MSB but C28 is LE
 		*spi_rx_buf = SpiaRegs.SPIRXBUF;
+		*spi_rx_buf = (*spi_rx_buf << 8) | (*spi_rx_buf >> 8);
 		spi_rx_buf++;
 		spi_rx_read_count--;
+		read_count--;
+	}
+	// skip garbage
+	while (read_count > 0 && spi_rx_trail_skip_count > 0) {
+		(void)SpiaRegs.SPIRXBUF;
+		spi_rx_trail_skip_count--;
 		read_count--;
 	}
 
@@ -73,17 +82,13 @@ interrupt void spi_rx_int(void) {
 		(void)SpiaRegs.SPIRXBUF;
 		read_count--;
 	}
-	if (spi_rx_read_count == 0 && spi_rx_skip_count == 0) {
+	if (spi_rx_read_count == 0 &&
+		spi_rx_skip_count == 0 &&
+		spi_rx_trail_skip_count == 0
+	) {
 		spi_rx_buf = 0; // signal that the read has finished
 		SPISTEA_DEASSERT;
-//		SpiaRegs.SPIFFRX.bit.RXFFIL = 16; // restore interrupt level
         SpiaRegs.SPIFFRX.bit.RXFFIENA = 0; // disable rx interrupt
-	} else {
-		// adjust interrupt level so RX FIFO doesn't have stale data of <16 words
-//		Uint16 remaining = spi_rx_read_count + spi_rx_skip_count;
-//		if (remaining < 16) {
-//			SpiaRegs.SPIFFRX.bit.RXFFIL = 1; // remaining
-//		}
 	}
 
     SpiaRegs.SPIFFRX.bit.RXFFINTCLR = 1;
@@ -117,12 +122,27 @@ interrupt void spi_tx_int(void) {
 
 // returns 1 if no operation is being performed, 0 otherwise
 Bool flash_is_ready() {
-	// check if both interrupts are disabled -
-	// this means that rx and tx interrupts finished all their work
-	return (
-		SpiaRegs.SPIFFRX.bit.RXFFIENA == 0 &&
-		SpiaRegs.SPIFFTX.bit.TXFFIENA == 0
-	);
+	if (SpiaRegs.SPIFFTX.bit.TXFFIENA) {
+		return 0;
+	}
+	if (SpiaRegs.SPIFFRX.bit.RXFFIENA) {
+		// if busy reading try to clean up stale skip reads
+		if (spi_rx_read_count == 0 &&
+			spi_rx_skip_count == 0 &&
+			spi_rx_trail_skip_count < SpiaRegs.SPIFFRX.bit.RXFFIL
+		) {
+			for (; spi_rx_trail_skip_count > 0; spi_rx_trail_skip_count--) {
+				(void)SpiaRegs.SPIRXBUF;
+			}
+			spi_rx_buf = 0; // signal that the read has finished
+			SPISTEA_DEASSERT;
+	        SpiaRegs.SPIFFRX.bit.RXFFIENA = 0; // disable rx interrupt
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 // returns 1 if rx queue overflowed and data got lost, otherwise 0
@@ -157,7 +177,7 @@ static inline void spi_end_reset(void) {
 
 // "nonblocking" read
 // starts reading `count` words from `address` on flash into `buf`
-// returns 1 if started reading, 0 if busy
+// returns 1 if started reading, 0 if busy or if count % 16 != 0
 Bool flash_read_array(volatile Uint16 *buf, Uint16 count, Uint32 address) {
 	if (!flash_is_ready()) {
 		return 0;
@@ -171,9 +191,12 @@ Bool flash_read_array(volatile Uint16 *buf, Uint16 count, Uint32 address) {
 
 	spi_rx_buf = buf;
 	spi_rx_read_count = count;
-	spi_tx_dummy_count = count;
 	spi_rx_skip_count = 2;
+	// align total read count to be 0 mod 16
+	spi_rx_trail_skip_count = (-spi_rx_read_count - spi_rx_skip_count) & 0x000F;
+	spi_tx_dummy_count = spi_rx_read_count + spi_rx_trail_skip_count;
 
+	SpiaRegs.SPIFFRX.bit.RXFFIL = 16;
 	spi_end_reset();
 
 	return 1;
@@ -190,6 +213,7 @@ static inline Bool flash_send_raw_word(Uint16 byte) {
 	SpiaRegs.SPITXBUF = byte;
 	spi_rx_skip_count = 1;
 
+	SpiaRegs.SPIFFRX.bit.RXFFIL = 1;
 	spi_end_reset();
 
 	return 1;
@@ -245,6 +269,7 @@ static inline Bool flash_send_cmd_address(Uint16 cmd, Uint32 address) {
 	SpiaRegs.SPITXBUF = (Uint16)address;
 	spi_rx_skip_count = 2;
 
+	SpiaRegs.SPIFFRX.bit.RXFFIL = 2;
 	spi_end_reset();
 
 	return 1;
@@ -276,8 +301,10 @@ Bool flash_write_array(volatile const Uint16 *buf, Uint16 count, Uint32 address)
 
 	spi_tx_buf = buf;
 	spi_tx_send_count = count;
-	spi_rx_skip_count = 2 + count;
+	spi_rx_skip_count = 2;
+	spi_rx_trail_skip_count = count;
 
+	SpiaRegs.SPIFFRX.bit.RXFFIL = 16;
 	spi_end_reset();
 
 	return 1;
@@ -298,6 +325,7 @@ Bool flash_read_status(FlashStatusRegister *status) {
 	spi_tx_dummy_count = 1;
 	spi_rx_skip_count = 1;
 
+	SpiaRegs.SPIFFRX.bit.RXFFIL = spi_rx_read_count + spi_rx_skip_count;
 	spi_end_reset();
 
 	return 1;
@@ -334,10 +362,7 @@ void flash_spi_setup(void) {
 	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0; // put RXFIFO into reset
 	SpiaRegs.SPIFFRX.bit.RXFFINTCLR = 1; // clear interrupt flag
 	SpiaRegs.SPIFFRX.bit.RXFFIENA = 0; // disable RXFIFO interrupt
-
-	// FIXME: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//	SpiaRegs.SPIFFRX.bit.RXFFIL = 16; // fire an interrupt when RXFIFO has 16 words
-	SpiaRegs.SPIFFRX.bit.RXFFIL = 1;
+    SpiaRegs.SPIFFRX.bit.RXFFIL = 1;
 
 	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1; // release RXFIFO from reset
 

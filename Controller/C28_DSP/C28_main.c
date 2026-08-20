@@ -76,7 +76,6 @@ void start_timers(void) {
 	CpuTimer1Regs.TCR.bit.TIE = 1; //Enable timer interrupt
 	CpuTimer1Regs.TCR.bit.TSS = 0; //Ensure timer start
 }
-
 void main(void) {
 	GpioG1DataRegs.GPADAT.bit.GPIO0 = 0; 	 //Remove system OK flag to FPGA
 
@@ -180,7 +179,7 @@ void main(void) {
 					case DBG_ST_READ_2: {
 						CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
 						CTOM_DATA->FlashData.Address = 0;
-						CTOM_DATA->FlashData.DataSize = 100;
+						CTOM_DATA->FlashData.DataSize = 128;
 						memset((void *)CTOM_DATA->FlashData.Buf, 0, CTOM_DATA->FlashData.DataSize);
 						dbg_st++;
 					} break;
@@ -250,6 +249,8 @@ void main(void) {
 						if (flash_status_register.snd.RDY_BSY == 0) {
 							CTOM_DATA->FlashData.Cmd = FLASH_CMD_DONE;
 							flash_st = FLASH_ST_DONE;
+						} else {
+							flash_st = FLASH_ST_POLL_STATUS;
 						}
 					} break;
 					default: break;
