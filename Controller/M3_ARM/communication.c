@@ -401,8 +401,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 					while (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
 						Task_sleep(100);
 					}
-					osci_response.len =
-						CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
+					osci_response.len = CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0]);
 					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
 				} else {

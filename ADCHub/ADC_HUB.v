@@ -110,7 +110,7 @@ localparam DATA_OUT_WIDTH = 32;  // 1 ток 12 бит + 1 напряжение 
 reg [DATA_OUT_WIDTH-1:0] tr_data;
 wire tr_ready;
 
-DATA_TRANSMITTER Transmitter (
+FO_TRANSMITTER Transmitter (
    .CLOCK(CLOCK_20),
    .DATA(tr_data),
    .READY_TO_SEND(tr_ready), 
@@ -132,9 +132,9 @@ wire rc_ready;
 wire rc_connect_fail;
 wire rc_invalid_data;
 
-DATA_RECEIVER Receiver (
+FO_RECEIVER Receiver (
    .CLOCK(CLOCK_20), 
-   .FO_IN(FO_INPUT), 
+   .FO_INP(FO_INPUT), 
    .DATA(rc_data),
    .DATA_READY(rc_ready),
    .ERR_CONNECT_FAIL(rc_connect_fail),
