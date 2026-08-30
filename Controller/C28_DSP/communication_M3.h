@@ -1,7 +1,10 @@
 #ifndef COMMUNICATION_M3_H
 #define COMMUNICATION_M3_H
 
+#include "communication_data.h"
 #include "communication_FPGA.h"
+
+extern volatile CTOM_Data *CTOM_DATA;
 
 short WriteTo_CTOM_MSGRAM_Float(unsigned short offset, float value);
 short WriteTo_CTOM_MSGRAM(unsigned short offset, short value);

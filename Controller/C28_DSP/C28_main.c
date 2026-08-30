@@ -7,6 +7,7 @@
 #include "error_handling.h"
 #include "communication_M3.h"
 #include "communication_FPGA.h"
+#include "flash.h"
 
 #define C28_FREQ			100		// C28 работает на 100 мГц
 #define MAIN_CYCLE_US		300		// Главный цикл С28 - 300 мкс
@@ -31,77 +32,6 @@ void setup_GPIO(void) {
     GpioG2CtrlRegs.GPEDIR.bit.GPIO128 = 1;
     GpioG1CtrlRegs.GPADIR.bit.GPIO19 = 1;
     EDIS;
-}
-
-void setup_SPI(void) {
-	// COPY PASTE
-
-#define SPI_BAUDRATE 1000000     // 1000KHz
-#define LSPCLK_FREQ  (CPU_FREQ/4)
-#define SPI_BRR      (LSPCLK_FREQ/SPI_BAUDRATE)-1
-
-	//GpioG1DataRegs.GPADAT.bit.GPIO19 = 1;
-
-	// Initialize SPI FIFO registers
-	// SPI reset
-	// Reset the FIFO pointer and hold in reset
-	//
-	SpiaRegs.SPIFFTX.bit.SPIRST = 0;
-	SpiaRegs.SPIFFTX.bit.TXFIFO = 0;
-
-	// Set TX FIFO to 4 words
-	// Enable TX FIFOs
-	// Enable TX FIFO interrupts
-	// Release FIFO from reset
-	SpiaRegs.SPIFFTX.bit.TXFFIL = 6; // в примере 4 у далера 6
-	SpiaRegs.SPIFFTX.bit.SPIFFENA = 1;
-	SpiaRegs.SPIFFTX.bit.TXFFIENA = 1;
-	SpiaRegs.SPIFFTX.bit.TXFIFO = 1;
-
-	//
-	// Put RX FIFO in reset
-	// Set RX FIFO to 4 words
-	// Enable RX FIFO interrupts
-	// Release RX FIFO from reset
-	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 0;
-	SpiaRegs.SPIFFRX.bit.RXFFIL = 6; // в примере 4 у далера 6
-	SpiaRegs.SPIFFRX.bit.RXFFINT = 1;
-	SpiaRegs.SPIFFRX.bit.RXFIFORESET = 1;
-
-	// Transmit delay is zero
-	// Release SPI from reset
-	SpiaRegs.SPIFFCT.all=0x0;
-	SpiaRegs.SPIFFTX.bit.SPIRST = 1;
-
-	// Set reset low before configuration changes
-	// Clock polarity (0 == rising, 1 == falling)
-	// 16-bit character
-	// Enable loop-back
-	SpiaRegs.SPICCR.bit.SPISWRESET = 0;
-	SpiaRegs.SPICCR.bit.CLKPOLARITY = 1;
-	SpiaRegs.SPICCR.bit.SPICHAR = (16-1);
-	SpiaRegs.SPICCR.bit.SPILBK = 0;
-
-	// Enable master (0 == slave, 1 == master)
-	// Enable transmission (Talk)
-	// Clock phase (0 == normal, 1 == delayed ВЫБРАЛ 1)
-	// SPI interrupts are disabled
-	SpiaRegs.SPICTL.bit.MASTER_SLAVE = 1;
-	SpiaRegs.SPICTL.bit.TALK = 1;
-	SpiaRegs.SPICTL.bit.CLK_PHASE = 0;
-	SpiaRegs.SPICTL.bit.SPIINTENA = 0;
-
-	// Set the baud rate
-	//
-	SpiaRegs.SPIBRR = SPI_BRR;
-
-	// Set FREE bit
-	// Halting on a breakpoint will not halt the SPI
-	SpiaRegs.SPIPRI.bit.FREE = 1;
-
-	//
-	// Release the SPI from reset
-	SpiaRegs.SPICCR.bit.SPISWRESET = 1;
 }
 
 /*
@@ -159,7 +89,6 @@ void main(void) {
     InitGpio();
 
     setup_GPIO();       // setup GPIO pins
-    setup_SPI();        // setup SPI pins
 
     // Configuring PIE (Peripheral Interrupt Expansion)
     // Инициализация системы прерываний
@@ -167,6 +96,8 @@ void main(void) {
 	IER = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	IFR = 0x0000; 		// Disable CPU interrupts and clear all CPU interrupt flags
 	InitPieVectTable(); // Initialize the PIE vector table with pointers to the shell ISR.
+
+	flash_spi_setup();
 
 	EINT;  // Enable Global interrupt INTM
 	ERTM;  // Enable Global realtime interrupt DBGM
@@ -193,7 +124,79 @@ void main(void) {
 	Uint16 LedCounter = 0;
 	Uint8  WatchDog = 0;
 
+	enum {
+		FLASH_ST_READ = 0,
+		FLASH_ST_ERASE_WE,
+		FLASH_ST_ERASE,
+		FLASH_ST_WRITE_WE,
+		FLASH_ST_WRITE,
+		FLASH_ST_POLL_STATUS,
+		FLASH_ST_CHECK_STATUS,
+		FLASH_ST_DONE,
+	} flash_st = FLASH_ST_READ;
 	for(;;) {  // Итерации раз в 300 мкс
+		static union FlashStatusRegister flash_status_register = {0};
+		switch (CTOM_DATA->FlashData.Cmd) {
+			case FLASH_CMD_DONE: break;
+			case FLASH_CMD_BUSY: {
+				if (!flash_is_ready()) {
+					break;
+				}
+				switch (flash_st) {
+					case FLASH_ST_READ: {
+						flash_read_array(
+							CTOM_DATA->FlashData.Buf,
+							CTOM_DATA->FlashData.DataSize,
+							CTOM_DATA->FlashData.Address
+						);
+						flash_st = FLASH_ST_POLL_STATUS;
+					} break;
+					case FLASH_ST_ERASE_WE:
+					case FLASH_ST_WRITE_WE: {
+						flash_write_enable();
+						flash_st++;
+					} break;
+					case FLASH_ST_ERASE: {
+						flash_block_erase_4K(CTOM_DATA->FlashData.Address);
+						flash_st = FLASH_ST_POLL_STATUS;
+					} break;
+					case FLASH_ST_WRITE: {
+						flash_write_array(
+							CTOM_DATA->FlashData.Buf,
+							CTOM_DATA->FlashData.DataSize,
+							CTOM_DATA->FlashData.Address
+						);
+						flash_st++;
+					} break;
+					case FLASH_ST_POLL_STATUS: {
+						flash_read_status(&flash_status_register);
+						flash_st = FLASH_ST_CHECK_STATUS;
+					} break;
+					case FLASH_ST_CHECK_STATUS: {
+						// wait for ongoing operation to complete
+						if (flash_status_register.RDY_BSY_1 == 0) {
+							CTOM_DATA->FlashData.Cmd = FLASH_CMD_DONE;
+							flash_st = FLASH_ST_DONE;
+						}
+					} break;
+					default: break;
+				}
+			} break;
+			case FLASH_CMD_READ: {
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_READ;
+			} break;
+			case FLASH_CMD_WRITE: {
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_WRITE_WE;
+			} break;
+			case FLASH_CMD_ERASE_4K: {
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_BUSY;
+				flash_st = FLASH_ST_ERASE_WE;
+			} break;
+			default: break;
+		}
+
 		if (DmaRegs.CH1.CONTROL.bit.TRANSFERSTS) {
 			continue;  // DMA занят, ждем
 		}

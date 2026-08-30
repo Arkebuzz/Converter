@@ -51,6 +51,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.9.compilerID.DIAG_WRAP.461680833" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.9.compilerID.DIAG_WRAP" value="com.ti.ccstudio.buildDefinitions.TMS470_16.9.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.9.compilerID.INCLUDE_PATH.1349837134" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.9.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/modbus/rtu}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}/../Shared&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${COM_TI_RTSC_TIRTOSC2000_INSTALL_DIR}/products/ndk_2_25_00_09/packages/ti/ndk/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${COM_TI_RTSC_TIRTOSC2000_INSTALL_DIR}/products/ndk_2_25_00_09/packages/ti/ndk/inc/bsd&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/modbus/tcp}&quot;"/>

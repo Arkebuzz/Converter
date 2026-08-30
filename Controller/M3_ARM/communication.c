@@ -10,6 +10,17 @@
 
 #include "communication.h"
 
+#define CTOM_MSGRAM 0x2007F000;
+volatile CTOM_Data *CTOM_DATA = (CTOM_Data *)CTOM_MSGRAM;
+
+#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
+volatile Uint16 SHARERAMS6[0x1000];
+
+#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
+volatile Uint16 SHARERAMS7[0x1000];
+
+#define S6_START SHARERAMS6
+#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
 
 // по идее может быть любым от 1024 до 65535
 #define TCPPORT_OSCI 1124
@@ -25,72 +36,11 @@ char *DomainName_cfg = "PMCB"; // сюда по идее чо угодно мо�
 // SubnetMask_cfg = "255.255.255.0";
 // DomainName_cfg = "PMCB";
 
+// IVAN: max amount of measurement packets that can be requested
+// in PACKET_CMD_OSCI
+#define MAX_PACKETS_REQUEST_CNT 16
+
 #define NUM_TCP_WORKERS 1
-
-typedef enum {
-	PACKET_CMD_ECHO = 0,
-	PACKET_CMD_OSCI,
-	PACKET_CMD_FULL,
-	PACKET_CMD_INFO,
-} Packet_Cmd;
-
-// IVAN: max amount of measurement packets that can be requested
-// in PACKET_CMD_OSCI
-#define MAX_PACKETS_REQUEST_CNT 16
-
-#define CTOM_MSGRAM 0x2007F000;
-
-#pragma DATA_SECTION(SHARERAMS6, "SHARERAMS6")
-volatile Uint16 SHARERAMS6[0x1000];
-
-#pragma DATA_SECTION(SHARERAMS7, "SHARERAMS7")
-volatile Uint16 SHARERAMS7[0x1000];
-
-#define S6_START SHARERAMS6
-#define S7_END   (&SHARERAMS7[sizeof(SHARERAMS7) / sizeof(SHARERAMS7[0])])
-
-// IVAN: max amount of measurement packets that can be requested
-// in PACKET_CMD_OSCI
-#define MAX_PACKETS_REQUEST_CNT 16
-
-// 4 u16
-typedef struct {
-	Uint16 C28_Errors;
-	Uint16 C28_Errors_Latch;
-	Uint16 FPGA_Errors;
-	Uint16 FPGA_Errors_Latch;
-} Osci_Errors;
-
-// 5 u16
-typedef struct {
-	Osci_Errors errors;
-	Uint16 SRAM_offset;
-} CTOM_Data;
-
-// 16 u16
-// TODO: Щас ошибки дублируются в пакете и в респонсе
-typedef struct {
-	Uint16 CycleCounter[4];
-	Osci_Errors errors;
-	Uint16 Current_1;
-	Uint16 Current_2;
-	Uint16 Voltage_Inp;
-	Uint16 Voltage_Out;
-	Uint16 FreeTimeCounter;
-	Uint16 WatchDog;
-	Uint16 __pad[2];
-} Osci_Packet;
-
-typedef struct {
-	Uint16 cmd;
-	Uint16 arg;
-} Osci_Request;
-
-typedef struct {
-	Uint16 cmd;
-	Uint16 len;
-	Osci_Errors errors;
-} Osci_Response;
 
 Void KeepAliveTask(UArg arg0, UArg arg1) {
 	// IVAN: toggles on some error pin likely to indicate that the task has started
@@ -344,9 +294,8 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 		Uint16 arg = request->arg;
 
 		// IVAN: forming the response
-		volatile CTOM_Data *ctom_data = (CTOM_Data *)CTOM_MSGRAM;
 		Osci_Response osci_response = {
-			.errors = ctom_data->errors,
+			.errors = CTOM_DATA->OsciErrors,
 		};
 		switch (cmd) {
 			case PACKET_CMD_ECHO: {
@@ -364,7 +313,7 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = arg * sizeof(Osci_Packet);
 
 				Osci_Packet packets[arg];
-				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + ctom_data->SRAM_offset);
+				volatile Osci_Packet *packet_ptr = (Osci_Packet *)((Uint16 *)S6_START + CTOM_DATA->SRAM_Offset);
 
 				for (Uint16 i = 0; i < arg; i++) {
 					if ((Uint16 *)packet_ptr < (Uint16 *)S6_START) {
@@ -384,12 +333,12 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 				osci_response.len = sizeof(SHARERAMS6) + sizeof(SHARERAMS7);
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 
-				volatile Uint16 before_offset = ctom_data->SRAM_offset;
+				volatile Uint16 before_offset = CTOM_DATA->SRAM_Offset;
 				tcp_send_all(client_fd, S6_START, osci_response.len);
-				volatile Uint16 after_offset = ctom_data->SRAM_offset;
+				volatile Uint16 after_offset = CTOM_DATA->SRAM_Offset;
 
 				// IVAN: send info about potentially invalid packets
-				osci_response.errors = ctom_data->errors;
+				osci_response.errors = CTOM_DATA->OsciErrors;
 				osci_response.cmd = PACKET_CMD_INFO;
 
 				struct {
@@ -400,6 +349,69 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1) {
 
 				tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
 				tcp_send_all(client_fd, &info_data, osci_response.len);
+			} break;
+
+			case PACKET_CMD_FLASH: {
+				osci_response.cmd = PACKET_CMD_FLASH;
+				Uint16 resp_flash_cmd = 0;
+				osci_response.len = sizeof(resp_flash_cmd);
+
+				if (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE || arg >= FLASH_CMD_SZ) {
+					// flash is still busy
+					resp_flash_cmd = FLASH_CMD_BUSY;
+
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
+					break;
+				}
+
+				// hack: set flash cmd to some garbage value so C28
+				// doesn't accept new commands nor advance it's state machine
+				// while we are waiting for the data
+				CTOM_DATA->FlashData.Cmd = FLASH_CMD_SZ;
+
+				// read address
+				tcp_recv_all(
+					client_fd,
+					&CTOM_DATA->FlashData.Address,
+					sizeof(CTOM_DATA->FlashData.Address)
+				);
+				if (arg == FLASH_CMD_WRITE || arg == FLASH_CMD_READ) {
+					// read data size
+					tcp_recv_all(
+						client_fd,
+						&CTOM_DATA->FlashData.DataSize,
+						sizeof(CTOM_DATA->FlashData.DataSize)
+					);
+					if (CTOM_DATA->FlashData.DataSize > 128) {
+						CTOM_DATA->FlashData.DataSize = 128;
+					}
+				}
+				if (arg == FLASH_CMD_WRITE) {
+					// read data
+					tcp_recv_all(
+						client_fd,
+						CTOM_DATA->FlashData.Buf,
+						CTOM_DATA->FlashData.DataSize * sizeof(CTOM_DATA->FlashData.Buf[0])
+					);
+				}
+				if (arg == FLASH_CMD_READ) {
+					CTOM_DATA->FlashData.Cmd = FLASH_CMD_READ;
+					// FIXME: blocks until read is done
+					while (CTOM_DATA->FlashData.Cmd != FLASH_CMD_DONE) {
+						Task_sleep(100);
+					}
+					osci_response.len =
+						CTOM_DATA->FlashData.DataSize) * sizeof(CTOM_DATA->FlashData.Buf[0]);
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, CTOM_DATA->FlashData.Buf, osci_response.len);
+				} else {
+					CTOM_DATA->FlashData.Cmd = (enum Flash_Cmd) arg;
+					resp_flash_cmd = arg;
+
+					tcp_send_all(client_fd, &osci_response, sizeof(Osci_Response));
+					tcp_send_all(client_fd, &resp_flash_cmd, osci_response.len);
+				}
 			} break;
 
 			default: {

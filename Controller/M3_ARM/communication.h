@@ -1,4 +1,6 @@
 
+#include "communication_data.h"
+
 Void KeepAliveTask(UArg arg0, UArg arg1);
 
 void netOpenHook();

@@ -1,10 +1,11 @@
 TARGET = target/visualizer.exe
 
 CXX = cl
-CXXFLAGS = /nologo /O2 /MD /W3 \
+CXXFLAGS = /nologo /O2 /MD /W3 /std:c++20 \
 		   /I. /I imgui /I imgui/backends /I glfw/include /I implot \
-		   /D "NDEBUG" /std:c++20
-		   # /fsanitize=address /Zi
+		   /I ../Controller/Shared \
+		   /fsanitize=address /Zi
+		   # /D "NDEBUG" 
 
 LIBS = user32.lib gdi32.lib shell32.lib ws2_32.lib opengl32.lib glfw/glfw3.lib
 
@@ -16,10 +17,9 @@ SRCS = main.cpp \
 	   imgui/backends/imgui_impl_glfw.cpp \
 	   imgui/backends/imgui_impl_opengl3.cpp \
 	   implot/implot.cpp \
-	   implot/implot_items.cpp
-       # \
-	   # imgui/imgui_demo.cpp \
-	   # implot/implot_demo.cpp
+	   implot/implot_items.cpp \
+	   imgui/imgui_demo.cpp \
+	   implot/implot_demo.cpp
 
 OBJS = $(addprefix target/, $(SRCS:.cpp=.obj))
 

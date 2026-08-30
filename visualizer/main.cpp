@@ -95,45 +95,10 @@ int tcp_recv_all(SOCKET fd, volatile void *buf, int len) {
 typedef uint16_t Uint16;
 
 #pragma pack(1)
-
-typedef struct {
-    Uint16 C28_Errors;
-    Uint16 C28_Errors_Latch;
-    Uint16 FPGA_Errors;
-    Uint16 FPGA_Errors_Latch;
-} Osci_Errors;
-
-typedef struct {
-    Uint16 CycleCounter[4];
-    Osci_Errors errors;
-    Uint16 Current_1;
-    Uint16 Current_2;
-    Uint16 Voltage_Inp;
-    Uint16 Voltage_Out;
-    Uint16 FreeTimeCounter;
-    Uint16 WatchDog;
-    Uint16 __pad[2];
-} Osci_Packet;
-
-typedef struct {
-    Uint16 cmd;
-    Uint16 arg;
-} Osci_Request;
-
-typedef struct {
-    Uint16 cmd;
-    Uint16 len;
-    Osci_Errors errors;
-} Osci_Response;
-
+extern "C" {
+#include "communication_data.h"
+}
 #pragma pack()
-
-typedef enum {
-    PACKET_CMD_ECHO = 0,
-    PACKET_CMD_OSCI,
-    PACKET_CMD_FULL,
-    PACKET_CMD_INFO,
-} Packet_Cmd;
 
 
 #define RING_BUF_LEN (2 << 16)
@@ -153,9 +118,16 @@ inline void ring_push(const Osci_Packet* packets, uint32_t num_packets) {
         return;
     }
     EnterCriticalSection(&g_rb.cs);
-    uint32_t num_wrap = num_packets < RING_BUF_LEN - g_rb.idx ? 0 : RING_BUF_LEN - g_rb.idx;
-    memcpy(g_rb.buf + g_rb.idx, packets, (num_packets - num_wrap) * sizeof(Osci_Packet));
-    memcpy(g_rb.buf, packets + num_wrap, num_wrap * sizeof(Osci_Packet));
+
+    uint32_t space_left = RING_BUF_LEN - g_rb.idx;
+    if (num_packets <= space_left) {
+        memcpy(g_rb.buf + g_rb.idx, packets, num_packets * sizeof(Osci_Packet));
+    } else {
+        uint32_t wrap_count = num_packets - space_left;
+        memcpy(g_rb.buf + g_rb.idx, packets, space_left * sizeof(Osci_Packet));
+        memcpy(g_rb.buf, packets + space_left, wrap_count * sizeof(Osci_Packet));
+    }
+
     g_rb.idx = (g_rb.idx + num_packets) % RING_BUF_LEN;
     LeaveCriticalSection(&g_rb.cs);
 }
@@ -306,7 +278,7 @@ DWORD WINAPI send_osci(LPVOID arg) {
     {
         Osci_Packet *packets = (Osci_Packet *)calloc(resp.len, 1);
         status = tcp_recv_all(sock, packets, resp.len);
-        if (status < 0) { goto err; }
+        if (status < 0) { free(packets); goto err; }
         double got_packets = (double)resp.len / sizeof(Osci_Packet);
         app_log(
             "Received OSCI packets: %u (bytes); requested %u packets, got %f",
@@ -347,7 +319,7 @@ DWORD WINAPI send_full(LPVOID arg) {
 
         packets = (Osci_Packet *)calloc(resp.len, 1);
         status = tcp_recv_all(sock, packets, resp.len);
-        if (status < 0) { goto err; }
+        if (status < 0) { free(packets); goto err; }
         got_packets = (double)resp.len / sizeof(Osci_Packet);
         app_log(
             "Received FULL packets: %u (bytes); %f (packets)\n",
@@ -359,7 +331,7 @@ DWORD WINAPI send_full(LPVOID arg) {
             Osci_Request { .cmd = PACKET_CMD_INFO, .arg = 123 },
             &resp
         );
-        if (status < 0) { goto err; }
+        if (status < 0) { free(packets); goto err; }
 
 #pragma pack(1)
         struct {
@@ -369,6 +341,7 @@ DWORD WINAPI send_full(LPVOID arg) {
 #pragma pack()
         if (resp.len != sizeof(info_data)) {
             app_log("ERROR: Mismatched INFO header response length");
+            free(packets);
             goto err;
         }
         tcp_recv_all(sock, &info_data, sizeof(info_data));
@@ -401,7 +374,7 @@ int main(void) {
 
     glfwSetErrorCallback(glfw_error_callback);
     glfwInit();
-    GLFWwindow *window = glfwCreateWindow(800, 600, "TCP Visualizer", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1000, 700, "TCP Visualizer", NULL, NULL);
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
@@ -410,15 +383,16 @@ int main(void) {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    char ip[32] = "10.1.3.12";
-    uint16_t port = 1124;
-    uint16_t num_packets = 16;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        static char ip[32] = "10.1.3.12";
+        static uint16_t port = 1124;
+        static uint16_t num_packets = 16;
 
         // monitor window
         {
@@ -451,6 +425,56 @@ int main(void) {
             }
             ImGui::SameLine();
             ImGui::Checkbox("Repeat", &g_repeat);
+
+            ImGui::End();
+        }
+
+        // flash window
+        {
+            ImGui::Begin("Flash");
+
+            // wow c++ is garbage
+            // thanks for breaking C compatibility
+            using enum Flash_Data::Flash_Cmd;
+
+            // this compiles only if declared with auto lmao
+            static auto flash_cmd = FLASH_CMD_READ;
+            if (ImGui::RadioButton("Read", flash_cmd == FLASH_CMD_READ)) {
+                flash_cmd = FLASH_CMD_READ;
+            }
+            if (ImGui::RadioButton("Write", flash_cmd == FLASH_CMD_WRITE)) {
+                flash_cmd = FLASH_CMD_WRITE;
+            }
+            if (ImGui::RadioButton("Erase 4K", flash_cmd == FLASH_CMD_ERASE_4K)) {
+                flash_cmd = FLASH_CMD_ERASE_4K;
+            }
+
+            static uint32_t address = 0;
+            static uint8_t data_size = 0;
+            // c++ doesn't have designated array initializers xD
+            static char read_data[sizeof(Flash_Data::Buf)] = {0};
+            static char write_data[sizeof(Flash_Data::Buf)] = {0};
+            ImGui::InputScalar("Address", ImGuiDataType_U32, &address,
+                    NULL, NULL, "%08X", ImGuiInputTextFlags_CharsHexadecimal);
+            if (flash_cmd == FLASH_CMD_READ) {
+                ImGui::InputScalar("Data Size", ImGuiDataType_U8, &data_size);
+                ImGui::Text("Data");
+                char prev_char = read_data[data_size];
+                read_data[data_size] = '\0';
+                ImGui::InputTextMultiline("##ReadData", read_data, data_size,
+                        ImVec2(-1.0f, 150.0f), ImGuiInputTextFlags_ReadOnly);
+                read_data[data_size] = prev_char;
+            } else if (flash_cmd == FLASH_CMD_WRITE) {
+                ImGui::Text("Data");
+                ImGui::InputTextMultiline("##WriteData", write_data, sizeof(write_data),
+                        ImVec2(-1.0f, 150.0f));
+            }
+
+            if (ImGui::Button("Send FLASH")) {
+                SendParams *params = send_params_new(port, ip);
+                HANDLE thr = CreateThread(NULL, 0, send_full, params, NULL, 0);
+                if (thr) { CloseHandle(thr); }
+            }
 
             ImGui::End();
         }
@@ -491,48 +515,110 @@ int main(void) {
         // plots
         {
             ImGui::Begin("Plots");
-            if (ImPlot::BeginPlot("Oscilloscope Data", ImVec2(-1, -1))) {
-                ImPlot::SetupAxes("Time (CycleCounter)", "Value");
+            
+            static float history = 1000000.0f;
+            ImGui::SliderFloat("History (Cycles)", &history, 1000.0f, 100000000.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
+
+            ImPlotAxisFlags x_flags = ImPlotAxisFlags_None;
+            ImPlotAxisFlags y_flags = ImPlotAxisFlags_AutoFit;
+
+            static bool has_wrapped = false;
+            static uint32_t last_idx = 0;
+
+            EnterCriticalSection(&g_rb.cs);
+            uint32_t current_idx = g_rb.idx;
+            LeaveCriticalSection(&g_rb.cs);
+
+            if (current_idx < last_idx) {
+                has_wrapped = true;
+            }
+            last_idx = current_idx;
+
+            uint32_t valid_count = has_wrapped ? RING_BUF_LEN : current_idx;
+
+            #define MAX_RENDER_POINTS 8192 
+            static Osci_Packet local_packets[MAX_RENDER_POINTS];
+            static double time_vals[MAX_RENDER_POINTS];
+            static double current1_vals[MAX_RENDER_POINTS];
+            static double current2_vals[MAX_RENDER_POINTS];
+            static double volt_in_vals[MAX_RENDER_POINTS];
+            static double volt_out_vals[MAX_RENDER_POINTS];
+            
+            int display_count = 0;
+
+            if (valid_count > 0) {
+                float plot_width = ImGui::GetContentRegionAvail().x;
+                int max_points = (plot_width > 0) ? (int)(plot_width * 2) : 2000;
                 
-                static Osci_Packet local_buf[RING_BUF_LEN];
-                static uint64_t time_vals[RING_BUF_LEN];
-                static uint64_t current_1_vals[RING_BUF_LEN];
-                static uint64_t current_2_vals[RING_BUF_LEN];
-                static uint64_t voltage_inp_vals[RING_BUF_LEN];
-                static uint64_t voltage_out_vals[RING_BUF_LEN];
+                int stride = valid_count / max_points;
+                if (stride < 1) stride = 1;
+                display_count = valid_count / stride;
+
+                if (display_count > MAX_RENDER_POINTS) display_count = MAX_RENDER_POINTS;
                 
+                uint32_t oldest_idx = has_wrapped ? current_idx : 0;
+
                 EnterCriticalSection(&g_rb.cs);
-                uint32_t oldest_idx = g_rb.idx;
-                uint32_t first_chunk = RING_BUF_LEN - oldest_idx;
-                
-                memcpy(local_buf, g_rb.buf + oldest_idx, first_chunk * sizeof(Osci_Packet));
-                if (oldest_idx > 0) {
-                    memcpy(local_buf + first_chunk, g_rb.buf, oldest_idx * sizeof(Osci_Packet));
+                for (int i = 0; i < display_count; i++) {
+                    uint32_t buf_idx = (oldest_idx + (i * stride)) % RING_BUF_LEN;
+                    local_packets[i] = g_rb.buf[buf_idx];
                 }
                 LeaveCriticalSection(&g_rb.cs);
 
-                for (uint32_t i = 0; i < RING_BUF_LEN; i++) {
-                    time_vals[i] = (uint64_t)local_buf[i].CycleCounter[3] << 48
-                                 | (uint64_t)local_buf[i].CycleCounter[2] << 32
-                                 | (uint64_t)local_buf[i].CycleCounter[1] << 16
-                                 | (uint64_t)local_buf[i].CycleCounter[0];
-                                        
-                    current_1_vals[i]   = (uint64_t)local_buf[i].Current_1;
-                    current_2_vals[i]   = (uint64_t)local_buf[i].Current_2;
-                    voltage_inp_vals[i] = (uint64_t)local_buf[i].Voltage_Inp;
-                    voltage_out_vals[i] = (uint64_t)local_buf[i].Voltage_Out;
+                for (int i = 0; i < display_count; i++) {
+                    Osci_Packet& p = local_packets[i];
+                    
+                    uint64_t t = ((uint64_t)p.CycleCounter[3] << 48) |
+                                 ((uint64_t)p.CycleCounter[2] << 32) |
+                                 ((uint64_t)p.CycleCounter[1] << 16) |
+                                 ((uint64_t)p.CycleCounter[0]);
+                                 
+                    time_vals[i]     = (double)t;
+                    current1_vals[i] = (double)p.Current_1;
+                    current2_vals[i] = (double)p.Current_2;
+                    volt_in_vals[i]  = (double)p.Voltage_Inp;
+                    volt_out_vals[i] = (double)p.Voltage_Out;
+                }
+            }
+
+            double latest_t = (valid_count > 0 && display_count > 0) ? time_vals[display_count - 1] : history;
+
+            if (ImPlot::BeginSubplots("##OsciSubplots", 4, 1, ImVec2(-1, -1), ImPlotSubplotFlags_LinkAllX)) {
+                
+                if (ImPlot::BeginPlot("##C1")) {
+                    ImPlot::SetupAxes(nullptr, "Current 1", x_flags, y_flags);
+                    ImPlot::SetupAxisLimits(ImAxis_X1, latest_t - history, latest_t, ImGuiCond_Always);
+                    if (valid_count > 0) ImPlot::PlotLine("##C1_line", time_vals, current1_vals, display_count);
+                    ImPlot::EndPlot();
                 }
 
-                ImPlot::PlotLine("Current_1",   time_vals, current_1_vals,   RING_BUF_LEN);
-                ImPlot::PlotLine("Current_2",   time_vals, current_2_vals,   RING_BUF_LEN);
-                ImPlot::PlotLine("Voltage_Inp", time_vals, voltage_inp_vals, RING_BUF_LEN);
-                ImPlot::PlotLine("Voltage_Out", time_vals, voltage_out_vals, RING_BUF_LEN);
-                
-                ImPlot::EndPlot();
+                if (ImPlot::BeginPlot("##C2")) {
+                    ImPlot::SetupAxes(nullptr, "Current 2", x_flags, y_flags);
+                    ImPlot::SetupAxisLimits(ImAxis_X1, latest_t - history, latest_t, ImGuiCond_Always);
+                    if (valid_count > 0) ImPlot::PlotLine("##C2_line", time_vals, current2_vals, display_count);
+                    ImPlot::EndPlot();
+                }
+
+                if (ImPlot::BeginPlot("##Vin")) {
+                    ImPlot::SetupAxes(nullptr, "Voltage In", x_flags, y_flags);
+                    ImPlot::SetupAxisLimits(ImAxis_X1, latest_t - history, latest_t, ImGuiCond_Always);
+                    if (valid_count > 0) ImPlot::PlotLine("##Vin_line", time_vals, volt_in_vals, display_count);
+                    ImPlot::EndPlot();
+                }
+
+                if (ImPlot::BeginPlot("##Vout")) {
+                    ImPlot::SetupAxes("Time (CycleCounter)", "Voltage Out", x_flags, y_flags);
+                    ImPlot::SetupAxisLimits(ImAxis_X1, latest_t - history, latest_t, ImGuiCond_Always);
+                    if (valid_count > 0) ImPlot::PlotLine("##Vout_line", time_vals, volt_out_vals, display_count);
+                    ImPlot::EndPlot();
+                }
+
+                ImPlot::EndSubplots();
             }
+            
             ImGui::End();
         }
-
+        
         // rendering
         ImGui::Render();
         int display_w, display_h;
