@@ -55,27 +55,49 @@ void DMADataTransferSet()
 		DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  (Uint16) DMA_CHANNELS_TO_TRANSFER; CurrentDataOffset++;
 	}
 
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value1; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value2; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value3; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value4; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value5; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value6; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value7; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value8; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value9; CurrentDataOffset++;
+	OsciValues1 = (short)(SEG_EXC_UIN);
+	OsciValues2 = (short)(SEG_U_MAIN);
+	OsciValues3 = (short)(SEG_I_IN*10.0);
+	OsciValues4 = (short)(SEG_IEXC1*10.0);
+	OsciValues5 = (short)(SEG_RECT_RI1);
+	OsciValues6 = (short)(SEG_RECT_RI2);
+	OsciValues7 = (short)(SEG_RECT_RI3);
+	OsciValues8 = (short)(SEG_RECT_RI4);
+	OsciValues9 = (short)(SEG_RECT_RI5);
+	OsciValues10 = (short)(SEG_RECT_RI6);
+	OsciValues11 = (short)(SEG_I1_UDC);
+	OsciValues12 = (short)(SEG_F_UA);
+	OsciValues13 = (short)(SEG_F_UB);
+	OsciValues14 = (short)(SEG_F_UC);
+	OsciValues15 = (short)(SEG_I1_IPH2+SEG_I2_IPH2+SEG_I3_IPH2); //Фаза А выход скипа
+	OsciValues16 = (short)(SEG_I1_IPH3+SEG_I2_IPH3+SEG_I3_IPH3); //Фаза B выход скипа
+	OsciValues17 = (short)(SEG_I1_IPH1+SEG_I2_IPH1+SEG_I3_IPH1); //Фаза С выход скипа
+	OsciValues18 = (short)(SEG_F_IA); //Фаза А выход преобр
+	OsciValues19 = (short)(SEG_F_IB); //Фаза B выход преобр
+	OsciValues20 = (short)(SEG_F_IC); //Фаза C выход преобр
 
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value10; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value11; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value12; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value13; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value14; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value15; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value16; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value17; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value18; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value19; CurrentDataOffset++;
-	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  ADC_Current_Value20; CurrentDataOffset++;
+
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues1; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues2; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues3; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues4; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues5; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues6; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues7; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues8; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues9; CurrentDataOffset++;
+
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues10; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues11; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues12; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues13; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues14; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues15; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues16; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues17; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues18; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues19; CurrentDataOffset++;
+	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  OsciValues20; CurrentDataOffset++;
 
 
 	DMADest = (Uint16*)(0x00012000 + CurrentDataOffset + CurrentBufOffset); *DMADest  =  (short)(((*OsciSources[SOC[0]])+OsciSourcesOffset[SOC[0]])*OsciSourcesGain[SOC[0]]);CurrentDataOffset++;
@@ -147,7 +169,122 @@ void FPGA_Read_Data (Uint16 CyclesCounter)
 	FPGA_EMIF_WD_Value = DMABufFPGA1[4];
 	FPGA_Inputs_State_H = DMABufFPGA1[5];
 	FPGA_Inputs_State_L = DMABufFPGA1[6];
+
 	FPGA_OCP_Counter  = DMABufFPGA1[11];
+
+	BoosterInput1 = DMABufFPGA1[12];
+	Booster_ChopperCurrent = (float)BoosterInput1;
+	BoosterInput2 = DMABufFPGA1[13];
+	Booster_BrakeCurrent = (float)BoosterInput2;
+	BoosterInput3 = DMABufFPGA1[14];
+	Booster_DCVoltage_IN = (float)BoosterInput3;
+	BoosterInput4 = DMABufFPGA1[15];
+	Booster_DCVoltage_OUT = (float)BoosterInput4;
+	BoosterInput5 = DMABufFPGA1[16];
+	Booster_ChopperSKiiPCurrent = (float)BoosterInput5;
+	BoosterInput6 = DMABufFPGA1[17];
+	Booster_BrakeSKiiPCurrent = (float)BoosterInput6;
+	BoosterInput7 = DMABufFPGA1[18];
+	Booster_ReGCurrentLimit = (float)BoosterInput7;
+	BoosterInput8 = DMABufFPGA1[19];
+	Booster_ChopperSKiiPTemperature = (float)((BoosterInput8>>8)&0x00FF);
+	Booster_BrakeSKiiPTemperature = (float)(BoosterInput8&0x00FF);
+
+	BoosterInput9 = DMABufFPGA1[20];
+	BoosterInput10 = DMABufFPGA1[21];
+	BoosterInput11 = DMABufFPGA1[22];
+	BoosterInput12 = DMABufFPGA1[23];
+
+	for (int i=0; i<60; i++)
+	{
+		CellsInput[i] = ReadWordFrom_FPGA(110+i);
+	}
+
+
+/*
+	ValueFromEMIF=ReadWordFrom_FPGA(0);
+	FPGA_Error_Latch_H = (Uint16) ValueFromEMIF;
+
+	ValueFromEMIF=ReadWordFrom_FPGA(1);
+	FPGA_Error_Latch_L = (Uint16) ValueFromEMIF;
+
+	ValueFromEMIF =  ReadWordFrom_FPGA(4);
+	FPGA_EMIF_WD_Value = (Uint16) ValueFromEMIF;
+
+	ValueFromEMIF = ReadWordFrom_FPGA(12);
+	BoosterInput1 = (Uint16) ValueFromEMIF;
+	Booster_ChopperCurrent = (float)BoosterInput1;
+
+	ValueFromEMIF = ReadWordFrom_FPGA(14);
+	BoosterInput3 = (Uint16) ValueFromEMIF;
+	Booster_DCVoltage_IN = (float)BoosterInput3;
+
+	if ((CalcCycleCounter%2)==0)
+	{
+		ValueFromEMIF = ReadWordFrom_FPGA(17);
+		BoosterInput6 = (Uint16) ValueFromEMIF;
+		Booster_BrakeSKiiPCurrent = (float)BoosterInput6;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(15);
+		BoosterInput4 = (Uint16) ValueFromEMIF;
+		Booster_DCVoltage_OUT = (float)BoosterInput4;
+	}
+	else
+	{
+		ValueFromEMIF = ReadWordFrom_FPGA(16);
+		BoosterInput5 = (Uint16) ValueFromEMIF;
+		Booster_ChopperSKiiPCurrent = (float)BoosterInput5;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(18);
+		BoosterInput7 = (Uint16) ValueFromEMIF;
+		Booster_ReGCurrentLimit = (float)BoosterInput7;
+	}
+
+	if (CalcCycleCounter==0)
+		{
+		ValueFromEMIF = ReadWordFrom_FPGA(2);
+		FPGA_Error_State_H = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF =  ReadWordFrom_FPGA(3);
+		FPGA_Error_State_L = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(23);
+		BoosterInput12 = (Uint16) ValueFromEMIF;
+		}
+	if (CalcCycleCounter==1)
+		{
+		ValueFromEMIF = ReadWordFrom_FPGA(5);
+		FPGA_Inputs_State_H = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(6);
+		FPGA_Inputs_State_L = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(13);
+		BoosterInput2 = (Uint16) ValueFromEMIF;
+		Booster_BrakeCurrent = (float)BoosterInput2;
+		}
+	if (CalcCycleCounter==2)
+		{
+		ValueFromEMIF = ReadWordFrom_FPGA(11);
+		FPGA_OCP_Counter = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(19);
+		BoosterInput8 = (Uint16) ValueFromEMIF;
+		Booster_ChopperSKiiPTemperature = (float)((BoosterInput8>>8)&0x00FF);
+		Booster_BrakeSKiiPTemperature = (float)(BoosterInput8&0x00FF);
+		}
+	if (CalcCycleCounter==3)
+		{
+		ValueFromEMIF = ReadWordFrom_FPGA(20);
+		BoosterInput9 = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(21);
+		BoosterInput10 = (Uint16) ValueFromEMIF;
+
+		ValueFromEMIF = ReadWordFrom_FPGA(22);
+		BoosterInput11 = (Uint16) ValueFromEMIF;
+		}
+*/
 
 }
 
@@ -174,71 +311,74 @@ Uint16 GetDINValue(Uint16 InputNum)
 
 void FPGA_Write_Exitation(void)
 {
-      EngineExcPWM = ExcitationPWM_Width;
 	  WriteWordTo_FPGA(62,0);
-	  WriteWordTo_FPGA(63,(unsigned short)(EngineExcPWM&0x0000FFFF));
+	  WriteWordTo_FPGA(63,(unsigned short)(ExcitationPWM_Width&0x0000FFFF));
 }
 
 void FPGA_Write_Phase_Freq (void)
 {
+	WriteWordTo_FPGA(54,(unsigned short)((MainPWM_OutputFrequency>>16)&0x0000FFFF));
+	WriteWordTo_FPGA(55,(unsigned short)(MainPWM_OutputFrequency&0x0000FFFF));
 
-	WriteWordTo_FPGA(56,(unsigned short)(Data_FromM3[12]));
-	WriteWordTo_FPGA(57,(unsigned short)(Data_FromM3[13]));
+	WriteWordTo_FPGA(56,(unsigned short)((MainPWM_PhaseShift>>16)&0x0000FFFF));
+	WriteWordTo_FPGA(57,(unsigned short)(MainPWM_PhaseShift&0x0000FFFF));
 
 }
 
 void FPGA_Write_Amp (void)
 {
-    EngineAMPSET=Data_FromM3[1];
 	WriteWordTo_FPGA(52,0);
-	WriteWordTo_FPGA(53,(unsigned short)(EngineAMPSET&0x0000FFFF));
+	WriteWordTo_FPGA(53,(unsigned short)(MainPWM_AMP&0x0000FFFF));
 
+	WriteWordTo_FPGA(58,(unsigned short)((MainPWM_PhaseSet>>16)&0x0000FFFF));
+	WriteWordTo_FPGA(59,(unsigned short)(MainPWM_PhaseSet&0x0000FFFF));
 }
 
 void FPGA_Write_Booster (void)
 {
-    EngineBuckPWM = 2400;
-    WriteWordTo_FPGA(60,0);
-    WriteWordTo_FPGA(61,(unsigned short)(EngineBuckPWM&0x0000FFFF));
+	//WriteWordTo_FPGA(82,(unsigned short)(Booster_Voltage_Setpoint));
+	//WriteWordTo_FPGA(83,(unsigned short)(Booster_Current_Limit));
+	//WriteWordTo_FPGA(84,(unsigned short)(Brake_PWM_Width));
+
+    WriteWordTo_FPGA(82,(unsigned short)(ChopperPWM_Width));
+    WriteWordTo_FPGA(83,(unsigned short)(ExcitationPWM_Width));
 }
 
-
-void FPGA_EXTOUT_SetBit(Uint16 bitnum)
-{
-    Uint16 Mask = 1;
-    if (bitnum<16)
-    {
-        Mask = Mask<<bitnum;
-        FPGA_EXT_OUT = FPGA_EXT_OUT|Mask;
-    }
-}
-
-void FPGA_EXTOUT_ClearBit(Uint16 bitnum)
-{
-    Uint16 Mask = 1;
-    if (bitnum<16)
-    {
-        Mask = Mask<<bitnum;
-        Mask = ~ Mask;
-        FPGA_EXT_OUT = FPGA_EXT_OUT&Mask;
-    }
-}
 
 void FPGA_Write_Aux (void)
 {
+
+	if (CalcCycleCounter==0)
+	{
 	WriteWordTo_FPGA(64,0);
 	WriteWordTo_FPGA(65,(unsigned short)(CoolerFanPWM_Width&0x0000FFFF));
-}
+	}
 
+	if (CalcCycleCounter==1)
+	{
+	WriteWordTo_FPGA(75,(unsigned short)(Const_TopACurrentLimit));
+	WriteWordTo_FPGA(76,(unsigned short)(Const_TopBCurrentLimit));
+	}
+
+	if (CalcCycleCounter==2)
+	{
+	WriteWordTo_FPGA(77,(unsigned short)(Const_TopCCurrentLimit));
+	WriteWordTo_FPGA(78,(unsigned short)(Const_BotACurrentLimit));
+	}
+
+	if (CalcCycleCounter==3)
+	{
+	WriteWordTo_FPGA(79,(unsigned short)(Const_BotBCurrentLimit));
+	WriteWordTo_FPGA(80,(unsigned short)(Const_BotCCurrentLimit));
+	}
+}
 
 void FPGA_Write_Data (void)
 {
-    BoosterInput1 = ReadWordFrom_FPGA(18);
-
 	CommitDataValue=43690;
 	CommitCurrentsValue=21845;
 	FPGA_EMIF_WD_Value = DMABufFPGA1[4];
-	//if (FPGA_EMIF_WD_Value_Prev==FPGA_EMIF_WD_Value) {ErrorSet(ERR_DMA_OVERRIDE);}
+	if (FPGA_EMIF_WD_Value_Prev==FPGA_EMIF_WD_Value) {ErrorSet(ERR_DMA_OVERRIDE);}
 	FPGA_EMIF_WD_Value_Prev = FPGA_EMIF_WD_Value;
 
 	if (FPGA_EMIF_WD_Value!=0xFFFF)
@@ -356,7 +496,6 @@ void M3_Write_Data (Uint32 CyclesCounter)
 	int k;
 	for (k=0;k<4;k++)
 	{
-
 		//CTOMtimeoutCounter++;
 		//if ((CtoMIpcRegs.CTOMIPCFLG.bit.IPC7 == 0) || CTOMtimeoutCounter>10000000)
 		//{
@@ -381,11 +520,130 @@ void M3_Write_Data (Uint32 CyclesCounter)
 				case 8: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Peak_WorkingCycleTime_uS>>16)); break;
 				case 9: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Peak_WorkingCycleTime_uS)); break;
 				case 10: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MainCyclesCounter)); break;
-				//case 10: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FPGA_EMIF_WD_Value)); break;
 
-				case 11: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[0]*100.0)); break;
-				case 12: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[1]*100.0)); break;
-				case 13: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[2]*100.0)); break;
+				case 11: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SCADASystemState)); break;
+				case 12: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(LastCommand)); break;
+				case 13: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(GlobalError)); break;
+
+				case 14: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(0)); break;	//VGEN
+				case 15: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ActivePower*0.001)); break; //Активная мощность
+				case 16: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ReactivePower*0.001)); break; // Реактивная мощность
+				case 17: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((OutputFrequency)*100.0)); break; //Частота
+				case 18: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(OutputPhase)); break; //Фаза
+				case 19: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(DCPower*0.001)); break; //Мощность DC
+
+				case 20: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SystemState)); break; //Состояние
+				case 21: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags1>>16)&0x0000FFFF)); break;
+				case 22: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags1&0x0000FFFF)); break;
+				case 23: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags2>>16)&0x0000FFFF)); break;
+				case 24: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags2&0x0000FFFF)); break;
+				case 25: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags3>>16)&0x0000FFFF)); break;
+				case 26: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags3&0x0000FFFF)); break;
+				case 27: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags4>>16)&0x0000FFFF)); break;
+				case 28: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags4&0x0000FFFF)); break;
+
+				case 29: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(0)); break; //RESERVE
+				case 30: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(0)); break; //RESERVE
+
+				case 31:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_EXC_UIN)); break;
+				case 32:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_U_MAIN)); break;
+				case 33:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_U_R)); break;
+				case 34:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I_IN*10.0)); break;
+				case 35:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(IExcMeanCurrent*10.0)); break;
+				case 36:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_IEXC2*10.0)); break;
+				case 37:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SKiiPC_MeanTemp)); break;
+
+				case 38:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_UG1)); break;
+				case 39:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_UG2)); break;
+				case 40:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(UDCMeanVoltage)); break;
+				case 41:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_UDCP)); break;
+				case 42:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_UDCN)); break;
+				case 43:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI1)); break;
+				case 44:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI2)); break;
+				case 45:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI3)); break;
+				case 46:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI4)); break;
+				case 47:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI5)); break;
+				case 48:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_RI6)); break;
+				case 49:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SKiiPA_MeanTemp)); break;
+				case 50:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SKiiPB_MeanTemp)); break;
+				case 51:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_RECT_TC1)); break;
+
+				case 52:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhC1IGBTCurrentRMS)); break;
+				case 53:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhA1IGBTCurrentRMS)); break;
+				case 54:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhB1IGBTCurrentRMS)); break;
+				case 55:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_SKIPH1)); break;
+				case 56:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_SKIPH2)); break;
+				case 57:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_SKIPH3)); break;
+				case 58:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_SKIDISCH)); break;
+				case 59:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_UDC)); break;
+				case 60:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TSK1)); break;
+				case 61:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TSK2)); break;
+				case 62:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TSK3)); break;
+				case 63:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TSKDISCH)); break;
+				case 64:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TLF)); break;
+				case 65:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TC1)); break;
+				case 66:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I1_TC2)); break;
+
+                case 67:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhC2IGBTCurrentRMS)); break;
+                case 68:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhA2IGBTCurrentRMS)); break;
+                case 69:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhB2IGBTCurrentRMS)); break;
+                case 70:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_SKIPH1)); break;
+                case 71:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_SKIPH2)); break;
+                case 72:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_SKIPH3)); break;
+                case 73:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_SKIDISCH)); break;
+                case 74:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_UDC)); break;
+                case 75:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TSK1)); break;
+                case 76:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TSK2)); break;
+                case 77:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TSK3)); break;
+                case 78:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TSKDISCH)); break;
+                case 79:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TLF)); break;
+                case 80:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TC1)); break;
+                case 81:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I2_TC2)); break;
+
+                case 82:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhC3IGBTCurrentRMS)); break;
+                case 83:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhA3IGBTCurrentRMS)); break;
+                case 84:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhB3IGBTCurrentRMS)); break;
+                case 85:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_SKIPH1)); break;
+                case 86:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_SKIPH2)); break;
+                case 87:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_SKIPH3)); break;
+                case 88:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_SKIDISCH)); break;
+                case 89:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_UDC)); break;
+                case 90:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TSK1)); break;
+                case 91:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TSK2)); break;
+                case 92:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TSK3)); break;
+                case 93:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TSKDISCH)); break;
+                case 94:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TLF)); break;
+                case 95:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TC1)); break;
+                case 96:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_I3_TC2)); break;
+
+                case 97:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhACurrentRMS)); break;
+                case 98:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhBCurrentRMS)); break;
+                case 99:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhCCurrentRMS)); break;
+                case 100:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhAVoltRMS)); break;
+                case 101:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhBVoltRMS)); break;
+                case 102:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhCVoltRMS)); break;
+                case 103:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_F_UN)); break;
+                case 104:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_F_UGRID)); break;
+                case 105:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_F_TC1)); break;
+                case 106:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_F_TC2)); break;
+                case 107:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_F_TC3)); break;
+
+                case 108:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_EXC)); break;
+                case 109:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_RECT)); break;
+                case 110:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_INV1)); break;
+                case 111:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_INV2)); break;
+                case 112:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_INV3)); break;
+                case 113:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_TEMPCELL_FILT)); break;
+
+                case 114:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_DCS1)); break;
+                case 115:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_DCS2)); break;
+                case 116:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_DCS3)); break;
+                case 117:  WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SEG_DCS3)); break;
+
+				//case 10: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FPGA_EMIF_WD_Value)); break;
+				/*case 11: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[0])); break;
+				case 12: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[1])); break;
+				case 13: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[2])); break;
 				case 14: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[3])); break;
 				case 15: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[4])); break;
 				case 16: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[5])); break;
@@ -402,67 +660,93 @@ void M3_Write_Data (Uint32 CyclesCounter)
 				case 27: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[16])); break;
 				case 28: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[17])); break;
 				case 29: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[18])); break;
-				case 30: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[19])); break;
+				case 30: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MeanValues[19])); break;*/
+
+
+				 /*
+				case 11: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN1_Values)); break;
+				case 12: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN2_Values)); break;
+				case 13: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN3_Values)); break;
+				case 14: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN4_Values)); break;
+				case 15: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN5_Values)); break;
+				case 16: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN6_Values)); break;
+				case 17: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN7_Values)); break;
+				case 18: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN8_Values)); break;
+				case 19: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN9_Values)); break;
+				case 20: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN10_Values)); break;
+				case 21: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN11_Values)); break;
+				case 22: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN12_Values)); break;
+				case 23: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN13_Values)); break;
+				case 24: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN14_Values)); break;
+				case 25: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN15_Values)); break;
+				case 26: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN16_Values)); break;
+				case 27: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN17_Values)); break;
+				case 28: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN18_Values)); break;
+				case 29: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN19_Values)); break;
+				case 30: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(AIN20_Values)); break;
+				*/
 
 				//case 31: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(CalculationsDelay)); break; //TEMP
-				case 31: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SCADASystemState)); break;
+
+				/*case 31: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SCADASystemState)); break;
 				case 32: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(LastCommand)); break;
 				case 33: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(GlobalError)); break;
-				case 34: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(RotationFrequency/*Частота вращения генератора об/мин*/)); break;
-				case 35: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ActivePower*0.01/*Активная мощность*/)); break;
-				case 36: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ReactivePower*0.01/*Реактивная мощность*/)); break;
-				case 37: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((OutputFrequency-50.0)*1000.0/*Частота*/)); break;
-				case 38: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(OutputPhase/*Фаза*/)); break;
-				case 39: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(DCPower*0.01)); break;
-				case 40: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SystemState/*Состояние*/)); break;
+				case 34: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(RotationFrequency)); break; //Частота вращения генератора об/мин
+				case 35: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ActivePower*0.001)); break; //Активная мощность
+				case 36: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ReactivePower*0.001)); break; // Реактивная мощность
+				case 37: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((OutputFrequency-60.0)*1000.0)); break; //Частота
+				case 38: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(OutputPhase)); break; //Фаза
+				case 39: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(DCPower*0.001)); break;
+				case 40: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(SystemState)); break; //Состояние
 				case 41: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags1>>16)&0x0000FFFF)); break;
 				case 42: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags1&0x0000FFFF)); break;
 				case 43: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags2>>16)&0x0000FFFF)); break;
 				case 44: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags2&0x0000FFFF)); break;
 				case 45: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((ErrorFlags4>>16)&0x0000FFFF)); break;
 				case 46: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ErrorFlags4&0x0000FFFF)); break;
-				case 47: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Isolated_Grid_ControlMode)); break;
+				case 47: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Const_IsConnectedToResistiveLoad)); break;
 				// SCADA DATA END-----------------------------
 
-				case    48  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    ChopperCurrent*100.0  ));break;
-				case    49  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    ExcitationCurrent*100.0   ));break;
-				case    50  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    ExcitationCurrent2*100.0  ));break;
-				case    51  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    DCVoltage_IN    ));break;
-				case    52  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    DCVoltage_OUT   ));break;
-				case    53  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    EXCTemp1    ));break;
-				case    54  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    EXCTemp2    ));break;
-				case    55  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    EXCTemp3    ));break;
-				case    56  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_U1  ));break;
-				case    57  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_V1  ));break;
-				case    58  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_W1  ));break;
-				case    59  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Voltage_1   ));break;
-				case    60  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp1_1 ));break;
-				case    61  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp1_2 ));break;
-				case    62  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp1_3 ));break;
-				case    63  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_U2  ));break;
-				case    64  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_V2  ));break;
-				case    65  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_W2  ));break;
-				case    66  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Voltage_2   ));break;
-				case    67  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp2_1 ));break;
-				case    68  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp2_2 ));break;
-				case    69  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp2_3 ));break;
-				case    70  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_U3  ));break;
-				case    71  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_V3  ));break;
-				case    72  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Current_W3  ));break;
-				case    73  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Voltage_3   ));break;
-				case    74  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp3_1 ));break;
-				case    75  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp3_2 ));break;
-				case    76  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Temp3_3 ));break;
+				case 48: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FreqChangeAmp*1000)); break;
+				case 49: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhaseChangeAmp*10)); break;
+				case 50: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FVAL_VoltageMagnitude)); break;
 
-				case    78  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    DMABufFPGA1[14] ));break; // velocity H
-				case    79  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    DMABufFPGA1[15] ));break; // velocity L
+				// Voltage/AMP REGULATORS
+				case 51: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Reg_VoltageError)); break;
+				case 52: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(OutputRMSVoltage)); break;
+				case 53: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ReactivePowerPID->CurrentOutput*0.001)); break;
+				case 54: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Reg_ReactivePowerBoost*0.001)); break;
+				case 55: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(ReactivePowerSetpoint*0.001)); break;
+				case 56: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(VoltagePID->CurrentOutput*10000)); break;
+				case 57: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(MainPWM_AMP)); break;
 
-				case    80  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempPh1*100.0 ));break; // GEN TEMP 1
-				case    81  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempPh2*100.0 ));break; // GEN TEMP 2
-				case    82  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempPh3*100.0 ));break; // GEN TEMP 3
-				case    83  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempExc1*100.0 ));break; // GEN TEMP 2
-				case    84  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempExc2*100.0 ));break; // GEN TEMP 2
-				case    85  :   WriteTo_CTOM_MSGRAM(Addr_Offset,(short)(    Gen_TempRearBearing*100.0 ));break; // GEN TEMP 2
+				// Freq-power REGULATORS``
+				case 58: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Alg_PowerDamping*0.001)); break;
+				case 59: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FreqToPowerPID->CurrentOutput*0.001)); break;
+				case 60: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PIDActivePowerSetpoint*0.001)); break;
+				case 61: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((FrequencyPID->CurrentOutput-60.0)*10000.0)); break;
+				case 62: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(PhasePID->CurrentOutput)); break;
+				case 63: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((Alg_BaseFrequency-60.0)*10000.0)); break;
+				case 64: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Reg_APowerSetpoint*0.001)); break;
+				case 65: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((Const_BaseFrequency-60.0)*10000.0)); break;
+				case 66: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)((Const_FrequencyWindow)*10000.0)); break;
+				case 67: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(UDCErr)); break;
+
+				case 68: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(FPGA_OCP_Counter)); break;
+
+				case 70: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput1)); break;
+				case 71: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput2)); break;
+				case 72: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput3)); break;
+				case 73: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput4)); break;
+				case 74: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput5)); break;
+				case 75: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput6)); break;
+				case 76: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput7)); break;
+				case 77: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput8)); break;
+				case 78: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput9)); break;
+				case 79: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput10)); break;
+				case 80: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput11)); break;
+				case 81: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(BoosterInput12)); break;
+				case 82: WriteTo_CTOM_MSGRAM(Addr_Offset, (short)(Const_BoosterModeDisable)); break; */
 
 				default: WriteTo_CTOM_MSGRAM(0, (short)(FPGA_Error_Latch_H));break;
 				}

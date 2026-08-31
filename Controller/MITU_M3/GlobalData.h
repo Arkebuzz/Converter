@@ -24,9 +24,6 @@
 #include <ti/sysbios/knl/Task.h>
 #include <ti/sysbios/heaps/HeapBuf.h>
 
-#include <ti/sysbios/knl/Semaphore.h>
-
-
 /* NDK BSD support */
 #include <sys/socket.h>
 
@@ -70,12 +67,12 @@
 
 
 
-#define CTOM_DATA_SIZE 100
+#define CTOM_DATA_SIZE 120
 #define MTOC_DATA_SIZE 100
 #define EXT_DATA_SIZE 100
 
 #define SETUP_DATA_SIZE 600
-#define SETUP_DATA_START_ADDR 200
+#define SETUP_DATA_START_ADDR 300
 #define SETUP_UINT_DATA_COUNT 50
 #define SETUP_FLOAT_DATA_COUNT 150
 
@@ -83,15 +80,6 @@
 
 #define NUMTCPWORKERS 1
 #define TCPPACKETSIZE 256
-
-#define MODBUS_TCP_PORT 502         // for multi-client task
-#define MODBUS_MAX_PDU  253         // spec: 253 bytes PDU
-#define MODBUS_MAX_ADU  (7 + MODBUS_MAX_PDU)
-#define MAX_CONN_WORKERS  8        // cap concurrent clients
-
-#define MODBUS_FC_READ_HOLDING_REGS 0x03
-#define MODBUS_FC_WRITE_SINGLE_REG  0x06
-
 
 #define TOTAL_CHANNELS 30
 #define HEADER_SIZE 12
@@ -115,19 +103,15 @@ extern Void tcpHandler1(UArg arg0, UArg arg1);
 extern Void DataExchangeListener(UArg arg0, UArg arg1);
 extern Void OscillogrammsListener(UArg arg0, UArg arg1);
 extern Void ModbusThread(UArg arg0, UArg arg1);
-extern Void ModbusThread2(UArg arg0, UArg arg1);
-
-extern Void ModbusServerTask(UArg arg0, UArg arg1);
-
 extern void Buffers_Init(void);
-extern Void KeepAliveTask(UArg arg0, UArg arg1);
+extern Void DataProcessor(UArg arg0, UArg arg1);
 
 static enum ThreadState
 {
     STOPPED,
     RUNNING,
     SHUTDOWN
-} ePollThreadState, ePollThreadState2;
+} ePollThreadState;
 
 extern char * IPAddr_cfg;
 extern char * SubnetMask_cfg;
@@ -161,11 +145,5 @@ extern USHORT   usRegInputStart;
 extern USHORT   usRegInputBuf[REG_INPUT_NREGS];
 extern USHORT   usRegHoldingStart;
 extern USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
-
-
-// Protect register writes across worker tasks
-extern Semaphore_Handle g_regLock;
-extern Semaphore_Handle g_connSlots;
-
 
 #endif /* GLOBALDATA_H_ */

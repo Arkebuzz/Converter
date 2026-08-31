@@ -8,14 +8,10 @@ int main(void)
 	long unsigned int i;
 	UInt16 DataSRAM;
 
-	for (i=0;i<1000000;i++);
-	{i=i+1;}
-
-
 	Task_Handle taskHandleData;
 	Task_Params taskParamsData;
 	Error_Block eb_Data;
-
+	System_printf("Starting M3... \n");
 	// Disable Protection
 	HWREG(SYSCTL_MWRALLOW) =  0xA5A5A5A5;
 
@@ -33,7 +29,7 @@ int main(void)
     Board_initEPI();
     Buffers_Init();
 
-    for (i=0;i<10000000;i++)  	{i=i+1;} //Wait for board powerup
+    for (i=0;i<50000000;i++)  	{i=i+1;} //Wait for board powerup
 
     System_printf("Init complete. Performing FPGA Test...\n");
     System_flush();
@@ -55,15 +51,40 @@ int main(void)
 		System_printf("Stopping operation. \n");
 		System_flush();
 		goto blocking_loop;
+		//goto endcheck_point;
 		}
 		WriteTo_SRAM(i,0);
 		DataSRAM++;
 	}
+	endcheck_point:
 	System_printf("FPGA Test complete.\n");
 	System_flush();
 
+    /*DataSRAM = 100;
+    for (i=0;i<0xFFFFF;i++)
+    {
+    	WriteTo_SRAM(i,DataSRAM);
+    	DataSRAM++;
+    }
+    DataSRAM = 100;
+    for (i=0;i<0xFFFFF;i++)
+	{
+    	if (DataSRAM != (UInt16)ReadFrom_SRAM(i))
+    	{
+		System_printf("Error testing SRAM! \n");
+		System_printf("Data at adress %d ", i);
+		System_printf(" = %d \n", ReadFrom_SRAM(i));
+		System_printf("Stopping operation. \n");
+		System_flush();
+		goto blocking_loop;
+    	}
+		WriteTo_SRAM(i,0);
+		DataSRAM++;
+	}
+	*/
 
-    System_printf(" Initializing C28 core.\n");
+	GPIO_write(TMDXDOCKH52C1_RES, GPIO_TURN_ON);
+    System_printf("Initializing C28 core.\n");
     System_flush();
     IPCMtoCBootControlSystem(CBROM_MTOC_BOOTMODE_BOOT_FROM_FLASH);
 
@@ -75,8 +96,8 @@ int main(void)
 
     HWREG(MTOCIPC_BASE + IPC_O_CTOMIPCACK)|=IPC_CTOMIPCSTS_IPC1; //Acknowledge init data copy. Proceed to thread init
 
-    IPAddr_cfg = "10.3.5.38";
-	SubnetMask_cfg = "255.255.255.0";
+    IPAddr_cfg = "10.1.3.82";
+	SubnetMask_cfg = "255.0.0.0";
 	DomainName_cfg = "PMCB";
 
     System_printf("C28 core init complete. Creating tasks...\n");
@@ -90,7 +111,7 @@ int main(void)
 	Error_init(&eb_Data);
 	taskParamsData.stackSize = 512;
 	taskParamsData.priority = 1;
-	taskHandleData = Task_create((Task_FuncPtr)KeepAliveTask, &taskParamsData, &eb_Data);
+	taskHandleData = Task_create((Task_FuncPtr)DataProcessor, &taskParamsData, &eb_Data);
 	if (taskHandleData == NULL) {System_printf("Failed to create Data Processor thread \n");}
 	else{System_printf("Started Data Processor thread. Initializing Data Exchange thread... \n");}
 	System_flush();

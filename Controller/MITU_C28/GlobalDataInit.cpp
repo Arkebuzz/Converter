@@ -29,8 +29,8 @@ TimedProtection PR_OutpPhCOverCurr;
 
 //Flash saved setup data----------------------------------------------------
 //Uint parameters
-Uint16 Const_BoosterModeDisable=1;
-Uint16 Const_BrakeModeDisable=1;
+Uint16 Const_BoosterModeDisable=0;
+Uint16 Const_BrakeModeDisable=0;
 Uint16 Const_IsResistiveLoadConverter=0;
 Uint16 Const_IsConnectedToResistiveLoad=0;
 Uint16 Const_SyncLaunchLocked = 0;
@@ -73,7 +73,7 @@ Uint16 Const_APOscPRMinCycles = 6000;
 Uint16 Const_APOscPRMaxCycles = 20000;
 Uint16 Const_APOscPRReleaseCycles = 1650;
 float Const_TPR_APOscLower = 30000;
-float Const_TPR_APOscUpper = 120000;
+float Const_TPR_APOscUpper = 200000;
 
 Uint16 Const_GFaultPRMinCycles = 3000;
 Uint16 Const_GFaultPRMaxCycles = 5000;
@@ -82,10 +82,10 @@ Uint16 Const_GFaultPRReleaseCycles = 1000;
 //NEW
 
 //Float parameters
-float Const_MaxOutputPower=100000;
+float Const_MaxOutputPower=550000;
 float Const_MinOutputPower=-10000;
-float Const_GeneratorToLoadMaxPower=100000;
-float Const_ResitiveLoadMaxPower=100000;
+float Const_GeneratorToLoadMaxPower=250000;
+float Const_ResitiveLoadMaxPower=550000;
 float Const_MaxVoltageBoost=50;
 float Const_SpeedLimitMaxPower=2900;
 float Const_SpeedLimitFreerun=2300;
@@ -93,7 +93,7 @@ float Const_TurbineLimitLine_K=0.75;
 float Const_TurbineLimitLine_B=-1700.0;
 float Const_VoltageErrorUpperLimit = 50;
 float Const_VoltageErrorLowerLimit = -50;
-float Const_OutputVoltageSetpoint = 180.0;
+float Const_OutputVoltageSetpoint = 232.0;
 float Const_ReactivePowerBoost = 2000;
 float Const_GenNumberOfPoles = 11;
 //NEW
@@ -107,7 +107,7 @@ float RPPID_I = 10.0;
 float RPPID_G = 1000.0;
 
 
-float Const_ReactivePowerMax = 100000;
+float Const_ReactivePowerMax = 300000;
 float Const_ReactivePowerMin = -100000;
 float Const_ReactivePowerLimiter = 0.75;
 
@@ -118,8 +118,8 @@ float FRPID_P = 1;
 float FRPID_I = 17;
 float FRPID_D =-0.001;
 float FRPID_G = 0.000001;
-float Const_FreqUpperLim = 51.8;
-float Const_FreqLowerLim = 48.2;
+float Const_FreqUpperLim = 61.8;
+float Const_FreqLowerLim = 58.2;
 float Const_FreqPropLimit = 0.01;
 float Const_FreqIntLimit = 10;
 
@@ -131,77 +131,77 @@ float Const_PhasePropLimit = 0.15;
 float Const_PhaseIntLimit = 12.5;
 
 
-float DCVPID_P = 0.2;
-float DCVPID_I = 4;
+float DCVPID_P = 0.1;
+float DCVPID_I = 2;
 float DCVPID_POSG = 0.5;
 float DCVPID_NEGG = 0.02;
 float Const_ExcitationMax = 40;
-float EXCPID_P = 2;
-float EXCPID_I = 500;
-float Const_BaseFrequency = 49.75;
+float EXCPID_P = 1000;
+float EXCPID_I = 2000;
+float Const_BaseFrequency = 60.05;
 float Const_FrequencyWindow = 0.25;
 
-float Const_SyncMaxPhaseChange = 6;
-float Const_SyncMaxFreqChange = 1.0;
-float Const_SyncMinVoltageMag = 140;
-float Const_SyncStarPhaseLead = 22;
+float Const_SyncMaxPhaseChange = 5;
+float Const_SyncMaxFreqChange = 0.35;
+float Const_SyncMinVoltageMag = 300;
+float Const_SyncStarPhaseLead = 12;
 
-float Prot_ExcCurrentMax = 45;
-float Prot_DCVoltageMax = 1000;
-float Prot_IGBTTempMax = 100;
-float Prot_IGBTTempUnbalance = 20;
+float Prot_ExcCurrentMax = 43;
+float Prot_DCVoltageMax = 1100;
+float Prot_IGBTTempMax = 70;
+float Prot_IGBTTempUnbalance = 10;
 float Prot_GenVoltageMax = 1100;
 float Prot_GenSpeedMax = 4200;
-float Prot_RectCurrUnbalance = 30;
-float Prot_OutpVoltageUnbalance = 100;
-float Prot_OutpCurrentUnbalance = 100;
-float Prot_IGBTCurrentUnbalance = 300;
-float Prot_OutpOverVoltage = 400;
-float Prot_OutpOverCurrent = 400;
-float Prot_APOverload = 100000;
-float Prot_APNegative = -20000;
-float Prot_RPOverload = 100000;
-float Prot_DCVoltageLow = 480;
+float Prot_RectCurrUnbalance = 250;
+float Prot_OutpVoltageUnbalance = 200;
+float Prot_OutpCurrentUnbalance = 1600;
+float Prot_IGBTCurrentUnbalance = 1600;
+float Prot_OutpOverVoltage = 700;
+float Prot_OutpOverCurrent = 1700;
+float Prot_APOverload = 600000;
+float Prot_APNegative = -200000;
+float Prot_RPOverload = 450000;
+float Prot_DCVoltageLow = 600;
 float Prot_GenSpeedOPLow = 2000;
 float Prot_GenSpeedOPHigh = 3800;
-float Prot_OutpFrequencyHigh = 52;
-float Prot_OutpFrequencyLow = 48;
+float Prot_OutpFrequencyHigh = 61.8;
+float Prot_OutpFrequencyLow = 58.2;
 
-float ProtRMS_RectCurrent=70;
-float ProtRMS_OutpVoltage=240;
-float ProtRMS_UDCVoltage=900;
-float ProtRMS_NeutralCurrent=150;
-float ProtRMS_NeutralIGBCurrent=300;
-float ProtRMS_ExcCurrent=45;
-float ProtRMS_IGBTTemp=90;
-float ProtRMS_IGBTCurrent=300;
-float ProtRMS_OutpCurrent=220;
+float ProtRMS_RectCurrent=350;
+float ProtRMS_OutpVoltage=690;
+float ProtRMS_UDCVoltage=1150;
+float ProtRMS_GenPhCurrent=250;
+float ProtRMS_GenPhVoltage=1100;
+float ProtRMS_ExcCurrent=42;
+float ProtRMS_IGBTTemp=60;
+float ProtRMS_IGBTCurrent=1200;
+float ProtRMS_OutpCurrent=1000;
 
-float Const_ExcMaxVoltage = 200;
+float Const_ExcMaxVoltage = 250;
 float Const_ExcCurrentBoost = 0.1;
 float Const_ExcPIDBoost = 4;
 
-float Const_TPR_DCLower = 900;
-float Const_TPR_DCUpper = 1000;
-float Const_TPR_RectCurrLower = 60;
-float Const_TPR_RectCurrUpper = 80;
-float Const_TPR_VoutLower = 30;
-float Const_TPR_VoutUpper = 50;
-float Const_TPR_IGBTUnbLower = 60;
-float Const_TPR_IGBTUnbUpper = 100;
-float Const_TPR_IGBTOCPLower = 160;
-float Const_TPR_IGBTOCPUpper = 200;
-float Const_TPR_APHighLower  = 80000;
-float Const_TPR_APHighUpper  = 100000;
-float Const_TPR_APLowLower = 10000;
-float Const_TPR_APLowUpper = 30000;
-float Const_TPR_RPHighLower = 60000;
-float Const_TPR_RPHighUpper = 90000;
-float Const_TPR_RPLowLower = 60000;
-float Const_TPR_RPLowUpper = 90000;
+float Const_TPR_DCLower = 1100;
+float Const_TPR_DCUpper = 1200;
+float Const_TPR_RectCurrLower = 250;
+float Const_TPR_RectCurrUpper = 300;
+float Const_TPR_VoutLower = 150;
+float Const_TPR_VoutUpper = 200;
+float Const_TPR_IGBTUnbLower = 500;
+float Const_TPR_IGBTUnbUpper = 1100;
+float Const_TPR_IGBTOCPLower = 1200;
+float Const_TPR_IGBTOCPUpper = 1700;
+float Const_TPR_APHighLower  = 1000000;
+float Const_TPR_APHighUpper  = 1200000;
+float Const_TPR_APLowLower = 40000;
+float Const_TPR_APLowUpper = 100000;
+float Const_TPR_RPHighLower = 450000;
+float Const_TPR_RPHighUpper = 600000;
+float Const_TPR_RPLowLower = 150000;
+float Const_TPR_RPLowUpper = 250000;
 
-float Const_TPR_FreqLower = 1.0;
-float Const_TPR_FreqUpper = 1.8;
+float Const_TPR_FreqLower = 2.5;
+float Const_TPR_FreqUpper = 3.8;
 
 float Const_UnderloadBoostPerVolt = 500;
 float Const_OverloadBoostPerVolt  = 500;
@@ -230,22 +230,21 @@ float ChGain[20] = {0.687228857,
 
 float ADCOffset = 2048.0;
 
-volatile Uint16 DMABufFPGA1[100];
+volatile Uint16 DMABufFPGA1[30];
+volatile Uint16 DMABufFPGA2[30];
 volatile Uint16 *DMADestFPGA;
 volatile Uint16 *DMASourceFPGA;
 volatile Uint16 transfer_countFPGA;
 
-Uint16 ButtonCounter = 0;
-Uint16 ButtonCounter2 = 0;
 
+SPIFlashReader* FlashReader;
 
-
-Uint16 Const_TopACurrentLimit = 2682;
-Uint16 Const_TopBCurrentLimit = 2682;
-Uint16 Const_TopCCurrentLimit = 2682;
-Uint16 Const_BotACurrentLimit = 1413;
-Uint16 Const_BotBCurrentLimit = 1413;
-Uint16 Const_BotCCurrentLimit = 1413;
+Uint16 Const_TopACurrentLimit = 3247;
+Uint16 Const_TopBCurrentLimit = 3247;
+Uint16 Const_TopCCurrentLimit = 3247;
+Uint16 Const_BotACurrentLimit = 848;
+Uint16 Const_BotBCurrentLimit = 848;
+Uint16 Const_BotCCurrentLimit = 848;
 
 Uint16 Booster_Voltage_Setpoint = 0;
 Uint16 Booster_Current_Limit = 0;
@@ -270,7 +269,7 @@ float  Float_DummyVariable=0;
 Uint16 Const_RecalcOperationValues=1;
 
 SecOrdFilter* OutputFrequencyFilter;
-float OutputFrequencyFiltered = 50;
+float OutputFrequencyFiltered = 60;
 
 Uint16 CPU_OverloadFlag = 0;
 
@@ -309,7 +308,7 @@ float PhaseChangeAmp=0;
 float FreqChangeAmp=0;
 
 
-float FVAL_InputFreq=50.0;
+float FVAL_InputFreq=60.0;
 float FVAL_InputPhase=0;
 float FVAL_InputSin = 0;
 float FVAL_InputSin_p2pidiv3 = 0;
@@ -327,7 +326,7 @@ float Const_CycleTime = 0;
 
 //float Const_50MHzCountsForPeriod = 1000000;
 
-Uint16 Const_RMSCalcCount=66;
+Uint16 Const_RMSCalcCount=56;
 
 float Ptransform_d = 0;
 float Ptransform_q = 0;
@@ -363,7 +362,7 @@ float OutputRMSVoltage = 0;
 
 Uint16 RMSCyclesCount=0;
 Uint16 RMS_Count_ValueNum=0;
-Int32 MeanValues[20];
+float MeanValues[20];
 float MeanValues_Buffers[20];
 float MeanValues_SummResults[20];
 
@@ -379,11 +378,6 @@ Uint32 CoolerFanPWM_Width=0;
 Uint32 MinimumCoolingPWMWidth=0;
 Uint32 CommitDataValue=43690;
 Uint32 CommitCurrentsValue=21845;
-
-Uint32 EngineAMPSET=0;
-Uint32 EnginePHASESET=0;
-Uint32 EngineBuckPWM=0;
-Uint32 EngineExcPWM=0;
 
 Uint32 MTOC_cyclesCounter=0;
 Uint32 CTOMtimeoutCounter=10000001;
@@ -413,8 +407,6 @@ Uint16 FPGA_EMIF_WD_Value_Prev = 0;
 Uint16 FPGA_Inputs_State_H = 0xFFFF;
 Uint16 FPGA_Inputs_State_L = 0xFFFF;
 
-volatile Uint16 FPGA_EXT_OUT = 0;
-
 Uint16 FPGA_OCP_Counter = 0x0000;
 
 Uint16 BoosterInput1 = 0;
@@ -429,6 +421,8 @@ Uint16 BoosterInput9 = 0;
 Uint16 BoosterInput10 = 0;
 Uint16 BoosterInput11 = 0;
 Uint16 BoosterInput12 = 0;
+
+Uint16 CellsInput[70];
 
 Uint16 FPGA_ResetValue;
 
@@ -478,6 +472,27 @@ volatile Uint16 AIN4_Values;
 volatile Uint16 AIN3_Values;
 volatile Uint16 AIN2_Values;
 volatile Uint16 AIN1_Values;
+
+volatile short OsciValues1;
+volatile short OsciValues2;
+volatile short OsciValues3;
+volatile short OsciValues4;
+volatile short OsciValues5;
+volatile short OsciValues6;
+volatile short OsciValues7;
+volatile short OsciValues8;
+volatile short OsciValues9;
+volatile short OsciValues10;
+volatile short OsciValues11;
+volatile short OsciValues12;
+volatile short OsciValues13;
+volatile short OsciValues14;
+volatile short OsciValues15;
+volatile short OsciValues16;
+volatile short OsciValues17;
+volatile short OsciValues18;
+volatile short OsciValues19;
+volatile short OsciValues20;
 
 volatile Uint16 IsBufferUpperHalf=0;
 volatile Uint16 IsBufferLowerHalf=0;
@@ -539,7 +554,7 @@ float Booster_BrakeSKiiPCurrent = 0;
 float Booster_BrakeSKiiPTemperature = 0;
 float Booster_ReGCurrentLimit = 0;
 
-float DCVoltage_IN  = 0;
+//float DCVoltage_IN  = 0;
 float DCVoltage_OUT = 0;
 float PW_ZeroVRise = 0;
 float PW_MaxRiseLimit = 0;
@@ -556,43 +571,7 @@ float ChopperCurrentSetpoint = 0;
 float CurrentChoppError = 0;
 float DCVoltageChoppError = 0;
 
-float Current_U1;
-float Current_V1;
-float Current_W1;
-float Voltage_1;
-float Temp1_1;
-float Temp1_2;
-float Temp1_3;
-
-float Current_U2;
-float Current_V2;
-float Current_W2;
-float Voltage_2;
-float Temp2_1;
-float Temp2_2;
-float Temp2_3;
-
-float Current_U3;
-float Current_V3;
-float Current_W3;
-float Voltage_3;
-float Temp3_1;
-float Temp3_2;
-float Temp3_3;
-
-float Gen_TempPh1;
-float Gen_TempPh2;
-float Gen_TempPh3;
-float Gen_TempExc1;
-float Gen_TempExc2;
-float Gen_TempRearBearing;
-
-float EXCTemp1;
-float EXCTemp2;
-float EXCTemp3;
-float ChopperCurrent;
 float ExcitationCurrent=0;
-float ExcitationCurrent2=0;
 float ExcitationCurrentFiltered=0;
 float ExcitationSetpoint=0;
 float ExcitationPWLimit=0;
@@ -609,15 +588,22 @@ Uint16 MainCycleMeasurmentsCounter=0;
 
 Uint16 OffsetRecalculated=0;
 Uint16 RecalcOffset=0;
-short ChannelOffsets[20] = {0,	0,	11,	22,	241,	15,	-143,	-147,	-25,	15,	-23,	-23,	14,	-236,	-23,	-23, 246, 246, 0,	0};
+short ChannelOffsets[20];
 Int32 ChannelOffsetCalc[20];
-
-
-
-
-
-
-
+float PhaseAVoltage = 0;
+float PhaseBVoltage = 0;
+float PhaseCVoltage = 0;
+float PhaseACurrent=0;
+float PhaseBCurrent=0;
+float PhaseCCurrent=0;
+float PhaseATemp = 0;
+float PhaseBTemp = 0;
+float PhaseCTemp = 0;
+//float PhaseChopperTemp = 0;
+float GenPhaseVoltage = 0;
+float Rect1Current = 0;
+float Rect2Current = 0;
+float Rect3Current = 0;
 
 float Rect1MeanCurrent = 0;
 float Rect2MeanCurrent = 0;
@@ -625,19 +611,22 @@ float Rect3MeanCurrent = 0;
 
 float UDCMeanVoltage=0;
 float IExcMeanCurrent=0;
-float IExcMeanCurrentPrecise=0;
-float ExcitationResistance=0;
-
 float SKiiPC_MeanTemp=0;
 float SKiiPB_MeanTemp=0;
 float SKiiPA_MeanTemp=0;
 
-float PhAIGBTCurrentRMS = 0;
-float PhBIGBTCurrentRMS = 0;
-float PhCIGBTCurrentRMS = 0;
+float PhA1IGBTCurrentRMS = 0;
+float PhB1IGBTCurrentRMS = 0;
+float PhC1IGBTCurrentRMS = 0;
+float PhA2IGBTCurrentRMS = 0;
+float PhB2IGBTCurrentRMS = 0;
+float PhC2IGBTCurrentRMS = 0;
+float PhA3IGBTCurrentRMS = 0;
+float PhB3IGBTCurrentRMS = 0;
+float PhC3IGBTCurrentRMS = 0;
 
-float NeutralIGBTCurrentRMS = 0;
-float NeutralCurrentRMS = 0;
+float GenPhaseRMSVoltage = 0;
+float GenPhaseRMSCurrent = 0;
 
 float PhACurrentRMS = 0;
 float PhBCurrentRMS = 0;
@@ -655,12 +644,12 @@ float PhaseCVoltage_Array[MEASURMENTS_BUFFER_SIZE];
 //float IGBT_PhC_Currents[MEASURMENTS_BUFFER_SIZE];
 
 
-float OutputFrequency=50;
+float OutputFrequency=60;
 float OutputPhaseSet = 0;
 float OutputPhase=0;
 float MinOutputFrequency = 40;
 Uint16 IndexShiftCount = 0;
-float FrequencyMultiplier = 833.33333; //Number of counts for quarter period mult base frequency 833.33333;
+float FrequencyMultiplier = 833.33333; //Number of counts for quarter period mult base frequency
 Uint16 ShiftedVoltageIndex = 0;
 float InstActivePower_A=0;
 float InstActivePower_B=0;
@@ -698,6 +687,95 @@ float TurbinePower_K = 0.75;
 float TurbinePower_B = -1700;
 
 float CurrentBaseSpeed = 1100;
+
+
+float   SEG_EXC_UIN  =0;
+float   SEG_U_MAIN   =0;
+float   SEG_U_R  =0;
+float   SEG_I_IN     =0;
+float   SEG_IEXC1    =0;
+float   SEG_IEXC2    =0;
+float   SEG_EXC_TEMP     =0;
+float   SEG_RECT_UG1     =0;
+float   SEG_RECT_UG2     =0;
+float   SEG_RECT_UDC     =0;
+float   SEG_RECT_UDCP    =0;
+float   SEG_RECT_UDCN    =0;
+float   SEG_RECT_RI1     =0;
+float   SEG_RECT_RI2     =0;
+float   SEG_RECT_RI3     =0;
+float   SEG_RECT_RI4     =0;
+float   SEG_RECT_RI5     =0;
+float   SEG_RECT_RI6     =0;
+float   SEG_RECT_TU1     =0;
+float   SEG_RECT_TU2     =0;
+float   SEG_RECT_TC1     =0;
+float   SEG_I1_IPH1  =0;
+float   SEG_I1_IPH2  =0;
+float   SEG_I1_IPH3  =0;
+float   SEG_I1_SKIPH1    =0;
+float   SEG_I1_SKIPH2    =0;
+float   SEG_I1_SKIPH3    =0;
+float   SEG_I1_SKIDISCH  =0;
+float   SEG_I1_UDC   =0;
+float   SEG_I1_TSK1  =0;
+float   SEG_I1_TSK2  =0;
+float   SEG_I1_TSK3  =0;
+float   SEG_I1_TSKDISCH  =0;
+float   SEG_I1_TLF   =0;
+float   SEG_I1_TC1   =0;
+float   SEG_I1_TC2   =0;
+float   SEG_I2_IPH1  =0;
+float   SEG_I2_IPH2  =0;
+float   SEG_I2_IPH3  =0;
+float   SEG_I2_SKIPH1    =0;
+float   SEG_I2_SKIPH2    =0;
+float   SEG_I2_SKIPH3    =0;
+float   SEG_I2_SKIDISCH  =0;
+float   SEG_I2_UDC   =0;
+float   SEG_I2_TSK1  =0;
+float   SEG_I2_TSK2  =0;
+float   SEG_I2_TSK3  =0;
+float   SEG_I2_TSKDISCH  =0;
+float   SEG_I2_TLF   =0;
+float   SEG_I2_TC1   =0;
+float   SEG_I2_TC2   =0;
+float   SEG_I3_IPH1  =0;
+float   SEG_I3_IPH2  =0;
+float   SEG_I3_IPH3  =0;
+float   SEG_I3_SKIPH1    =0;
+float   SEG_I3_SKIPH2    =0;
+float   SEG_I3_SKIPH3    =0;
+float   SEG_I3_SKIDISCH  =0;
+float   SEG_I3_UDC   =0;
+float   SEG_I3_TSK1  =0;
+float   SEG_I3_TSK2  =0;
+float   SEG_I3_TSK3  =0;
+float   SEG_I3_TSKDISCH  =0;
+float   SEG_I3_TLF   =0;
+float   SEG_I3_TC1   =0;
+float   SEG_I3_TC2   =0;
+float   SEG_F_IA     =0;
+float   SEG_F_IB     =0;
+float   SEG_F_IC     =0;
+float   SEG_F_UA     =0;
+float   SEG_F_UB     =0;
+float   SEG_F_UC     =0;
+float   SEG_F_UN     =0;
+float   SEG_F_UGRID  =0;
+float   SEG_F_TC1    =0;
+float   SEG_F_TC2    =0;
+float   SEG_F_TC3    =0;
+float   SEG_TEMPCELL_EXC     =0;
+float   SEG_TEMPCELL_RECT    =0;
+float   SEG_TEMPCELL_INV1    =0;
+float   SEG_TEMPCELL_INV2    =0;
+float   SEG_TEMPCELL_INV3    =0;
+float   SEG_TEMPCELL_FILT    =0;
+Uint16   SEG_DCS1     =0;
+Uint16   SEG_DCS2     =0;
+Uint16   SEG_DCS3     =0;
+Uint16   SEG_DCS4     =0;
 
 //Turbine char in kW
 float TurbineChar[20] = {22.9,	//1000RPM
@@ -814,12 +892,10 @@ FloatCyclicPID* PhasePID; //регулятор частоты
 
 FloatPID* RotationSpeedPID; //регулятор напряжения
 
-float NTC_LUT[7]= {0, 8.1, 19.52, 41.05, 77.86, 135.55, 219.35};
-
 			//						1		2		3		4		5		6		7		8		9		10		11		12		13		14		15		16		17		18		19		20
-Uint16 ADCPeakProt_Values_Min[20] = {0,		0,		656,	1127,	1127,	1127,	0,		0,		0,		1280,	0,		0,		1127,	1127,	0,		0,		1127,	1127,	0,		0};
-Uint16 ADCPeakProt_Values_Max[20] = {4095,	4095,	3430,	2969,	2969,	2969,	4095,	4095,	4095,	2816,	4095,	4095,	2970,	2970,	4095,	4095,	2970,	2970,	4095,	4095};
-Uint32 ADCPeakProt_ERR_Mask = 0xFFF3323C;
+Uint16 ADCPeakProt_Values_Min[20] = {1085,	1085,	1085,	69,		69,		69,		721,	249,	721,	673,	271,	271,	271,	0,		289,	13,		289,	13,		289,	13};
+Uint16 ADCPeakProt_Values_Max[20] = {3011,	3011,	3011,	4027,	4027,	4027,	3375,	3847,	3375,	3423,	3825,	3825,	3825,	4095,	3807,	4083,	3807,	4083,	3807,	4083};
+Uint32 ADCPeakProt_ERR_Mask = 0xFFF57FFF;
 Uint32 ADCPeakProt_InverterPhAOCP = 0x00000000;
 Uint32 InverterPhAOCP_Flag=0;
 Uint32 ADCPeakProt_InverterPhBOCP = 0x00000000;

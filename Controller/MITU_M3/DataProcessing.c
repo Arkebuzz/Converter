@@ -7,7 +7,7 @@
 
 #include "GlobalData.h"
 
-Void KeepAliveTask(UArg arg0, UArg arg1)
+Void DataProcessor(UArg arg0, UArg arg1)
 {
 	unsigned int i=0;
 	unsigned int j=0;

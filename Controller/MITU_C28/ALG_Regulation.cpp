@@ -10,44 +10,108 @@
 void ExcitationRegulation(void)
 {
 	//Расчет ограничений на возбуждение
-	float MaximumExcitationCurrent = Const_ExcitationMax;//28-6*Reg_GenSpeeed/1000; //(10 + 4 + 7*(10-4))/2 - (10-4)*Reg_GenSpeeed/1000.0; //Excitation limitation to avoid overvoltage, 10A at 3000, 4A at 4000
+	Reg_GenSpeeed=GenSpeedFiltered;
+	if (Reg_GenSpeeed<100) {Reg_GenSpeeed=100;} else if (Reg_GenSpeeed>5500) {Reg_GenSpeeed=5500;}
+	float MaximumExcitationCurrent = 40; //(10 + 4 + 7*(10-4))/2 - (10-4)*Reg_GenSpeeed/1000.0; //Excitation limitation to avoid overvoltage, 10A at 3000, 4A at 4000
 	if (MaximumExcitationCurrent>Const_ExcitationMax) {MaximumExcitationCurrent=Const_ExcitationMax;}
 	if (MaximumExcitationCurrent<1) {MaximumExcitationCurrent=1;}
 
-
+	if (Const_IsResistiveLoadConverter==0)
+	{
 	//Расчет уставки напряжения шины постоянного тока
-	Reg_DCVoltageSetpoint = 200;
-	if (ChopperManualControl==1) {DCOutSetpoint = (float)((unsigned short)Data_FromM3[11])*900.0/65535.0;} //Ручное управление напряжением DC
+	Reg_DCVoltageSetpoint = Alg_DCOutSetpoint;
+
+	/*if (Const_IsConnectedToResistiveLoad!=0)
+		{
+		if (Const_ActivateLoadControl==0)
+			{
+		    if (Alg_MaxGeneratorControlledLoad < Const_GeneratorToLoadMaxPower) {Alg_MaxGeneratorControlledLoad = Alg_MaxGeneratorControlledLoad + 20;} //Soft turn on for voltage boost
+		    if (Alg_MaxGeneratorControlledLoad > Const_GeneratorToLoadMaxPower) {Alg_MaxGeneratorControlledLoad = Const_GeneratorToLoadMaxPower;}
+			}
+		else
+			{
+			if (Alg_MaxGeneratorControlledLoad < 0) {Alg_MaxGeneratorControlledLoad = 0;}
+			if (Alg_MaxGeneratorControlledLoad > 0) {Alg_MaxGeneratorControlledLoad = Alg_MaxGeneratorControlledLoad - 20;} //Soft turn off for voltage boost
+			}
+
+		Reg_VoltageBoost = (Const_MaxOutputPower - Alg_PowerDamping); //Primary boost total available power
+		if (Reg_VoltageBoost>Alg_MaxGeneratorControlledLoad) {Reg_VoltageBoost=Alg_MaxGeneratorControlledLoad;} //Generator to resistive load power limitation
+		Reg_VoltageBoost = Reg_VoltageBoost - ActivePower; //Apply excitation boost for generator power only, ActivePower - inverter output/input power
+		if (Reg_VoltageBoost>Const_ResitiveLoadMaxPower) {Reg_VoltageBoost = Const_ResitiveLoadMaxPower;} //Total resistive load power limitation
+		Reg_VoltageBoost = (25000 + Reg_VoltageBoost - (DCPower - ActivePower))/1000;
+		if (Reg_VoltageBoost>Const_MaxVoltageBoost) {Reg_VoltageBoost = Const_MaxVoltageBoost;}
+		if (Reg_VoltageBoost<0) {Reg_VoltageBoost = 0;}
+		Reg_DCVoltageSetpoint = Reg_DCVoltageSetpoint + Reg_VoltageBoost;
+		}
+		*/
+
+	if (ChopperManualControl==1) {DCOutSetpoint = (float)((unsigned short)Data_FromM3[11])*500.0/65535.0;} //Ручное управление напряжением DC
 	else {DCOutSetpoint = Reg_DCVoltageSetpoint;}
 	float BoosterSetpoint = DCOutSetpoint+20.0;
 	if (BoosterSetpoint<0) {BoosterSetpoint = 0;}
-	if (BoosterSetpoint>900) {BoosterSetpoint = 900;}
-	if (Const_BoosterModeDisable==0){Booster_Voltage_Setpoint = (unsigned short)(BoosterSetpoint);}
-	else {Booster_Voltage_Setpoint=0;}
+	if (BoosterSetpoint>500) {BoosterSetpoint = 500;}
+	Booster_Voltage_Setpoint = (unsigned short)(BoosterSetpoint);
+
 
 	// Регулятор возбуждения -----------------------------------------------------------------------------
 	// Регулятор напряжения на шине постоянного тока -----------------------------------------------------
 	if (ExcitationActivated!=0)
 	{
-		DCVoltagePID->SetProp(DCVPID_P);
 
-		if (SystemManualControl==1) {Reg_DCInpSetpoint = DCOutSetpoint; }
-		else {Reg_DCInpSetpoint = Alg_DCInpSetpoint;}
-		DCVoltageError = DCOutSetpoint - UDCOUTFiltered;
+		DCVoltagePID->SetInt(DCVPID_I);
+		DCVoltagePID->SetProp(DCVPID_P);
+		DCVoltageError = DCOutSetpoint - fabs(SEG_U_MAIN);
 		DCVoltagePID->PIDStep(DCVoltageError);
-		DCVoltagePID->SetUpperIntegratorLimit(Alg_Excitation_limit);
-		DCVoltagePID->SetUpperOutputLimit(Alg_Excitation_limit);
+		DCVoltagePID->SetUpperIntegratorLimit(40);
+		DCVoltagePID->SetUpperOutputLimit(40);
+
+		ChopperPID->SetProp(0.002);ChopperPID->SetInt(0.008);
+		ChopperPID->SetUpperIntegratorLimit(0.5);
+		ChopperPID->SetUpperOutputLimit(0.5);
+		//if (ChopperActivated==1)
+		//{
+		if (fabs(SEG_I_IN) > 30)
+		    {
+		    ChopperPID->PIDStep(-20);
+		    ChopperPWM_Width = ChopperPID->CurrentOutput*4096.0;
+		    }
+		else
+		    {
+		     float DCVoltageChoppError = DCOutSetpoint - fabs(SEG_U_MAIN);
+		     if (DCVoltageChoppError>30) {DCVoltageChoppError=30;}
+		     ChopperPID->PIDStep(DCVoltageChoppError);
+		     ChopperPWM_Width = ChopperPID->CurrentOutput*4000.0;
+		    }
+		if (ChopperPWM_Width<125) {ChopperPWM_Width = 0;}
+		else if (ChopperPWM_Width>4000) {ChopperPWM_Width = 4000;}
+		//}
+		//else {
+		//     ChopperPID->ResetData(0,0);
+		//      ChopperPWM_Width = 0;}
 
 		// Регулятор тока возбуждения --------------------------------------------------------------------------
-		ExcitationPWLimit = 2400.0;
+
+		ExcitationPWLimit = 4000.0;
+		if (ExcitationPWLimit>4000.0) {ExcitationPWLimit = 4000.0;}
+		if (ExcitationPWLimit<0) {ExcitationPWLimit = 0;}
 		if (ExcitationManualControl==1) {ExcitationSetpoint = (float)((unsigned short)Data_FromM3[10])*40.0/65535.0;}
 		else {
 			 Reg_ExcSetpoint = DCVoltagePID->CurrentOutput;
+
+			 /*if (InverterActivated==1 && UDCOUTFiltered<MINIMAL_BOOST_DC_VOLTAGE && SystemManualControl==0)
+			 {
+				 Reg_ExcSetpoint = Reg_ExcSetpoint + (MINIMAL_BOOST_DC_VOLTAGE - UDCOUTFiltered)*Const_ExcCurrentBoost; //Excitation boost on DC fall
+				 ExcitationCurrentPID->SetProp(EXCPID_P*Const_ExcPIDBoost);
+				 ExcitationCurrentPID->SetInt(EXCPID_I*Const_ExcPIDBoost);
+			 }
+			 else {ExcitationCurrentPID->SetProp(EXCPID_P); ExcitationCurrentPID->SetInt(EXCPID_I);}*/
+			 ExcitationCurrentPID->SetProp(EXCPID_P); ExcitationCurrentPID->SetInt(EXCPID_I);
+
 			 if (Reg_ExcSetpoint>MaximumExcitationCurrent) {Reg_ExcSetpoint=MaximumExcitationCurrent;}
+			 if (Reg_ExcSetpoint>12.0) {Reg_ExcSetpoint=12.0;}
 			 if (Reg_ExcSetpoint<1.0) {Reg_ExcSetpoint=1.0;}
 			 ExcitationSetpoint = Reg_ExcSetpoint;
 			 }
-		ExcitationCurrentPID->SetProp(EXCPID_P); ExcitationCurrentPID->SetInt(EXCPID_I);
 		ExcitationCurrentPID->SetUpperIntegratorLimit(ExcitationPWLimit);
 		ExcitationCurrentPID->SetUpperOutputLimit(ExcitationPWLimit);
 		ExcitationCurrentPID->PIDStep(ExcitationSetpoint - ExcitationCurrentFiltered);
@@ -56,13 +120,21 @@ void ExcitationRegulation(void)
 		{
 		ExcitationCurrentPID->ResetData(0,0);
 		DCVoltagePID->ResetData(0,0);
+		ChopperPID->ResetData(0,0);
 		DCVoltagePID->SetInt(DCVPID_I*0.01);
+		ChopperPID->ResetData(0,0);
+		ChopperPWM_Width = 0;
 		}
 
-	if (ExcitationCurrentPID->CurrentOutput<100) {ExcitationPWM_Width = 0;}
-	else if (ExcitationCurrentPID->CurrentOutput>2480) {ExcitationPWM_Width = 2400;}
+	if (ExcitationCurrentPID->CurrentOutput<125) {ExcitationPWM_Width = 0;}
+	else if (ExcitationCurrentPID->CurrentOutput>4000) {ExcitationPWM_Width = 4000;}
 	else {ExcitationPWM_Width = (Uint16)(ExcitationCurrentPID->CurrentOutput);}
 	// ----------------------------------------------------------------------------------------------------
+	}
+	else
+	{
+		ExcitationPWM_Width = 0;
+	}
 }
 
 
@@ -216,11 +288,11 @@ void ActivePowerRegulation(void)
 {
 	// Регулятор активной мощности (частоты) инвертора-----------------------------------------------------------------
 	if (InverterFrequencyManualControl==1)
-	{float TargetFrequency = 49.0+(((float)Data_FromM3[2])*2.0/65535);  OutputFrequency = TargetFrequency; MainPWM_PhaseShift=0; }
+	{float TargetFrequency = 45.0+(((float)Data_FromM3[2])*10.0/65535);  OutputFrequency = TargetFrequency; MainPWM_PhaseShift=0; }
 	else   	{
 				if (Const_IsResistiveLoadConverter==1)
 				{
-					OutputFrequency=50.0;
+					OutputFrequency=60.0;
 					MainPWM_PhaseShift=0;
 					MainPWM_PhaseSet=0;
 				}
@@ -299,8 +371,8 @@ void ActivePowerRegulation(void)
 
 						FrequencyPID->PIDStep(PIDActivePowerSetpoint - ActivePower);
 						OutputFrequency = FrequencyPID->CurrentOutput;
-						if (OutputFrequency<48.0) {OutputFrequency=48.0;}
-						if (OutputFrequency>52.0) {OutputFrequency=52.0;}
+						if (OutputFrequency<58.0) {OutputFrequency=58.0;}
+						if (OutputFrequency>62.0) {OutputFrequency=62.0;}
 						PhasePID->PIDStep(PIDActivePowerSetpoint - ActivePower);
 						float OutputFrequencyTicks = 50000000.0/OutputFrequency;
 						MainPWM_PhaseShift = PhasePID->CurrentOutput* Const_1_div360 * OutputFrequencyTicks;
@@ -308,8 +380,8 @@ void ActivePowerRegulation(void)
 					else
 					{
 						FrequencyPID->ResetData(OutputFrequency,OutputFrequency);
-						if (OutputFrequency<48.0) {OutputFrequency=48.0;}
-						if (OutputFrequency>52.0) {OutputFrequency=52.0;}
+						if (OutputFrequency<58.0) {OutputFrequency=58.0;}
+						if (OutputFrequency>62.0) {OutputFrequency=62.0;}
 						PhasePID->ResetData(0,0);
 						float OutputFrequencyTicks = 50000000.0/OutputFrequency;
 						MainPWM_PhaseShift = PhasePID->CurrentOutput* Const_1_div360 * OutputFrequencyTicks;
@@ -317,8 +389,8 @@ void ActivePowerRegulation(void)
 				}
 			}
 
-	if (OutputFrequency>52)  {MainPWM_OutputFrequency= (Uint32)(50000000.0/52.0);}
-	else if (OutputFrequency<48) {MainPWM_OutputFrequency= (Uint32)(50000000.0/48.0);}
+	if (OutputFrequency>55)  {MainPWM_OutputFrequency= (Uint32)(50000000.0/55.0);}
+	else if (OutputFrequency<45) {MainPWM_OutputFrequency= (Uint32)(50000000.0/45.0);}
 	else {MainPWM_OutputFrequency= (Uint32)(50000000.0/OutputFrequency);}
 	// ----------------------------------------------------------------------------------------------------
 }
@@ -439,9 +511,21 @@ void StateRecognition(void)
 void CoolingControl(void)
 {
 	//Cooler fan PWM control
-	if (ExcitationActivated==0 && ChopperActivated==0 && InverterActivated==0) {CoolerFanPWM_Width=0;}
-	else {CoolerFanPWM_Width=5000;}
-	if (Data_FromM3[5] > CoolerFanPWM_Width) {CoolerFanPWM_Width=Data_FromM3[5];}
+    if (SEG_TEMPCELL_EXC>21.0)
+    {
+        float FanPWM = (Uint32)(SEG_TEMPCELL_EXC - 20.0)*100.0;
+        if (FanPWM>1000) {FanPWM = 1000;}
+        if (FanPWM<0) {FanPWM = 0;}
+        CoolerFanPWM_Width = (Uint32)FanPWM;
+    }
+    else
+    {
+        CoolerFanPWM_Width = 0;
+    }
+
+	//if (ExcitationActivated==0 && ChopperActivated==0 && InverterActivated==0) {CoolerFanPWM_Width=0;}
+	//else {CoolerFanPWM_Width=5000;}
+	//if (Data_FromM3[5] > CoolerFanPWM_Width) {CoolerFanPWM_Width=Data_FromM3[5];}
 	//if (ExcitationActivated!=0) {CoolerFanPWM_Width=1000;SystemState|=0x0001;} else {SystemState&=0xFFFE;}
 	//if (ChopperActivated!=0) {CoolerFanPWM_Width=5000;SystemState|=0x0002;} else {SystemState&=0xFFFD;}
 	//if (InverterActivated!=0) {CoolerFanPWM_Width=10000;SystemState|=0x0004;}  else {SystemState&=0xFFFB;}

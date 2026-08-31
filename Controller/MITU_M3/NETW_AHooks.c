@@ -13,9 +13,7 @@
 #define TCPPORT_ECHO 1003
 #define TCPPORT_ECHO2 1004
 #define TCPPORT_EXCHANGE 1000
-
-//#define TCPPORT_OSCI 1001
-#define TCPPORT_OSCI 1124
+#define TCPPORT_OSCI 1001
 
 #define TCPHANDLERSTACK 800
 
@@ -36,10 +34,6 @@ typedef struct _ci_ipnet {
         char    Domain[CFG_DOMAIN_MAX]; /* IPNet Domain Name */
         } CI_IPNET;
 
-
-/* ----------------------- MBUS variables ---------------------------------*/
-Semaphore_Handle g_regLock;
-Semaphore_Handle g_connSlots;
 
 /*
  *  ======== netOpenHook ========
@@ -66,15 +60,6 @@ void netOpenHook()
 	Task_Handle taskHandle_MBUS;
 	Task_Params taskParams_MBUS;
 	Error_Block eb_MBUS;
-
-    Task_Handle taskHandle_MBUS_v2;
-    Task_Params taskParams_MBUS_v2;
-    Error_Block eb_MBUS_v2;
-
-
-	Task_Handle taskHandle_MBUS2;
-	Task_Params taskParams_MBUS2;
-	Error_Block eb_MBUS2;
 
 
     CI_IPNET NA;
@@ -134,57 +119,17 @@ void netOpenHook()
 	System_printf("Started Oscillogramms Data Exchange thread. Initializing Modbus thread...\n");
 	System_flush();
 
-	////////////////////////////////////
-	// Modbus Initialization
+	//Modbus Initialisation
+	Task_Params_init(&taskParams_MBUS);
+	Error_init(&eb_MBUS);
+	taskParams_MBUS.stackSize = 1024;
+	taskParams_MBUS.priority = 1;
+	taskHandle_MBUS = Task_create((Task_FuncPtr)ModbusThread, &taskParams_MBUS, &eb_MBUS);
+	if (taskHandle_MBUS == NULL)
+	{System_printf("Can't start protocol stack!\n"); System_flush();}
+	System_printf("Started Modbus thread \n");
+	System_flush();
 
-	// CLASSIC driver (on 502 port)
-    Task_Params_init(&taskParams_MBUS);
-    Error_init(&eb_MBUS);
-    taskParams_MBUS.stackSize = 1024;
-    taskParams_MBUS.priority = 1;
-    taskHandle_MBUS = Task_create((Task_FuncPtr)ModbusThread, &taskParams_MBUS, &eb_MBUS);
-    if (taskHandle_MBUS == NULL)
-    {System_printf("Can't start protocol stack!\n"); System_flush();}
-    System_printf("Started Modbus thread \n");
-    System_flush();
-
-
-
-    // NEW multi-client driver (on 504 port)
-	// Create binary semaphore (mutex) for register map
-    Semaphore_Params sp1;
-    Semaphore_Params_init(&sp1);
-    g_regLock = Semaphore_create(1, &sp1, NULL);
-
-    // Pre-create a counting semaphore to limit concurrent workers
-    Semaphore_Params sp2;
-    Semaphore_Params_init(&sp2);
-    g_connSlots = Semaphore_create(MAX_CONN_WORKERS, &sp2, NULL);
-
-
-/*
-	Task_Params_init(&taskParams_MBUS_v2);
-    Error_init(&eb_MBUS_v2);
-    taskParams_MBUS_v2.stackSize = 1024;
-    taskParams_MBUS_v2.priority = 2;
-    taskHandle_MBUS = Task_create((Task_FuncPtr)ModbusServerTask, &taskParams_MBUS_v2, &eb_MBUS_v2);
-    if (taskHandle_MBUS == NULL)
-    {System_printf("Can't start protocol stack!\n"); System_flush();}
-    System_printf("Started Modbus thread \n");
-    System_flush();
-*/
-
-
-
-	//Task_Params_init(&taskParams_MBUS2);
-	//Error_init(&eb_MBUS2);
-    //taskParams_MBUS2.stackSize = 1024;
-    //taskParams_MBUS2.priority = 1;
-    //taskHandle_MBUS2 = Task_create((Task_FuncPtr)ModbusThread2, &taskParams_MBUS2, &eb_MBUS2);
-    //if (taskHandle_MBUS2 == NULL)
-    //{System_printf("Can't start protocol stack #2!\n"); System_flush();}
-    //System_printf("Started Modbus thread #2 \n");
-    //System_flush();
 
    /*Task_Params_init(&taskParams2);
      Error_init(&eb2);

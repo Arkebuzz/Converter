@@ -38,7 +38,7 @@ void InitGpio(void)
     GpioG2CtrlRegs.AIOMUX2.all = 0x0000;    // Dig.IO funct. applies to
                                             // AIO18,20,22,26,28,30
 
-    GpioG1CtrlRegs.GPADIR.all = 0x03FF;     // GPIO0-GPIO9 are outputs ,GPIO10-GPIO31 are inputs
+    GpioG1CtrlRegs.GPADIR.all = 0x0FFF;     // GPIO0-GPIO11 are outputs ,GPIO12-GPIO31 are inputs
     GpioG1CtrlRegs.GPBDIR.all = 0x0000;     // GPIO32-GPIO63 are inputs
     GpioG1CtrlRegs.GPCDIR.all = 0x0000;     // GPIO68-GPIO71 are inputs
     GpioG2CtrlRegs.GPEDIR.all = 0x00FF;     // GPIO128-GPIO135 are outputs

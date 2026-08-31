@@ -7,7 +7,7 @@
 #include "GlobalData.h"
 
 
-char * IPAddr_cfg = "10.1.3.12";
+char * IPAddr_cfg = "10.1.3.32";
 char * SubnetMask_cfg = "255.0.0.0";
 char * DomainName_cfg = "PMCB";
 

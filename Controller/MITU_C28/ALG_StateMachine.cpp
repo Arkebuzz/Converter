@@ -8,10 +8,36 @@
 
 void CommandsProcess(void)
 {
+	//if (Const_RecalcOperationValues==1)
+	//   {
+	//	   if (Const_SpeedLimitMaxPower>(Const_SpeedLimitFreerun+100))
+	//		{
+	//		Const_TurbineLimitLine_K = Const_MaxOutputPower/(Const_SpeedLimitMaxPower - Const_SpeedLimitFreerun);
+	//		Const_TurbineLimitLine_B = Const_MaxOutputPower/(1-Const_SpeedLimitMaxPower/Const_SpeedLimitFreerun);
+	//		}
+	//    Const_RecalcOperationValues = 0;
+	//   }
 
+	MomentLimitedPower = 3.1415*GenSpeedFiltered*Const_GeneratorMomentLimit/30.0;
+	//TurbineLimitedPower = 1000.0*(GenSpeedFiltered*Const_TurbineLimitLine_K + Const_TurbineLimitLine_B);
+	Alg_DCInpSetpoint = GenSpeedFiltered*NOMINAL_DC_VOLTAGE/2500;
+	if (Alg_DCInpSetpoint>NOMINAL_DC_VOLTAGE) {Alg_DCInpSetpoint = NOMINAL_DC_VOLTAGE;}
+	if (Alg_DCInpSetpoint<300) {Alg_DCInpSetpoint = 300;}
 
-	MomentLimitedPower = 150000; //3.1415*GenSpeedFiltered*Const_GeneratorMomentLimit/30.0;
-	Alg_DCInpSetpoint = 0;
+	float UDCINLimited = Booster_DCVoltage_IN;
+	if (UDCINLimited < 10) {UDCINLimited = 10;}
+	float B_Current_Limit = MomentLimitedPower/UDCINLimited;
+	if (B_Current_Limit>900) {B_Current_Limit=900;}
+	if (B_Current_Limit<0) {B_Current_Limit=0;}
+	if (ChopperManualControl==1 && B_Current_Limit<800) {B_Current_Limit=800;}
+	if (Const_BoosterModeDisable==0)
+	{
+	Booster_Current_Limit = (unsigned short)(B_Current_Limit);
+	}
+	else
+	{
+	Booster_Current_Limit=0;
+	}
 
 
 	if(Const_BoosterModeDisable==0)
@@ -81,9 +107,9 @@ void CommandsProcess(void)
 	*/
 	//---------new turbine char end ------------------
 
-	//TurbineLimitedPower = 1000.0*(GenSpeedFiltered*TurbinePower_K + TurbinePower_B);
+	TurbineLimitedPower = 1000.0*(GenSpeedFiltered*TurbinePower_K + TurbinePower_B);
 
-	//if (TurbineLimitedPower<MomentLimitedPower) {MomentLimitedPower = TurbineLimitedPower; }
+	if (TurbineLimitedPower<MomentLimitedPower) {MomentLimitedPower = TurbineLimitedPower; }
     PowerDampingLimit = Const_MaxOutputPower - MomentLimitedPower;
 
     float DCOUT_Limited = DCVoltage_OUT;
@@ -102,23 +128,22 @@ void CommandsProcess(void)
     if (PowerDampingLimit>Alg_PowerDamping) {Alg_PowerDamping = Alg_PowerDamping+100;}
     if (PowerDampingLimit<Alg_PowerDamping) {Alg_PowerDamping = Alg_PowerDamping-100;}
 
-    //if (Alg_PowerDamping<0) Alg_PowerDamping = 0;
-    //if (Alg_PowerDamping>(Const_MaxOutputPower-20000)) Alg_PowerDamping = Const_MaxOutputPower-20000;
-    Alg_PowerDamping = 0;
+    if (Alg_PowerDamping<0) Alg_PowerDamping = 0;
+    if (Alg_PowerDamping>(Const_MaxOutputPower-20000)) Alg_PowerDamping = Const_MaxOutputPower-20000;
 
 
-    NewCommand = Data_FromM3[0];
-
+	NewCommand = Data_FromM3[0];
 	if (NewCommand!=LastCommand || NewCommand==1)
-	        {
-	        CurrentCommand = NewCommand;
-	        LastCommand = NewCommand;
-	        }
-	    else
-	        {
-	        CurrentCommand = 0;
-	        }
+		{
+		CurrentCommand = NewCommand;
+		LastCommand = NewCommand;
+		}
+	else
+		{
+		CurrentCommand = 0;
+		}
 
+	//CurrentCommand = Data_FromM3[0];
 	MasterCode = Data_FromM3[3];
 	if (CurrentCommand==1) {ErrorSet(ERR_EMERGENCY_STOP_ALG);CurrentAlg=0;} //Emergency stop;
 
@@ -129,15 +154,29 @@ void CommandsProcess(void)
 
 	if (CurrentAlg==0) //Emergency stop
 		{
-	    Const_MinOutputPower = -10000;
-
+			if (EmergencyCounter<200000 && BrakeLocker==0 && Const_BrakeModeDisable==0)
+			{
+				EmergencyCounter = EmergencyCounter + 1;
+				Alg_Excitation_limit = Const_ExcitationMax;
+				ActivateBrake(1);
+				Alg_DCOutSetpoint = Alg_DCInpSetpoint;
+				if (MomentLimitedPower<30000 || GenSpeedFiltered<1200)
+				{
+					BrakeLocker = 1;
+					ActivateBrake(0);
+					ActivateExcitation(0);
+				}
+			}
+			else
+			{
 				Alg_Excitation_limit = 0;
 				Alg_DCOutSetpoint = 0;
 				BrakeLocker = 1;
 				MinimumCoolingPWMWidth=0;
 				ActivateBrake(0);
 				ActivateExcitation(0);
-
+			}
+		//ADCPeakProt_ERR_Mask = 0xFFFFFFFF;
 		ErrorSet(ERR_EMERGENCY_STOP_ALG);
 		CurrentSysytemState = 0;
 		SCADASystemState = SYSTEM_STATE_EMERGENCY; //EMERGENCY
@@ -165,6 +204,11 @@ void CommandsProcess(void)
 			else if (CurrentCommand==112) {Isolated_Grid_ControlMode=1;}
 			else if (CurrentCommand==113) {Isolated_Grid_ControlMode=0;}
 			else if (CurrentCommand==120) {PIDReInit();}
+			else if ( (CurrentCommand==99) && (OffsetRecalculated==0))
+					{	OffsetRecalculated = 1;	RecalcOffset = 1;
+						for (int ChNum=0; ChNum<20; ChNum++)
+						{ ChannelOffsets[ChNum] =0; ChannelOffsetCalc[ChNum] =0; }
+					}
 			else if (CurrentCommand==999) {if (SaveDataRequestFlag==0) {SaveDataRequestFlag = 1;}} //Save to flash
 			else if (CurrentCommand==998) {if (SaveDataRequestFlag==0) {SaveDataRequestFlag = 3;}} //Erase flash
 
@@ -174,8 +218,6 @@ void CommandsProcess(void)
 	else if (CurrentAlg==1)
 	{
 	 //Idle state Ready to work
-	    Const_MinOutputPower = -10000;
-
 		Alg_DCOutSetpoint = 0;
 		MinimumCoolingPWMWidth=0;
 		if (SystemManualControl==1)
@@ -196,13 +238,18 @@ void CommandsProcess(void)
 				}
 			}
 			else {ActivateInverter(0);}
+
+			if (Data_FromM3[7]!=0 && Const_BoosterModeDisable==0) {ActivateChopper(1);} else {ActivateChopper(0);}
 			if (Data_FromM3[8]!=0) {ActivateExcitation(1);} else {ActivateExcitation(0);}
+			//if (Data_FromM3[18]!=0) {CurrentLimitControlActivated=1;} else {CurrentLimitControlActivated=0;} //TEMP!!!
+			//if (Data_FromM3[49]!=0) {ActivateBreakerControl(1);} else {ActivateBreakerControl(0);} //TEMP!!!!!
 		}
 		else
 		{
-			if (DCVoltage_OUT<30) {SCADASystemState = SYSTEM_STATE_IDLE_DISCHARGED;}
+			Alg_Excitation_limit = 0;
+			if (DCVoltage_OUT<20) {SCADASystemState = SYSTEM_STATE_IDLE_DISCHARGED;}
 			else {SCADASystemState = SYSTEM_STATE_IDLE_CHARGED;}
-			//if (CurrentCommand==3) {CurrentAlg=2;} //К запуску возбуждения
+			if (CurrentCommand==3) {CurrentAlg=2;} //К запуску возбуждения
 			ActivateInverter(0);
 			ActivateChopper(0);
 			ActivateExcitation(0);
@@ -210,106 +257,67 @@ void CommandsProcess(void)
 	}
 	else if (CurrentAlg==2) //Запуск возбуждения
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-	    FPGA_EXTOUT_ClearBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
 		Alg_Excitation_limit = PRECHARGE_EXC_CURRENT;
-		ActivateExcitation(1);
-	    //Alg_Excitation_limit = 0; // TEMP!!!
-	    //ActivateExcitation(0); // TEMP!!!
-
-
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 		MinimumCoolingPWMWidth=5000;
 		Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
-
+		ActivateExcitation(1);
 		CurrentAlg = 3; //К ожиданию возбуждения
 		AlgCounter=0;
 	}
 	else if (CurrentAlg==3) //Ожидание предзаряда шины
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-	    FPGA_EXTOUT_ClearBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
 		Alg_Excitation_limit = PRECHARGE_EXC_CURRENT;
-		//Alg_Excitation_limit = 0; // TEMP!!!
-		//CurrentAlg=4; // TEMP!!!
-
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 		Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
 		AlgCounter++;
 		MinimumCoolingPWMWidth=5000;
-		if (AlgCounter>25000 && DCVoltage_OUT>50 && ExcitationCurrent>1) {CurrentAlg=4;} //К запуску повышающего преобразователя
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
+		if (Const_BoosterModeDisable==0)
+		{
+		if (AlgCounter>25000 && DCVoltage_OUT>50 && GenSpeedFiltered>1000 && ExcitationCurrent>0.2) {CurrentAlg=4;} //К запуску повышающего преобразователя
+		}
+		else
+		{
+		if (AlgCounter>25000 && DCVoltage_OUT>50 && GenSpeedFiltered>2200 && ExcitationCurrent>0.2) {CurrentAlg=4;} //К запуску повышающего преобразователя
+		}
+		if (AlgCounter>100000) {AlgCounter=100000;}
 	}
 	else if (CurrentAlg==4) //Запуск повышающего преобразователя
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-        FPGA_EXTOUT_ClearBit(2); //Emergency
-        FPGA_EXTOUT_ClearBit(3); //Operation
-        FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
 		Alg_Excitation_limit = Const_ExcitationMax;
-		//Alg_Excitation_limit = 0; // TEMP!!!
-
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
-		Alg_DCOutSetpoint = Alg_DCOutSetpoint + 0.1;
+		Alg_DCOutSetpoint = Alg_DCOutSetpoint +1;
 		if (Alg_DCOutSetpoint<PRECHARGE_DC_VOLTAGE) {Alg_DCOutSetpoint=PRECHARGE_DC_VOLTAGE;}
 		if (Alg_DCOutSetpoint>NOMINAL_DC_VOLTAGE) {Alg_DCOutSetpoint=NOMINAL_DC_VOLTAGE;}
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 		MinimumCoolingPWMWidth=10000;
-
-		if (AlgCounter>25000 && DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE) {CurrentAlg = 5;AlgCounter=0;} //К запуску повышающего преобразователя
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
-
-		 //К ожиданию заряда шины постоянного тока
-
+		if (Const_BoosterModeDisable==0) {ActivateChopper(1);}
+		CurrentAlg = 5; //К ожиданию заряда шины постоянного тока
+		AlgCounter=0;
 	}
 	else if (CurrentAlg==5) //Ожидание заряда шины
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-        FPGA_EXTOUT_ClearBit(2); //Emergency
-        FPGA_EXTOUT_ClearBit(3); //Operation
-        FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
-	    Alg_Excitation_limit = Const_ExcitationMax;
-	    //Alg_Excitation_limit = 0; // TEMP!!!
-
+		Alg_Excitation_limit = Const_ExcitationMax;
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
 		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 		AlgCounter++;
 		MinimumCoolingPWMWidth=10000;
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
-		if (AlgCounter>25000 && DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE) {CurrentAlg=6;AlgCounter=0;} //К запуску инвертора
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
+		if (Const_BoosterModeDisable==0)
+		{
+		if (AlgCounter>25000 && DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE && GenSpeedFiltered>1000) {CurrentAlg=6;AlgCounter=0;} //К запуску инвертора
+		}
+		else
+		{
+		if (AlgCounter>25000 && DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE && GenSpeedFiltered>2300) {CurrentAlg=6;AlgCounter=0;} //К запуску инвертора
+		}
+		if (AlgCounter>100000) {AlgCounter=100000;}
 	}
 	else if (CurrentAlg==6) //Запуск инвертора
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-        FPGA_EXTOUT_ClearBit(2); //Emergency
-        FPGA_EXTOUT_ClearBit(3); //Operation
-        FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
 		Alg_Excitation_limit = Const_ExcitationMax;
-        //Alg_Excitation_limit = 0; // TEMP!!!
-
-
 		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
 		MinimumCoolingPWMWidth=10000;
@@ -319,57 +327,30 @@ void CommandsProcess(void)
 		{
 			if (DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE)
 			{
-			    TurnOnCommand = 1; CurrentAlg = 7;AlgCounter=0; TryToSyncCounter=0;
+			//if (Isolated_Grid_ControlMode==1) {TurnOnCommand = 1; CurrentAlg = 7;AlgCounter=0;} //К включению на изолированную нагрузку
+			//else {TurnOnCommand = 1; CurrentAlg = 8;AlgCounter=0; TryToSyncCounter=0;} //К включению на сеть
+				TurnOnCommand = 1; CurrentAlg = 8;AlgCounter=0; TryToSyncCounter=0; //К включению на сеть/изолированную нагрузку
 			}
 		}
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
+		if (AlgCounter>100000) {AlgCounter=100000;}
 	}
-	else if (CurrentAlg==7) //Включение Выключателя
+	else if (CurrentAlg==7) //Включение на изолированного потребителя
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(1);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-	    FPGA_EXTOUT_ClearBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
-
 		Alg_Excitation_limit = Const_ExcitationMax;
-		//Alg_Excitation_limit = 0; // TEMP!!!
-
-		AlgCounter++;
-		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE+100;
+		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 		SCADASystemState = SYSTEM_STATE_READYTOSYNC;
 		MinimumCoolingPWMWidth=10000;
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
-		TurnOnCommand = 2;
-		if (DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE)
-		        {
-		            ActivateBreakerControl(1);
-		        }
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
-		if (AlgCounter>35000 && TurnOnCommand==2)
-		        {
-		        if (OutputRMSVoltage < 30) { VoltagePID->ResetData(0,0.3);ActivateInverter(1);AlgCounter=0;CurrentAlg=9;TurnOnCommand=3;} //К включению на изолированную нагрузку
-		        else if (OutputRMSVoltage > 160) {TurnOnCommand = 1; CurrentAlg = 8;AlgCounter=0; TryToSyncCounter=0;} //К включению на сеть
-		        }
+		//if (CurrentCommand==5 && TurnOnCommand==1) {TurnOnCommand = 2; }
+		//if (PhAVoltRMS<20 && PhBVoltRMS<20 && PhCVoltRMS<20) {AlgCounter++;}
+		//if (AlgCounter>100000) {AlgCounter=100000;}
+		//if (AlgCounter>5000 && TurnOnCommand==2) {ActivateInverter(1);AlgCounter=0;CurrentAlg=9;TurnOnCommand=3;}
 	}
 	else if (CurrentAlg==8) //Включение на сеть, ожидание включения выключателя
 	{
-	    Const_OutputVoltageSetpoint = 190;
-	    Const_MinOutputPower = 15000;
-	    ActivateBreakerControl(1);
-	    FPGA_EXTOUT_SetBit(1); //Ready
-        FPGA_EXTOUT_ClearBit(2); //Emergency
-        FPGA_EXTOUT_ClearBit(3); //Operation
-        FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
-	    Alg_Excitation_limit = Const_ExcitationMax;
-	    //Alg_Excitation_limit = 0; // TEMP!!!
-
-		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE+100;
-
-		if (TurnOnCommand==1) {TurnOnCommand = 2; }
+		Alg_Excitation_limit = Const_ExcitationMax;
+		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
+		if (CurrentCommand==5 && TurnOnCommand==1) {TurnOnCommand = 2; }
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 		if (AlgCounter==0) {SCADASystemState = SYSTEM_STATE_READYTOSYNC;}
 		if (AlgCounter>30000 && TurnOnCommand==2 && TryToSyncCounter==0 && DCVoltage_OUT>MINIMAL_BOOST_DC_VOLTAGE)
@@ -386,22 +367,24 @@ void CommandsProcess(void)
 			AlgCounter=0;CurrentAlg=10; //К работе на сеть
 			}
 
+		if (DCVoltage_OUT>MINIMAL_DC_VOLTAGE)
+		{
+			ActivateBreakerControl(1);
+		}
+
 		MinimumCoolingPWMWidth=10000;
 		if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 		AlgCounter++;
-		if (AlgCounter>200000) {AlgCounter=200000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
+		if (AlgCounter>100000) {AlgCounter=100000;}
 	}
 	else if (CurrentAlg==9) //Преобразователь в работе на изолированного потребителя
 	{
-	    Const_MinOutputPower = -30000;
-	    FPGA_EXTOUT_SetBit(1); //Ready
-        FPGA_EXTOUT_ClearBit(2); //Emergency
-        FPGA_EXTOUT_SetBit(3); //Operation
-        FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-        Const_OutputVoltageSetpoint = 180;
+		if (Const_BoosterModeDisable==0)
+		{
+		if (GenSpeedFiltered>2600 && ChopperActivated==1) {ActivateChopper(0);}
+		if (GenSpeedFiltered<2500 && ChopperActivated==0) {ActivateChopper(1);}
+		}
 		Alg_Excitation_limit = Const_ExcitationMax;
-		//Alg_Excitation_limit = 0; // TEMP!!!
-
 		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 		SCADASystemState = SYSTEM_STATE_OPERATION_NORMAL;
 		MinimumCoolingPWMWidth=10000;
@@ -411,39 +394,26 @@ void CommandsProcess(void)
 	}
 	else if (CurrentAlg==10) //Преобразователь в работе на сеть
 		{
-	        FPGA_EXTOUT_SetBit(1); //Ready
-	        FPGA_EXTOUT_ClearBit(2); //Emergency
-	        FPGA_EXTOUT_SetBit(3); //Operation
-
+			if (Const_BoosterModeDisable==0)
+			{
+			if (GenSpeedFiltered>2600 && ChopperActivated==1) {ActivateChopper(0);}
+			if (GenSpeedFiltered<2500 && ChopperActivated==0) {ActivateChopper(1);}
+			}
 			Alg_Excitation_limit = Const_ExcitationMax;
-			//Alg_Excitation_limit = 0; // TEMP!!!
-
-			Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE+100;
+			Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 			SCADASystemState = SYSTEM_STATE_OPERATION_NORMAL;
 			MinimumCoolingPWMWidth=10000;
 			if (CurrentCommand==4) {CurrentAlg=20;} //К останову
 			AlgCounter++;
-			if (AlgCounter>30000)
-			{
-			    FPGA_EXTOUT_SetBit(4);  //TurnOffPowerInputs
-			    Const_OutputVoltageSetpoint = 180;
-			}
-			if (AlgCounter>35000)
-			{
-			    Const_MinOutputPower = -30000;
-			    if (Alg_DCOutSetpoint>NOMINAL_DC_VOLTAGE+50) {Alg_DCOutSetpoint = Alg_DCOutSetpoint - 1;}
-			    else {Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE+50;}
-			}
 			if (AlgCounter>100000) {AlgCounter=100000;}
 		}
 	else if (CurrentAlg==20) //Старт алгоритма останова
 	{
-
-	        FPGA_EXTOUT_ClearBit(1); //Ready
-	        FPGA_EXTOUT_ClearBit(2); //Emergency
-	        FPGA_EXTOUT_ClearBit(2); //Operation
-	        FPGA_EXTOUT_ClearBit(2); //TurnOffPowerInputs
-
+			if (Const_BoosterModeDisable==0)
+			{
+			if (GenSpeedFiltered>2600 && ChopperActivated==1) {ActivateChopper(0);}
+			if (GenSpeedFiltered<2500 && ChopperActivated==0) {ActivateChopper(1);}
+			}
 			Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
 			SCADASystemState = SYSTEM_STATE_STOPPING;
 			MinimumCoolingPWMWidth=10000;
@@ -453,103 +423,62 @@ void CommandsProcess(void)
 			else
 			{
 				//Переход к отключенному состоянию
-			    Const_MinOutputPower = -10000;
 				ActivateExcitation(0); ActivateChopper(0);ActivateInverter(0);
 				CurrentAlg=1; AlgCounter=0;
 				MinimumCoolingPWMWidth=0;
-				ActivateBreakerControl(0);
-				FPGA_EXTOUT_ClearBit(1); //Ready
-				FPGA_EXTOUT_ClearBit(2); //Emergency
-				FPGA_EXTOUT_ClearBit(3); //Operation
-				FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
 			}
 	}
 	else if (CurrentAlg==21) //Остановка инвертора
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    ActivateInverter(0);
-	    FPGA_EXTOUT_ClearBit(1); //Ready
-	    FPGA_EXTOUT_ClearBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
-
-	    Alg_Excitation_limit = 2;
-	    //Alg_Excitation_limit = 0; // TEMP!!!
-
-	    Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
-	    SCADASystemState = SYSTEM_STATE_STOPPING;
+		if (Const_BoosterModeDisable==0)
+		{
+		if (GenSpeedFiltered>2600 && ChopperActivated==1) {ActivateChopper(0);}
+		if (GenSpeedFiltered<2500 && ChopperActivated==0) {ActivateChopper(1);}
+		}
+		Alg_Excitation_limit = Const_ExcitationMax;
+		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
+		SCADASystemState = SYSTEM_STATE_STOPPING;
 		MinimumCoolingPWMWidth=10000;
 		AlgCounter++;
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
-		if (AlgCounter>5000) {AlgCounter=0; CurrentAlg=22;} //Переход к отключению повышающего преобразователя
+		if (AlgCounter>100000) {AlgCounter=100000;}
+		//if (ActivePower>15000) {Alg_PowerDamping =  Alg_PowerDamping + 110;}
+		if ((AlgCounter>25000) && (ActivePower<30000)) {ActivateInverter(0); AlgCounter=0; CurrentAlg=22; ActivateBreakerControl(0);} //Переход к отключению повышающего преобразователя
 	}
 	else if (CurrentAlg==22) //Отключение повышающего преобразователя
 	{
-	    Const_MinOutputPower = -10000;
-	   ActivateBreakerControl(0);
-       ActivateInverter(0);
-       FPGA_EXTOUT_ClearBit(1); //Ready
-       FPGA_EXTOUT_ClearBit(2); //Emergency
-       FPGA_EXTOUT_ClearBit(3); //Operation
-       FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-
-       Alg_Excitation_limit = 2;
-       //Alg_Excitation_limit = 0; // TEMP!!!
-
-       Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
-       SCADASystemState = SYSTEM_STATE_STOPPING;
-       MinimumCoolingPWMWidth=10000;
-       AlgCounter++;
-       if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
-       SCADASystemState = SYSTEM_STATE_EXCITATION;
+		Alg_Excitation_limit = Const_ExcitationMax;
+		Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
+		SCADASystemState = SYSTEM_STATE_EXCITATION;
+		MinimumCoolingPWMWidth=10000;
+	    AlgCounter++;
+		if (AlgCounter>100000) {AlgCounter=100000;}
 		ActivateChopper(0); CurrentAlg=23; AlgCounter=0; //Переход к отключению возбуждения
 	}
 	else if (CurrentAlg==23) //Отключение возбуждения
 	{
-	    Const_MinOutputPower = -10000;
-	    ActivateBreakerControl(0);
-	    ActivateInverter(0);
-	    ActivateExcitation(0);
-	    ActivateChopper(0);
-	    FPGA_EXTOUT_ClearBit(1); //Ready
-	    FPGA_EXTOUT_ClearBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
-	    Alg_Excitation_limit = 2;
-	    Alg_DCOutSetpoint = PRECHARGE_DC_VOLTAGE;
-	    MinimumCoolingPWMWidth=10000;
-	    Alg_Excitation_limit = PRECHARGE_EXC_CURRENT;
+		Alg_Excitation_limit = PRECHARGE_EXC_CURRENT;
 		Alg_DCOutSetpoint = 0;
 		SCADASystemState = SYSTEM_STATE_EXCITATION;
 		ActivateInverter(0);
+		ActivateExcitation(0);
+		ActivateChopper(0);
 		MinimumCoolingPWMWidth=1000;
 		AlgCounter++;
-		if (ExcitationCurrent<1 || AlgCounter>50000) //Переход к остановленному состоянию
+		if (ExcitationCurrent<0.3 || AlgCounter>50000) //Переход к остановленному состоянию
 		{
 			ActivateExcitation(0); ActivateChopper(0);ActivateInverter(0);
 			CurrentAlg=1; AlgCounter=0;
 			MinimumCoolingPWMWidth=0;
 		}
-		if (AlgCounter>100000) {AlgCounter=100000;ErrorSet(ERR_EMERGENCY_STOP_ALG);}
+		if (AlgCounter>100000) {AlgCounter=100000;}
 	}
 	else
 	{
-	    Const_MinOutputPower = -10000;
-	    FPGA_EXTOUT_ClearBit(1); //Ready
-	    FPGA_EXTOUT_SetBit(2); //Emergency
-	    FPGA_EXTOUT_ClearBit(3); //Operation
-	    FPGA_EXTOUT_ClearBit(4); //TurnOffPowerInputs
 		Alg_Excitation_limit = 0;
 		Alg_DCOutSetpoint = 0;
 		SCADASystemState = SYSTEM_STATE_EMERGENCY;
-		ErrorSet(ERR_UNEXPECTED);
+		ErrorSet(ERR_EMERGENCY_STOP_ALG);
 		CurrentAlg=0;
-		ActivateBreakerControl(0);
-		ActivateInverter(0);
-		ActivateExcitation(0);
-		ActivateChopper(0);
 	}
 
 	if (CurrentAlg!=0)
@@ -573,6 +502,27 @@ void CommandsProcess(void)
 	ActivateSynchronizer(0);
 	}
 
+
+	if (Const_IsResistiveLoadConverter==0)
+	{
+		if ( (CurrentAlg!=8 && CurrentAlg!=10 && CurrentAlg!=20 && CurrentAlg!=21) || DCVoltage_OUT<MINIMAL_DC_VOLTAGE )
+			{
+			ActivateBreakerControl(0);
+			}
+	}
+	else
+	{
+		Alg_DCOutSetpoint = NOMINAL_DC_VOLTAGE;
+		if (InverterActivated==0)
+		{
+			ActivateBreakerControl(0); //Turn off Res Load Ventilation
+		}
+		else
+		{
+			ActivateBreakerControl(1); //Turn on Res Load Ventilation
+		}
+	}
+
 	if (CurrentAlg!=7 && CurrentAlg!=8)
 	{
 		TurnOnCommand = 0;
@@ -588,6 +538,24 @@ void CommandsProcess(void)
 	}
 	else {InverterActivatedCounts=0;}
 
+
+	//TEMP!!!!!! Отключение инвертера для тестирования синхронизации
+	/*
+	if (InverterActivated!=0)
+	{
+		InverterActivatedCounts++;
+		if (InverterActivatedCounts>10000)
+		{
+			ActivateInverter(0);
+			ErrorSet(ERR_EMERGENCY_STOP_ALG);
+			CurrentAlg=0;
+		}
+	}
+	else
+		{
+		InverterActivatedCounts=0;
+		}
+	*/
 
 }
 

@@ -76,7 +76,7 @@ Void DataExchangeWorker(UArg arg0, UArg arg1)
 }
 
 
-Void OsciConnectionHandler(UArg arg0, UArg arg1)
+Void OscillogrammsWorker(UArg arg0, UArg arg1)
 {
     int clientfd = (int)arg0;
     int nbytes;
@@ -177,10 +177,10 @@ Void OsciConnectionHandler(UArg arg0, UArg arg1)
 					temp_buf = send_buffer_header;
 					*temp_buf = (char)TOTAL_CHANNELS;
 					temp_buf += 2;
-					Time3 = (unsigned short) ReadFrom_CTOM_MSGRAM(100); *temp_buf = (char) (Time3>>8); temp_buf++; *temp_buf = (char) (Time3);  temp_buf++;
-					Time2 = (unsigned short) ReadFrom_CTOM_MSGRAM(101); *temp_buf = (char) (Time2>>8); temp_buf++; *temp_buf = (char) (Time2);  temp_buf++;
-					Time1 = (unsigned short) ReadFrom_CTOM_MSGRAM(102); *temp_buf = (char) (Time1>>8); temp_buf++; *temp_buf = (char) (Time1);  temp_buf++;
-					Time0 = (unsigned short) ReadFrom_CTOM_MSGRAM(103); *temp_buf = (char) (Time0>>8); temp_buf++; *temp_buf = (char) (Time0);  temp_buf++;
+					Time3 = (unsigned short) ReadFrom_CTOM_MSGRAM(120); *temp_buf = (char) (Time3>>8); temp_buf++; *temp_buf = (char) (Time3);  temp_buf++;
+					Time2 = (unsigned short) ReadFrom_CTOM_MSGRAM(121); *temp_buf = (char) (Time2>>8); temp_buf++; *temp_buf = (char) (Time2);  temp_buf++;
+					Time1 = (unsigned short) ReadFrom_CTOM_MSGRAM(122); *temp_buf = (char) (Time1>>8); temp_buf++; *temp_buf = (char) (Time1);  temp_buf++;
+					Time0 = (unsigned short) ReadFrom_CTOM_MSGRAM(123); *temp_buf = (char) (Time0>>8); temp_buf++; *temp_buf = (char) (Time0);  temp_buf++;
 					send(clientfd, send_buffer_header, 10, 0);
 			break;
 
@@ -628,7 +628,7 @@ Void OscillogrammsListener(UArg arg0, UArg arg1)
         Task_Params_init(&taskParams);
         taskParams.arg0 = (UArg)clientfd;
         taskParams.stackSize = 1024;
-        taskHandle = Task_create((Task_FuncPtr)OsciConnectionHandler, &taskParams, &eb);
+        taskHandle = Task_create((Task_FuncPtr)OscillogrammsWorker, &taskParams, &eb);
         if (taskHandle == NULL) {
             System_printf("tcpHandler: Failed to create new Task\n");
             close(clientfd);

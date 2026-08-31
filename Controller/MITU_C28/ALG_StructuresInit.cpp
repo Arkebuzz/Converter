@@ -64,9 +64,9 @@ void InitData(void)
    DCVoltagePID = new FloatBipolarPID();
    DCVoltagePID->PIDInit(Const_CycleTime,DCVPID_P,DCVPID_I,0,DCVPID_POSG,DCVPID_NEGG,Const_ExcitationMax,0,Const_ExcitationMax,0,10);
 
-   // PIDStep, Proportional, Integral, Dif, InputG, UpperIntLim, LowerIntLim, UpperOutLim, LowerOutLim, PropLimit, IntLimit, StoredValuesNum
+   //StepSize, Prop, Integ, Diff, InputGainPos, InputGainNeg, UpperIntLim, LowerIntLim, UpperOutLim, LowerOutLim, StoredValuesNum
    ExcitationCurrentPID = new FloatPID();
-   ExcitationCurrentPID->PIDInit(Const_CycleTime,EXCPID_P,EXCPID_I,0,1,2400,100,2400,0,10);
+   ExcitationCurrentPID->PIDInit(Const_CycleTime,EXCPID_P,EXCPID_I,0,1,10000,0,10000,0,10);
 
    //200Hz +
    APLowpassFilter = new SecOrdFilter();

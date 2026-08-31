@@ -35,7 +35,7 @@ void ActivateSynchronizer(Uint16 Activate)
 
 void CalcFundamentalValues(void)
 {
-	/*FVAL_InputPhase = FVAL_InputPhase + Const_CycleTime*Const_2pi*FVAL_InputFreq;
+	FVAL_InputPhase = FVAL_InputPhase + Const_CycleTime*Const_2pi*FVAL_InputFreq;
 	if (FVAL_InputPhase>Const_2pi) {FVAL_InputPhase = FVAL_InputPhase - Const_2pi;}
 	FVAL_InputSin = sin(FVAL_InputPhase);
 	FVAL_InputSin_p2pidiv3 = sin(FVAL_InputPhase + Const_2pi_div3);
@@ -58,7 +58,7 @@ void CalcFundamentalValues(void)
 	if (FVAL_VoltagePhaseChange>=180) {FVAL_VoltagePhaseChange = FVAL_VoltagePhaseChange - 360;}
 	FVAL_MeasuredOutputFrequency = FVAL_VoltagePhaseChange * Const_DelayedPhaseFrequency / 360 + FVAL_InputFreq;
 	FreqFilter->Input(FVAL_MeasuredOutputFrequency);
-	MeasuredOutputFrequency = FreqFilter->CurrentOutput;*/
+	MeasuredOutputFrequency = FreqFilter->CurrentOutput;
 }
 
 void SynchronizerOperation(void)
@@ -89,8 +89,8 @@ void SynchronizerOperation(void)
 				float OutputFrequencyTicks = 50000000.0/OutputFrequency;
 				MainPWM_PhaseSet = OutputFrequencyTicks*(OutputPhaseSet/360.0);
 				//if (OutputPhaseSet<3) {ActivateSyncout(1);} //TEMP!!
-				StartingVoltageMagnitude = FVAL_VoltageMagnitude+10;
-				if (UDCOUTFiltered>1)	{StartingPWMAmp = 2*StartingVoltageMagnitude/UDCOUTFiltered;}
+				StartingVoltageMagnitude = FVAL_VoltageMagnitude;
+				if (DCOutSetpoint>1)	{StartingPWMAmp = 2*StartingVoltageMagnitude/DCOutSetpoint;}
 				else {StartingPWMAmp=1;}
 				if (StartingPWMAmp>1) {StartingPWMAmp=1;}
 				if (StartingPWMAmp<0) {StartingPWMAmp=0;}

@@ -11,6 +11,7 @@
 #include "Filters.h"
 #include "math.h"
 #include "ERROR_NUMBERS.h"
+#include "SPIFlashFunctions.h"
 #include <string.h>
 #include "TimedProt.h"
 
@@ -27,13 +28,13 @@ extern Uint16 RamfuncsRunStart;
 #endif
 
 #define PRECHARGE_DC_VOLTAGE    100
-#define NOMINAL_DC_VOLTAGE    570
-#define MINIMAL_BOOST_DC_VOLTAGE    550
-#define MINIMAL_DC_VOLTAGE    500
-#define MINIMAL_EXTREME_DC_VOLTAGE    450
+#define NOMINAL_DC_VOLTAGE    760
+#define MINIMAL_BOOST_DC_VOLTAGE    720
+#define MINIMAL_DC_VOLTAGE    630
+#define MINIMAL_EXTREME_DC_VOLTAGE    550
 #define MINIMAL_EXTREME_UGEN_VOLTAGE    100
 
-#define PRECHARGE_EXC_CURRENT    3
+#define PRECHARGE_EXC_CURRENT    2
 
 
 #define C28_FREQ    100         //CPU frequency in MHz
@@ -54,11 +55,11 @@ extern Uint16 RamfuncsRunStart;
 #define FPGA_CRITICAL_INPUT_DATA_SIZE 7
 #define FPGA_OUTPUT_DATA_SIZE 18
 #define FPGA_OUTPUT_OFFSET 50
-#define CTOM_DATA_TRANSMITT_COUNT 100
+#define CTOM_DATA_TRANSMITT_COUNT 120
 #define MTOC_DATA_TRANSMITT_COUNT 100
 
 #define SETUP_DATA_SIZE 600
-#define SETUP_DATA_START_ADDR 200
+#define SETUP_DATA_START_ADDR 300
 #define SETUP_UINT_DATA_COUNT 50
 #define SETUP_FLOAT_DATA_COUNT 150
 
@@ -76,8 +77,6 @@ extern void FPGA_Write_Aux (void);
 extern void FPGA_Write_Booster (void);
 extern void FPGA_Write_Amp (void);
 extern void FPGA_Write_Phase_Freq (void);
-extern void FPGA_EXTOUT_SetBit(Uint16 bitnum);
-extern void FPGA_EXTOUT_ClearBit(Uint16 bitnum);
 extern void M3_Read_Data (void);
 extern void M3_Write_Data (Uint32 CyclesCounter);
 extern void DMADataTransferSet(void);
@@ -111,7 +110,6 @@ extern void ActivateBreakerControl(Uint16 Activate);
 extern void ActivateSyncout(Uint16 Activate);
 extern void InitData(void);
 extern void CalculateValues(void);
-extern float CalculateNTC(Uint16 value);
 extern void CalculatePower(void);
 extern void RotationSpeedMeasurments(void);
 extern void ProtectionsCheck(void);
@@ -141,15 +139,14 @@ extern void SaveOffsetsToFlash(void);
 extern void PIDReInit(void);
 extern Uint16 GetDINValue(Uint16 InputNum);
 
-extern volatile Uint16 DMABufFPGA1[100];
-
+extern volatile Uint16 DMABufFPGA1[30];
+extern volatile Uint16 DMABufFPGA2[30];
 extern volatile Uint16 *DMADestFPGA;
 extern volatile Uint16 *DMASourceFPGA;
 extern volatile Uint16 transfer_countFPGA;
 
-extern Uint16 ButtonCounter;
-extern Uint16 ButtonCounter2;
 
+extern SPIFlashReader* FlashReader;
 
 extern TimedProtection PR_DCOvervoltage;
 extern TimedProtection PR_RectUnbalance;
@@ -257,12 +254,102 @@ extern float Prot_OutpFrequencyLow;
 extern float ProtRMS_RectCurrent;
 extern float ProtRMS_OutpVoltage;
 extern float ProtRMS_UDCVoltage;
-extern float ProtRMS_NeutralCurrent;
-extern float ProtRMS_NeutralIGBCurrent;
+extern float ProtRMS_GenPhCurrent;
+extern float ProtRMS_GenPhVoltage;
 extern float ProtRMS_ExcCurrent;
 extern float ProtRMS_IGBTTemp;
 extern float ProtRMS_IGBTCurrent;
 extern float ProtRMS_OutpCurrent;
+
+
+extern float    SEG_EXC_UIN ;
+extern float    SEG_U_MAIN  ;
+extern float    SEG_U_R ;
+extern float    SEG_I_IN    ;
+extern float    SEG_IEXC1   ;
+extern float    SEG_IEXC2   ;
+extern float    SEG_EXC_TEMP    ;
+extern float    SEG_RECT_UG1    ;
+extern float    SEG_RECT_UG2    ;
+extern float    SEG_RECT_UDC    ;
+extern float    SEG_RECT_UDCP   ;
+extern float    SEG_RECT_UDCN   ;
+extern float    SEG_RECT_RI1    ;
+extern float    SEG_RECT_RI2    ;
+extern float    SEG_RECT_RI3    ;
+extern float    SEG_RECT_RI4    ;
+extern float    SEG_RECT_RI5    ;
+extern float    SEG_RECT_RI6    ;
+extern float    SEG_RECT_TU1    ;
+extern float    SEG_RECT_TU2    ;
+extern float    SEG_RECT_TC1    ;
+extern float    SEG_I1_IPH1 ;
+extern float    SEG_I1_IPH2 ;
+extern float    SEG_I1_IPH3 ;
+extern float    SEG_I1_SKIPH1   ;
+extern float    SEG_I1_SKIPH2   ;
+extern float    SEG_I1_SKIPH3   ;
+extern float    SEG_I1_SKIDISCH ;
+extern float    SEG_I1_UDC  ;
+extern float    SEG_I1_TSK1 ;
+extern float    SEG_I1_TSK2 ;
+extern float    SEG_I1_TSK3 ;
+extern float    SEG_I1_TSKDISCH ;
+extern float    SEG_I1_TLF  ;
+extern float    SEG_I1_TC1  ;
+extern float    SEG_I1_TC2  ;
+extern float    SEG_I2_IPH1 ;
+extern float    SEG_I2_IPH2 ;
+extern float    SEG_I2_IPH3 ;
+extern float    SEG_I2_SKIPH1   ;
+extern float    SEG_I2_SKIPH2   ;
+extern float    SEG_I2_SKIPH3   ;
+extern float    SEG_I2_SKIDISCH ;
+extern float    SEG_I2_UDC  ;
+extern float    SEG_I2_TSK1 ;
+extern float    SEG_I2_TSK2 ;
+extern float    SEG_I2_TSK3 ;
+extern float    SEG_I2_TSKDISCH ;
+extern float    SEG_I2_TLF  ;
+extern float    SEG_I2_TC1  ;
+extern float    SEG_I2_TC2  ;
+extern float    SEG_I3_IPH1 ;
+extern float    SEG_I3_IPH2 ;
+extern float    SEG_I3_IPH3 ;
+extern float    SEG_I3_SKIPH1   ;
+extern float    SEG_I3_SKIPH2   ;
+extern float    SEG_I3_SKIPH3   ;
+extern float    SEG_I3_SKIDISCH ;
+extern float    SEG_I3_UDC  ;
+extern float    SEG_I3_TSK1 ;
+extern float    SEG_I3_TSK2 ;
+extern float    SEG_I3_TSK3 ;
+extern float    SEG_I3_TSKDISCH ;
+extern float    SEG_I3_TLF  ;
+extern float    SEG_I3_TC1  ;
+extern float    SEG_I3_TC2  ;
+extern float    SEG_F_IA    ;
+extern float    SEG_F_IB    ;
+extern float    SEG_F_IC    ;
+extern float    SEG_F_UA    ;
+extern float    SEG_F_UB    ;
+extern float    SEG_F_UC    ;
+extern float    SEG_F_UN    ;
+extern float    SEG_F_UGRID ;
+extern float    SEG_F_TC1   ;
+extern float    SEG_F_TC2   ;
+extern float    SEG_F_TC3   ;
+extern float    SEG_TEMPCELL_EXC    ;
+extern float    SEG_TEMPCELL_RECT   ;
+extern float    SEG_TEMPCELL_INV1   ;
+extern float    SEG_TEMPCELL_INV2   ;
+extern float    SEG_TEMPCELL_INV3   ;
+extern float    SEG_TEMPCELL_FILT   ;
+extern Uint16    SEG_DCS1    ;
+extern Uint16    SEG_DCS2    ;
+extern Uint16    SEG_DCS3    ;
+extern Uint16    SEG_DCS4    ;
+
 
 extern float Const_ExcMaxVoltage;
 extern float Const_ExcCurrentBoost;
@@ -471,7 +558,7 @@ extern float OutputRMSVoltage;
 
 extern Uint16 RMSCyclesCount;
 extern Uint16 RMS_Count_ValueNum;
-extern Int32 MeanValues[20];
+extern float MeanValues[20];
 extern float MeanValues_Buffers[20];
 extern float MeanValues_SummResults[20];
 
@@ -487,11 +574,6 @@ extern Uint32 CoolerFanPWM_Width;
 extern Uint32 MinimumCoolingPWMWidth;
 extern Uint32 CommitDataValue;
 extern Uint32 CommitCurrentsValue;
-
-extern Uint32 EngineAMPSET;
-extern Uint32 EnginePHASESET;
-extern Uint32 EngineBuckPWM;
-extern Uint32 EngineExcPWM;
 
 extern Uint32 MTOC_cyclesCounter;
 extern Uint32 CTOMtimeoutCounter;
@@ -521,8 +603,6 @@ extern Uint16 FPGA_EMIF_WD_Value_Prev;
 extern Uint16 FPGA_Inputs_State_H;
 extern Uint16 FPGA_Inputs_State_L;
 
-extern volatile Uint16 FPGA_EXT_OUT;
-
 extern Uint16 FPGA_OCP_Counter;
 
 extern Uint16 BoosterInput1;
@@ -537,6 +617,8 @@ extern Uint16 BoosterInput9;
 extern Uint16 BoosterInput10;
 extern Uint16 BoosterInput11;
 extern Uint16 BoosterInput12;
+
+extern Uint16 CellsInput[70];
 
 extern Uint16 FPGA_ResetValue;
 
@@ -586,6 +668,27 @@ extern volatile Uint16 AIN4_Values;
 extern volatile Uint16 AIN3_Values;
 extern volatile Uint16 AIN2_Values;
 extern volatile Uint16 AIN1_Values;
+
+extern volatile short OsciValues1;
+extern volatile short OsciValues2;
+extern volatile short OsciValues3;
+extern volatile short OsciValues4;
+extern volatile short OsciValues5;
+extern volatile short OsciValues6;
+extern volatile short OsciValues7;
+extern volatile short OsciValues8;
+extern volatile short OsciValues9;
+extern volatile short OsciValues10;
+extern volatile short OsciValues11;
+extern volatile short OsciValues12;
+extern volatile short OsciValues13;
+extern volatile short OsciValues14;
+extern volatile short OsciValues15;
+extern volatile short OsciValues16;
+extern volatile short OsciValues17;
+extern volatile short OsciValues18;
+extern volatile short OsciValues19;
+extern volatile short OsciValues20;
 
 extern volatile Uint16 IsBufferUpperHalf;
 extern volatile Uint16 IsBufferLowerHalf;
@@ -650,7 +753,7 @@ extern float Booster_BrakeSKiiPTemperature;
 extern float Booster_ReGCurrentLimit;
 
 
-extern float DCVoltage_IN;
+//float DCVoltage_IN ;
 extern float DCVoltage_OUT;
 extern float PW_ZeroVRise;
 extern float PW_MaxRiseLimit;
@@ -686,44 +789,20 @@ extern Uint16 OffsetRecalculated;
 extern Uint16 RecalcOffset;
 extern short ChannelOffsets[20];
 extern Int32 ChannelOffsetCalc[20];
-
-extern float Current_U1;
-extern float Current_V1;
-extern float Current_W1;
-extern float Voltage_1;
-extern float Temp1_1;
-extern float Temp1_2;
-extern float Temp1_3;
-
-extern float Current_U2;
-extern float Current_V2;
-extern float Current_W2;
-extern float Voltage_2;
-extern float Temp2_1;
-extern float Temp2_2;
-extern float Temp2_3;
-
-extern float Current_U3;
-extern float Current_V3;
-extern float Current_W3;
-extern float Voltage_3;
-extern float Temp3_1;
-extern float Temp3_2;
-extern float Temp3_3;
-
-extern float Gen_TempPh1;
-extern float Gen_TempPh2;
-extern float Gen_TempPh3;
-extern float Gen_TempExc1;
-extern float Gen_TempExc2;
-extern float Gen_TempRearBearing;
-
-extern float EXCTemp1;
-extern float EXCTemp2;
-extern float EXCTemp3;
-extern float ChopperCurrent;
-extern float ExcitationCurrent;
-extern float ExcitationCurrent2;
+extern float PhaseAVoltage;
+extern float PhaseBVoltage;
+extern float PhaseCVoltage;
+extern float PhaseACurrent;
+extern float PhaseBCurrent;
+extern float PhaseCCurrent;
+extern float PhaseATemp;
+extern float PhaseBTemp;
+extern float PhaseCTemp;
+//extern float PhaseChopperTemp;
+extern float GenPhaseVoltage;
+extern float Rect1Current;
+extern float Rect2Current;
+extern float Rect3Current;
 
 extern float Rect1MeanCurrent;
 extern float Rect2MeanCurrent;
@@ -731,18 +810,22 @@ extern float Rect3MeanCurrent;
 
 extern float UDCMeanVoltage;
 extern float IExcMeanCurrent;
-extern float IExcMeanCurrentPrecise;
-extern float ExcitationResistance;
 extern float SKiiPC_MeanTemp;
 extern float SKiiPB_MeanTemp;
 extern float SKiiPA_MeanTemp;
 
-extern float PhAIGBTCurrentRMS;
-extern float PhBIGBTCurrentRMS;
-extern float PhCIGBTCurrentRMS;
+extern float PhA1IGBTCurrentRMS;
+extern float PhB1IGBTCurrentRMS;
+extern float PhC1IGBTCurrentRMS;
+extern float PhA2IGBTCurrentRMS;
+extern float PhB2IGBTCurrentRMS;
+extern float PhC2IGBTCurrentRMS;
+extern float PhA3IGBTCurrentRMS;
+extern float PhB3IGBTCurrentRMS;
+extern float PhC3IGBTCurrentRMS;
 
-extern float NeutralIGBTCurrentRMS;
-extern float NeutralCurrentRMS;
+extern float GenPhaseRMSVoltage;
+extern float GenPhaseRMSCurrent;
 
 extern float PhACurrentRMS;
 extern float PhBCurrentRMS;
@@ -850,7 +933,6 @@ extern Uint16 Reg_ReactiveDropCounterValue;
 extern Uint16 Reg_ReactiveDropCounter;
 
 extern float RotationFrequency;
-
 extern float MeasuredRotFreq;
 extern float Const_RotFreqMultiplier;
 extern float Const_GenNumberOfPoles;
@@ -891,7 +973,6 @@ extern FloatCyclicPID* PhasePID; //ПИД регулятор частоты
 
 extern FloatPID* RotationSpeedPID; //ПИД регулятор напряжения
 
-extern float NTC_LUT[7];
 
 extern Uint16 ADCPeakProt_Values_Min[20];
 extern Uint16 ADCPeakProt_Values_Max[20];

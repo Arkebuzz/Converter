@@ -162,8 +162,8 @@ void Setups_Init(void)
 	FloatSetups[66] = & ProtRMS_RectCurrent; FloatSetupsCount++;
 	FloatSetups[67] = & ProtRMS_OutpVoltage; FloatSetupsCount++;
 	FloatSetups[68] = & ProtRMS_UDCVoltage; FloatSetupsCount++;
-	FloatSetups[69] = & ProtRMS_NeutralCurrent; FloatSetupsCount++;
-	FloatSetups[70] = & ProtRMS_NeutralIGBCurrent; FloatSetupsCount++;
+	FloatSetups[69] = & ProtRMS_GenPhCurrent; FloatSetupsCount++;
+	FloatSetups[70] = & ProtRMS_GenPhVoltage; FloatSetupsCount++;
 	FloatSetups[71] = & ProtRMS_ExcCurrent; FloatSetupsCount++;
 	FloatSetups[72] = & ProtRMS_IGBTTemp; FloatSetupsCount++;
 	FloatSetups[73] = & ProtRMS_IGBTCurrent; FloatSetupsCount++;
@@ -226,7 +226,7 @@ void OsciChannelsInit(void)
 //Init service osci data-------------------------------------------------------------------------------------------------
 	OsciSources[0] = & ActivePower; 					OsciSourcesGain[0]=0.001; 		OsciSourcesOffset[0]=0;
 	OsciSources[1] = & ReactivePower; 					OsciSourcesGain[1]=0.001; 		OsciSourcesOffset[1]=0;
-	OsciSources[2] = & OutputFrequency; 				OsciSourcesGain[2]=10000.0; 	OsciSourcesOffset[2]=-50.0;
+	OsciSources[2] = & OutputFrequency; 				OsciSourcesGain[2]=10000.0; 	OsciSourcesOffset[2]=-60.0;
 	OsciSources[3] = & Booster_DCVoltage_IN;			OsciSourcesGain[3]=1; 			OsciSourcesOffset[3]=0;
 	OsciSources[4] = & PIDActivePowerSetpoint; 			OsciSourcesGain[4]=0.001; 		OsciSourcesOffset[4]=0;
 	OsciSources[5] = & MainPWM_AMP_F; 					OsciSourcesGain[5]=1; 			OsciSourcesOffset[5]=0;
@@ -235,36 +235,36 @@ void OsciChannelsInit(void)
 	OsciSources[8] = & ExcitationCurrentPID->CurrentOutput; OsciSourcesGain[8]=1; 		OsciSourcesOffset[8]=0;
 	OsciSources[9] = & GenSpeedFiltered; 				OsciSourcesGain[9]=1; 			OsciSourcesOffset[9]=0;
 
-	OsciSources[10] = & Alg_PowerDamping; 				OsciSourcesGain[10]=0.001; 		OsciSourcesOffset[10]=0;
-	OsciSources[11] = & Reg_VoltageBoost; 				OsciSourcesGain[11]=1; 			OsciSourcesOffset[11]=0;
-	OsciSources[12] = & DCOutSetpoint; 					OsciSourcesGain[12]=1; 			OsciSourcesOffset[12]=0;
-	OsciSources[13] = & DCVoltageError; 				OsciSourcesGain[13]=1; 			OsciSourcesOffset[13]=0;
-	OsciSources[14] = & ExcitationCurrentFiltered;	 	OsciSourcesGain[14]=1000;		OsciSourcesOffset[14]=0;
-	OsciSources[15] = & ExcitationPWM_Width_F;			OsciSourcesGain[15]=1; 			OsciSourcesOffset[15]=0;
-	OsciSources[16] = & Reg_APowerSetpoint; 			OsciSourcesGain[16]=0.001; 		OsciSourcesOffset[16]=0;
-	OsciSources[17] = & NeutralIGBTCurrentRMS; 			OsciSourcesGain[17]=1; 			OsciSourcesOffset[17]=0;
+	OsciSources[10] = & SEG_U_R; 				        OsciSourcesGain[10]=1; 		    OsciSourcesOffset[10]=0;
+	OsciSources[11] = & SEG_IEXC2; 				        OsciSourcesGain[11]=10; 			OsciSourcesOffset[11]=0;
+	OsciSources[12] = & SEG_EXC_TEMP; 					OsciSourcesGain[12]=1; 			OsciSourcesOffset[12]=0;
+	OsciSources[13] = & SEG_RECT_UDC; 				    OsciSourcesGain[13]=1; 			OsciSourcesOffset[13]=0;
+	OsciSources[14] = & SEG_RECT_TU1;	 	            OsciSourcesGain[14]=1;		OsciSourcesOffset[14]=0;
+	OsciSources[15] = & SEG_RECT_TU2;			        OsciSourcesGain[15]=1; 			OsciSourcesOffset[15]=0;
+	OsciSources[16] = & SEG_RECT_TC1; 			        OsciSourcesGain[16]=1; 		OsciSourcesOffset[16]=0;
+	OsciSources[17] = & SEG_I1_IPH1; 			        OsciSourcesGain[17]=1; 			OsciSourcesOffset[17]=0;
 
-	OsciSources[18] = & FrequencyPID->CurrentOutput; 	OsciSourcesGain[18]=10000.0; 	OsciSourcesOffset[18]=-60.0;
-	OsciSources[19] = & Reg_APowerSetpoint; 			OsciSourcesGain[19]=0.001;	 	OsciSourcesOffset[19]=0;
-	OsciSources[20] = & Reg_ActivePowerPIDBoost; 		OsciSourcesGain[20]=1; 			OsciSourcesOffset[20]=0;
-	OsciSources[21] = & VoltagePID->CurrentOutput; 		OsciSourcesGain[21]=1; 			OsciSourcesOffset[21]=0;
-	OsciSources[22] = & Reg_VoltageError; 				OsciSourcesGain[22]=1; 			OsciSourcesOffset[22]=0;
-	OsciSources[23] = & Alg_DCOutSetpoint; 				OsciSourcesGain[23]=1; 			OsciSourcesOffset[23]=0;
-	OsciSources[24] = & ReactivePowerPID->CurrentOutput;OsciSourcesGain[24]=0.001; 		OsciSourcesOffset[24]=0;
-	OsciSources[25] = & ReactivePowerSetpointReg; 		OsciSourcesGain[25]=0.001; 		OsciSourcesOffset[25]=0;
-	OsciSources[26] = & Reg_ReactivePowerBoost; 		OsciSourcesGain[26]=0.001;		OsciSourcesOffset[26]=0;
+	OsciSources[18] = & SEG_I1_IPH2; 	                OsciSourcesGain[18]=1; 	        OsciSourcesOffset[18]=0;
+	OsciSources[19] = & SEG_I1_IPH3; 			        OsciSourcesGain[19]=1;	 	    OsciSourcesOffset[19]=0;
+	OsciSources[20] = & SEG_I1_SKIPH1; 		            OsciSourcesGain[20]=1; 			OsciSourcesOffset[20]=0;
+	OsciSources[21] = & SEG_I1_SKIPH2; 		            OsciSourcesGain[21]=1; 			OsciSourcesOffset[21]=0;
+	OsciSources[22] = & SEG_I1_SKIPH3; 				    OsciSourcesGain[22]=1; 			OsciSourcesOffset[22]=0;
+	OsciSources[23] = & SEG_I1_TSK1; 				    OsciSourcesGain[23]=1; 			OsciSourcesOffset[23]=0;
+	OsciSources[24] = & SEG_I2_IPH1 ;                   OsciSourcesGain[24]=1; 		OsciSourcesOffset[24]=0;
+	OsciSources[25] = & SEG_I2_IPH2; 		            OsciSourcesGain[25]=1; 		OsciSourcesOffset[25]=0;
+	OsciSources[26] = & SEG_I2_IPH3; 		            OsciSourcesGain[26]=1;		OsciSourcesOffset[26]=0;
 
-	OsciSources[27] = & FVAL_InputFreq; 				OsciSourcesGain[27]=10000.0; 	OsciSourcesOffset[27]=-50.0;
-	OsciSources[28] = & FVAL_MeasuredOutputFrequency; 	OsciSourcesGain[28]=10000.0; 	OsciSourcesOffset[28]=-50.0;
-	OsciSources[29] = & MeasuredOutputFrequency; 		OsciSourcesGain[29]=10000.0; 	OsciSourcesOffset[29]=-50.0;
-	OsciSources[30] = & FVAL_VoltagePhase; 				OsciSourcesGain[30]=50; 		OsciSourcesOffset[30]=0;
-	OsciSources[31] = & FVAL_VoltageMagnitude; 			OsciSourcesGain[31]=1; 			OsciSourcesOffset[31]=0;
+	OsciSources[27] = & SEG_I2_SKIPH1; 				    OsciSourcesGain[27]=1; 	OsciSourcesOffset[27]=0;
+	OsciSources[28] = & SEG_I2_SKIPH2; 	                OsciSourcesGain[28]=1; 	OsciSourcesOffset[28]=0;
+	OsciSources[29] = & SEG_I2_SKIPH3; 		            OsciSourcesGain[29]=1; 	OsciSourcesOffset[29]=0;
+	OsciSources[30] = & SEG_I3_IPH1; 				    OsciSourcesGain[30]=1; 		OsciSourcesOffset[30]=0;
+	OsciSources[31] = & SEG_I3_IPH2; 			        OsciSourcesGain[31]=1; 			OsciSourcesOffset[31]=0;
 
-	OsciSources[32] = & PhaseChangeAmp; 				OsciSourcesGain[32]=50; 		OsciSourcesOffset[32]=0;
-	OsciSources[33] = & FreqChangeAmp; 					OsciSourcesGain[33]=10000.0; 	OsciSourcesOffset[33]=0;
-	OsciSources[34] = & OutputPhaseSet; 				OsciSourcesGain[34]=50; 		OsciSourcesOffset[34]=0;
-	OsciSources[35] = & StartingVoltageMagnitude; 		OsciSourcesGain[35]=1; 			OsciSourcesOffset[35]=0;
-	OsciSources[36] = & StartingPWMAmp; 				OsciSourcesGain[36]=10000.0; 	OsciSourcesOffset[36]=0;
+	OsciSources[32] = & SEG_I3_IPH3; 				    OsciSourcesGain[32]=1; 		OsciSourcesOffset[32]=0;
+	OsciSources[33] = & SEG_I3_UDC; 					OsciSourcesGain[33]=1;      OsciSourcesOffset[33]=0;
+	OsciSources[34] = & SEG_I3_SKIPH1; 				OsciSourcesGain[34]=1; 		OsciSourcesOffset[34]=0;
+	OsciSources[35] = & SEG_I3_SKIPH2; 		OsciSourcesGain[35]=1; 			OsciSourcesOffset[35]=0;
+	OsciSources[36] = & SEG_I3_SKIPH3; 				OsciSourcesGain[36]=1; 	OsciSourcesOffset[36]=0;
 
 	OsciSources[37] = & ZeroBaseSpeed;					OsciSourcesGain[37]=1; 			OsciSourcesOffset[37]=0;
 	OsciSources[38] = & MomentLimitedPower;				OsciSourcesGain[38]=0.001;	 	OsciSourcesOffset[38]=0;
@@ -272,7 +272,7 @@ void OsciChannelsInit(void)
 
 	OsciSources[40] = & PR_IGBTAOverCurr.ProtectionActive_f;	OsciSourcesGain[40]=1; 	    OsciSourcesOffset[40]=0;
 
-	OsciSources[41] = & PhAIGBTCurrentRMS;				OsciSourcesGain[41]=1; 		OsciSourcesOffset[41]=0;
+	OsciSources[41] = & PhA1IGBTCurrentRMS;				OsciSourcesGain[41]=1; 		OsciSourcesOffset[41]=0;
 	OsciSources[42] = & DCVoltage_OUT;					OsciSourcesGain[42]=1; 		OsciSourcesOffset[42]=0;
 
 	OsciSources[43] = & PhasePID->CurrentOutput; 				OsciSourcesGain[43]=50; 			OsciSourcesOffset[43]=0;
@@ -317,7 +317,7 @@ Uint16 ReadDataFromFlash(void)
 	Uint16 FlashVersion3 = SyncReadWordFromFlash(read_pointer);read_pointer++; //SETUP_UINT_DATA_COUNT
 	Uint16 FlashVersion4 = SyncReadWordFromFlash(read_pointer);read_pointer++; //SETUP_FLOAT_DATA_COUNT
 
-	GpioG1DataRegs.GPADAT.bit.GPIO4 = 0; // LED Blink // Turn off LED
+	GpioG1DataRegs.GPADAT.bit.GPIO10 = 0; // LED Blink // Turn off LED
 
 	if (FlashVersion1!=Const_CurrentSetupVersion1) {ReadSuccess=0;}
 	else if (FlashVersion2!=Const_CurrentSetupVersion2) { ReadSuccess=0;}
@@ -338,8 +338,8 @@ Uint16 ReadDataFromFlash(void)
 		//Read and verify float data
 		for (i=0;i<SETUP_FLOAT_DATA_COUNT;i++)
 		{
-			if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO4 = 1; LED=1;}
-			else {GpioG1DataRegs.GPADAT.bit.GPIO4 = 0; LED=0;}
+			if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO10 = 1; LED=1;}
+			else {GpioG1DataRegs.GPADAT.bit.GPIO10 = 0; LED=0;}
 			Uint16 FValue1 = SyncReadWordFromFlash(read_pointer);read_pointer++;
 			Uint16 FValue2 = SyncReadWordFromFlash(read_pointer);read_pointer++;
 			Uint16 FValue3 = SyncReadWordFromFlash(read_pointer);read_pointer++;
@@ -372,13 +372,13 @@ Uint16 ReadDataFromFlash(void)
 	}
 
 	reader_exit:
-	GpioG1DataRegs.GPADAT.bit.GPIO4 = 0; // LED Blink // Turn off LED
+	GpioG1DataRegs.GPADAT.bit.GPIO10 = 0; // LED Blink // Turn off LED
 	return (ReadSuccess);
 }
 
 void SaveDataToFlash(void)
 {
-	/*int i;
+	int i;
 	Uint32 write_pointer;
 	Uint16 LED=0;
 	Uint64 Checksumm = 0;
@@ -398,8 +398,8 @@ void SaveDataToFlash(void)
 
 	for (i=0;i<SETUP_UINT_DATA_COUNT;i++)
 	{
-		if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO4 = 1; LED=1;}
-		else {GpioG1DataRegs.GPADAT.bit.GPIO4 = 0; LED=0;}
+		if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO10 = 1; LED=1;}
+		else {GpioG1DataRegs.GPADAT.bit.GPIO10 = 0; LED=0;}
 		Uint16 WordToWrite = Setups_ReadUintParam(i);
 		SyncWriteWordToFlash(write_pointer, WordToWrite); write_pointer++;
 		SyncWriteWordToFlash(write_pointer, WordToWrite); write_pointer++;
@@ -408,8 +408,8 @@ void SaveDataToFlash(void)
 
 	for (i=0;i<SETUP_FLOAT_DATA_COUNT;i++)
 	{
-		if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO4 = 1; LED=1;}
-		else {GpioG1DataRegs.GPADAT.bit.GPIO4 = 0; LED=0;}
+		if (LED==0) {GpioG1DataRegs.GPADAT.bit.GPIO10 = 1; LED=1;}
+		else {GpioG1DataRegs.GPADAT.bit.GPIO10 = 0; LED=0;}
 		FloatUnion.f = Setups_ReadFloatParam(i);
 		Uint16 DataHighWord = FloatUnion.parts.Word1;
 		Uint16 DataLowWord = FloatUnion.parts.Word2;
@@ -429,7 +429,7 @@ void SaveDataToFlash(void)
 	SyncWriteWordToFlash(write_pointer, Checksum3); write_pointer++;
 	SyncWriteWordToFlash(write_pointer, Checksum2); write_pointer++;
 	SyncWriteWordToFlash(write_pointer, Checksum1); write_pointer++;
-    */
+
 
 }
 
@@ -444,7 +444,7 @@ void SaveOffsetsToFlash(void)
 	Long_cast Uint32Union;
 	Uint32 Checksum=0;
 
-	GpioG1DataRegs.GPADAT.bit.GPIO4 = 1;
+	GpioG1DataRegs.GPADAT.bit.GPIO10 = 1;
 	write_pointer = FLASH_OFFSET_DATA_START_ADDRESS;
 	SyncWriteWordToFlash(write_pointer, 1); write_pointer++; //Dummy word to make sure block is cleared
 	for (i=0;i<1000;i++) {i=i+1;} //Wait for flash to init and clear block
@@ -471,7 +471,7 @@ Uint16 ReadOffsetsFromFlash(void)
 	Uint16 ReadSuccess=1;
 	Short_cast ShortUnion;
 
-	GpioG1DataRegs.GPADAT.bit.GPIO4 = 1;
+	GpioG1DataRegs.GPADAT.bit.GPIO10 = 1;
 
 	read_pointer=FLASH_OFFSET_DATA_START_ADDRESS;
 	Uint16 DummyRead = SyncReadWordFromFlash(read_pointer);read_pointer++; //Dummy word to make sure operations start
@@ -492,14 +492,14 @@ Uint16 ReadOffsetsFromFlash(void)
 		else {ReadSuccess=0;}
 		}
 
-	GpioG1DataRegs.GPADAT.bit.GPIO4 = 0;
+	GpioG1DataRegs.GPADAT.bit.GPIO10 = 0;
 	return(ReadSuccess);
 }
 
 
 void EraseFlashData(void)
 {
-	/*int i;
+	int i;
 	Uint32 write_pointer;
 	for (i=0;i<1000;i++) {i=i+1;}
 	FlashReader->SetRewriteFlash();
@@ -508,28 +508,28 @@ void EraseFlashData(void)
 	SyncWriteWordToFlash(write_pointer, 0); write_pointer++;
 	SyncWriteWordToFlash(write_pointer, 0); write_pointer++;
 	SyncWriteWordToFlash(write_pointer, 0); write_pointer++;
-	SyncWriteWordToFlash(write_pointer, 0); write_pointer++;*/
+	SyncWriteWordToFlash(write_pointer, 0); write_pointer++;
 
 }
 
 
 Uint16 SyncReadWordFromFlash(Uint32 Addr)
 {
-	/*Uint16 i =0;
+	Uint16 i =0;
 	for (i=0;i<1000;i++) {i=i+1;}
 	FlashReader->SPIFlashReaderInit(MAIN_CYCLE_US);
 	FlashReader->InitReadWordFromFlash(Addr);
 	while (FlashReader->SPIFlashStep()!=1) {while (CpuTimer1Regs.TCR.bit.TIF==0) {}	CpuTimer1Regs.TCR.bit.TIF = 1;}
-	return (FlashReader->GetReadValue());*/
+	return (FlashReader->GetReadValue());
 }
 
 void SyncWriteWordToFlash(Uint32 Addr, Uint16 Data)
 {
-	/*Uint16 i = 0;
+	Uint16 i = 0;
 	for (i=0;i<1000;i++) {i=i+1;}
 	FlashReader->SPIFlashReaderInit(MAIN_CYCLE_US);
 	FlashReader->InitWriteWordToFlash(Addr,Data);
-	while (FlashReader->SPIFlashStep()!=1) {while (CpuTimer1Regs.TCR.bit.TIF==0) {}	CpuTimer1Regs.TCR.bit.TIF = 1;}*/
+	while (FlashReader->SPIFlashStep()!=1) {while (CpuTimer1Regs.TCR.bit.TIF==0) {}	CpuTimer1Regs.TCR.bit.TIF = 1;}
 }
 
 void Setups_WriteUintParam(Uint16 ID, Uint16 Value)

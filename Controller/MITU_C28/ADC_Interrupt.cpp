@@ -12,28 +12,63 @@ volatile Uint16 PHCCurrent;
 interrupt void  adc1_isr(void)
 {
 
+	//ADC_Current_Value15 = Adc1Result.ADCRESULT1; //SKiiP PhC current
+	//ADC_Current_Value17 = Adc1Result.ADCRESULT6; //SKiiP PhB current
+	//ADC_Current_Value19 = Adc1Result.ADCRESULT8; //SKiiP PhA current
+	//PHACurrent = ADC_Current_Value19+ChannelOffsets[18]; //SKiiP PhA current
+	//PHBCurrent = ADC_Current_Value17+ChannelOffsets[16]; //SKiiP PhB current
+	//PHCCurrent = ADC_Current_Value15+ChannelOffsets[14]; //SKiiP PhC current
+
+
+    ADC_Current_Value15 = 2048; //SKiiP PhC current
+    ADC_Current_Value17 = 2048; //SKiiP PhB current
+    ADC_Current_Value19 = 2048; //SKiiP PhA current
+    PHACurrent = 0;//ADC_Current_Value19+ChannelOffsets[18]; //SKiiP PhA current
+    PHBCurrent = 0;//ADC_Current_Value17+ChannelOffsets[16]; //SKiiP PhB current
+    PHCCurrent = 0;//ADC_Current_Value15+ChannelOffsets[14]; //SKiiP PhC current
+	WriteWordTo_FPGA(70,0); //SKiiP PhA current
+	WriteWordTo_FPGA(71,0); //SKiiP PhB current
+	WriteWordTo_FPGA(72,0); //SKiiP PhC current
+	WriteWordTo_FPGA(74,(unsigned short)(CommitCurrentsValue)); //Data transfer commit
+
+
 	if (TimerTicksDivideCounter == ADC_SAMPLE_DATA_DIVIDER)
 	{
-		ADC_Current_Value1 = DMABufFPGA1[18]; //Chopp
-		ADC_Current_Value2 = DMABufFPGA1[19]; //Exc1
-		ADC_Current_Value3 = DMABufFPGA1[20]; //Exc2
-		ADC_Current_Value4 = DMABufFPGA1[7]; //ExcVin
-		ADC_Current_Value5 = DMABufFPGA1[8]; //ExcVout
-		ADC_Current_Value6 = DMABufFPGA1[24]; //INV1 Current1
-		ADC_Current_Value7 = DMABufFPGA1[25]; //INV1 Current2
-		ADC_Current_Value8 = DMABufFPGA1[26]; //INV1 Current3
-		ADC_Current_Value9 = DMABufFPGA1[27]; //INV1 Voltage
-		ADC_Current_Value10 =  DMABufFPGA1[32]; //INV2 Current1
-		ADC_Current_Value11 =  DMABufFPGA1[33]; //INV2 Current2
-		ADC_Current_Value12 =  DMABufFPGA1[34]; //INV2 Current3
-		ADC_Current_Value13 =  DMABufFPGA1[35]; //INV2 Voltage
-		ADC_Current_Value14 = DMABufFPGA1[40]; //INV3 Current1
-		ADC_Current_Value15 = DMABufFPGA1[41]; //INV3 Current2
-		ADC_Current_Value16 = DMABufFPGA1[42]; //INV3 Current3
-		ADC_Current_Value17 = DMABufFPGA1[43]; //INV3 Voltage
-		ADC_Current_Value18 = DMABufFPGA1[5]; //PhU1PWM
-		ADC_Current_Value19 = DMABufFPGA1[12]; //Phase_H
-		ADC_Current_Value20 = DMABufFPGA1[13]; //Phase_L
+		/*ADC_Current_Value1 = Adc2Result.ADCRESULT9;
+		ADC_Current_Value2 = Adc2Result.ADCRESULT8;
+		ADC_Current_Value3 = Adc2Result.ADCRESULT7;
+		ADC_Current_Value4 = Adc2Result.ADCRESULT6;
+		ADC_Current_Value5 = Adc2Result.ADCRESULT0;
+		ADC_Current_Value6 = Adc2Result.ADCRESULT1;
+		ADC_Current_Value7 = Adc2Result.ADCRESULT2;
+		ADC_Current_Value8 = Adc2Result.ADCRESULT3;
+		ADC_Current_Value9 = Adc2Result.ADCRESULT4;
+		ADC_Current_Value10 = Adc2Result.ADCRESULT5;
+		ADC_Current_Value11 = Adc1Result.ADCRESULT5;
+		ADC_Current_Value12 = Adc1Result.ADCRESULT4;
+		ADC_Current_Value13 = Adc1Result.ADCRESULT3;
+		ADC_Current_Value14 = Adc1Result.ADCRESULT2;
+		ADC_Current_Value16 = Adc1Result.ADCRESULT0;
+		ADC_Current_Value18 = Adc1Result.ADCRESULT7;
+		ADC_Current_Value20 = Adc1Result.ADCRESULT9;*/
+
+        ADC_Current_Value1 = 2048;
+        ADC_Current_Value2 =  2048;
+        ADC_Current_Value3 =  2048;
+        ADC_Current_Value4 =  2048;
+        ADC_Current_Value5 =  2048;
+        ADC_Current_Value6 =  2048;
+        ADC_Current_Value7 =  2048;
+        ADC_Current_Value8 =  2048;
+        ADC_Current_Value9 =  2048;
+        ADC_Current_Value10 =  2048;
+        ADC_Current_Value11 =  2048;
+        ADC_Current_Value12 =  2048;
+        ADC_Current_Value13 =  2048;
+        ADC_Current_Value14 =  2048;
+        ADC_Current_Value16 =  2048;
+        ADC_Current_Value18 =  2048;
+        ADC_Current_Value20 =  2048;
 
 	ADCPeakProt_Flag = 1;
 	ADCPeakProt_Now = 0;
@@ -49,7 +84,8 @@ interrupt void  adc1_isr(void)
 	    else MeasurmentsCounter++;
 
 	MeasurmentsTime = TimerTicksCount;
-	/*AIN1_Values  = ADC_Current_Value1+ChannelOffsets[0];  if (ADC_Current_Value1>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value1 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
+
+	AIN1_Values  = ADC_Current_Value1+ChannelOffsets[0];  if (ADC_Current_Value1>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value1 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
 	AIN2_Values  = ADC_Current_Value2+ChannelOffsets[1];  if (ADC_Current_Value2>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value2 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
 	AIN3_Values  = ADC_Current_Value3+ChannelOffsets[2];  if (ADC_Current_Value3>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value3 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
 	AIN4_Values  = ADC_Current_Value4+ChannelOffsets[3];  if (ADC_Current_Value4>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value4 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
@@ -70,10 +106,71 @@ interrupt void  adc1_isr(void)
 	AIN18_Values  = ADC_Current_Value18+ChannelOffsets[17]; if (ADC_Current_Value18>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value18 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
 	AIN19_Values  = ADC_Current_Value19+ChannelOffsets[18]; if (ADC_Current_Value19>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value19 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
 	AIN20_Values  = ADC_Current_Value20+ChannelOffsets[19]; if (ADC_Current_Value20>ADCPeakProt_Values_Max[ADCPeakProt_Counter] || ADC_Current_Value20 < ADCPeakProt_Values_Min[ADCPeakProt_Counter]) {ADCPeakProt_Now = ADCPeakProt_Now|ADCPeakProt_Flag;} ADCPeakProt_Flag=ADCPeakProt_Flag<<1; ADCPeakProt_Counter++;
-    */
-	ADCPeakProt_ERR =	0;//ADCPeakProt_Now & ADCPeakProt_ERR_Mask;
-	if (ADCPeakProt_ERR!=0)	{ErrorSet(96);} //Set C28 error to FPGA
+
+
+	/*AIN1_Values = 0;
+	AIN2_Values = 0;
+	AIN3_Values = 0;
+	AIN4_Values = 0;
+	AIN5_Values = 0;
+	AIN6_Values = 0;
+	AIN7_Values = 0;
+	AIN8_Values = 0;
+	AIN9_Values = 0;
+	AIN10_Values = 0;
+	AIN11_Values = 0;
+	AIN12_Values = 0;
+	AIN13_Values = 0;
+	AIN14_Values = 0;
+	AIN15_Values = 0;
+	AIN16_Values = 0;
+	AIN17_Values = 0;
+	AIN18_Values = 0;
+	AIN19_Values = 0;
+	AIN20_Values = 0;*/
+
+
+
+	ADCPeakProt_Now = 0;
+
+	ADCPeakProt_ERR =	0;
+	//if (ADCPeakProt_ERR!=0)	{ErrorSet(96);} //Set C28 error to FPGA
 	TimerTicksDivideCounter=0;
+
+
+	//-------------START GEN SPEED DETECTOR-------------------------------------
+		/*TickCounts++;
+		TransitTickCounts++;
+		SignChangeTickCounts++;
+		GenVoltage_Unscaled = AIN9_Values ;
+		if (TickCounts>10000)
+		{MeasuredRotFreq = 0; RotSpeedMeasReset = 1; TickCounts=0; TransitTickCounts=0; SignChangeTickCounts=0; TransitCounts=0;}
+
+		if ( (GenVoltage_Unscaled>(DetectionLevelHigh)) && (GenVoltageLow==1) && (SignChangeTickCounts>1))
+		{
+			TransitCounts++;
+			if (RotSpeedMeasReset==1)
+			{RotSpeedMeasReset=0; TickCounts=0;TransitCounts=0;}
+			if (RotSpeedMeasReady==0)
+				{
+				TotalTransitCount = TransitCounts;
+				TransitLengthCounts = TransitTickCounts;
+				MeasurmentLengthCounts = TickCounts;
+				RotSpeedMeasReady=1;
+				}
+			GenVoltageLow=0;
+			GenVoltageHigh=1;
+			TransitTickCounts=0;
+			SignChangeTickCounts=0;
+		}
+		else if ( (GenVoltage_Unscaled < (DetectionLevelLow)) && (GenVoltageHigh==1) && (SignChangeTickCounts>1))
+		{
+			GenVoltageLow=1;
+			GenVoltageHigh=0;
+			SignChangeTickCounts=0;
+		} */
+	//-------------END GEN SPEED DETECTOR-------------------------------------
+
 	}
 
 	TimerTicksDivideCounter++;
